@@ -5,7 +5,15 @@
     "type": "multiplication",
     "title": "Aufwärmrunde",
     "subtitle": "1×1 mit 2, 5 und 10",
-    "config": { "factors": [2, 5, 10], "count": 10, "mode": "choice" }
+    "config": {
+      "factors": [
+        2,
+        5,
+        10
+      ],
+      "count": 10,
+      "mode": "choice"
+    }
   },
   {
     "id": "1x1-reihe-3-4",
@@ -14,7 +22,13 @@
     "title": "Kleiner Parcours",
     "subtitle": "Die 3er- und 4er-Reihe",
     "requires": "1x1-aufwaermen",
-    "config": { "factors": [3, 4], "count": 10 }
+    "config": {
+      "factors": [
+        3,
+        4
+      ],
+      "count": 10
+    }
   },
   {
     "id": "1x1-reihe-6-7",
@@ -23,7 +37,13 @@
     "title": "Über den Wassergraben",
     "subtitle": "Die 6er- und 7er-Reihe",
     "requires": "1x1-reihe-3-4",
-    "config": { "factors": [6, 7], "count": 10 }
+    "config": {
+      "factors": [
+        6,
+        7
+      ],
+      "count": 10
+    }
   },
   {
     "id": "1x1-reihe-8-9",
@@ -32,7 +52,13 @@
     "title": "Hohe Hürden",
     "subtitle": "Die 8er- und 9er-Reihe",
     "requires": "1x1-reihe-6-7",
-    "config": { "factors": [8, 9], "count": 10 }
+    "config": {
+      "factors": [
+        8,
+        9
+      ],
+      "count": 10
+    }
   },
   {
     "id": "1x1-turnier",
@@ -42,7 +68,19 @@
     "subtitle": "Das ganze 1×1 gemischt",
     "requires": "1x1-reihe-8-9",
     "passRatio": 0.7,
-    "config": { "factors": [2, 3, 4, 5, 6, 7, 8, 9], "count": 15 }
+    "config": {
+      "factors": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "count": 15
+    }
   },
   {
     "id": "en-stall-waehlen",
@@ -50,7 +88,12 @@
     "type": "vocabulary",
     "title": "Im Pferdestall",
     "subtitle": "Englisch → Deutsch, auswählen",
-    "config": { "list": "stable", "direction": "en-de", "mode": "choice", "count": 8 }
+    "config": {
+      "list": "stable",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    }
   },
   {
     "id": "en-stall-tippen",
@@ -59,7 +102,12 @@
     "title": "Stall-Profi",
     "subtitle": "Deutsch → Englisch, selbst tippen",
     "requires": "en-stall-waehlen",
-    "config": { "list": "stable", "direction": "de-en", "mode": "input", "count": 8 }
+    "config": {
+      "list": "stable",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    }
   },
   {
     "id": "en-tiere-waehlen",
@@ -68,7 +116,12 @@
     "title": "Auf dem Bauernhof",
     "subtitle": "Tiere: Englisch → Deutsch",
     "requires": "en-stall-tippen",
-    "config": { "list": "animals", "direction": "en-de", "mode": "choice", "count": 8 }
+    "config": {
+      "list": "animals",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    }
   },
   {
     "id": "en-farben-tippen",
@@ -77,7 +130,12 @@
     "title": "Bunte Schabracken",
     "subtitle": "Farben: Deutsch → Englisch tippen",
     "requires": "en-tiere-waehlen",
-    "config": { "list": "colors", "direction": "de-en", "mode": "input", "count": 8 }
+    "config": {
+      "list": "colors",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    }
   },
   {
     "id": "en-schule-tippen",
@@ -87,6 +145,216 @@
     "subtitle": "Schulwörter: Deutsch → Englisch tippen",
     "requires": "en-farben-tippen",
     "passRatio": 0.7,
-    "config": { "list": "school", "direction": "de-en", "mode": "input", "count": 10 }
+    "config": {
+      "list": "school",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 10
+    }
+  },
+  {
+    "id": "de-artikel",
+    "track": "german",
+    "type": "quiz",
+    "title": "Der, die, das",
+    "subtitle": "Welcher Artikel passt?",
+    "config": {
+      "bank": "artikel",
+      "mode": "choice",
+      "count": 10
+    }
+  },
+  {
+    "id": "de-mehrzahl",
+    "track": "german",
+    "type": "quiz",
+    "title": "Eins und viele",
+    "subtitle": "Die Mehrzahl finden",
+    "config": {
+      "bank": "mehrzahl",
+      "mode": "choice",
+      "count": 8
+    },
+    "requires": "de-artikel"
+  },
+  {
+    "id": "de-rechtschreibung",
+    "track": "german",
+    "type": "quiz",
+    "title": "Schreib-Parcours",
+    "subtitle": "Welches Wort ist richtig geschrieben?",
+    "config": {
+      "bank": "rechtschreibung",
+      "mode": "choice",
+      "count": 10
+    },
+    "requires": "de-mehrzahl"
+  },
+  {
+    "id": "de-wortarten",
+    "track": "german",
+    "type": "quiz",
+    "title": "Wortarten-Kür",
+    "subtitle": "Nomen, Verb oder Adjektiv?",
+    "config": {
+      "bank": "wortarten",
+      "mode": "choice",
+      "count": 10
+    },
+    "requires": "de-rechtschreibung"
+  },
+  {
+    "id": "de-mehrzahl-tippen",
+    "track": "german",
+    "type": "quiz",
+    "title": "Große Dressur",
+    "subtitle": "Mehrzahl selbst tippen",
+    "config": {
+      "bank": "mehrzahl",
+      "mode": "input",
+      "count": 8
+    },
+    "requires": "de-wortarten",
+    "passRatio": 0.7
+  },
+  {
+    "id": "fr-haras",
+    "track": "french",
+    "type": "vocabulary",
+    "title": "Au haras",
+    "subtitle": "Im Pferdestall: Französisch → Deutsch",
+    "config": {
+      "list": "fr-stable",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    }
+  },
+  {
+    "id": "fr-bonjour",
+    "track": "french",
+    "type": "vocabulary",
+    "title": "Bonjour !",
+    "subtitle": "Hallo & Tschüss auf Französisch",
+    "config": {
+      "list": "fr-hello",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    },
+    "requires": "fr-haras"
+  },
+  {
+    "id": "fr-nombres",
+    "track": "french",
+    "type": "vocabulary",
+    "title": "Un, deux, trois",
+    "subtitle": "Zahlen bis 12",
+    "config": {
+      "list": "fr-numbers",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 10
+    },
+    "requires": "fr-bonjour"
+  },
+  {
+    "id": "fr-couleurs",
+    "track": "french",
+    "type": "vocabulary",
+    "title": "Les couleurs",
+    "subtitle": "Farben: Deutsch → Französisch tippen",
+    "config": {
+      "list": "fr-colors",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    },
+    "requires": "fr-nombres"
+  },
+  {
+    "id": "fr-grand-prix",
+    "track": "french",
+    "type": "vocabulary",
+    "title": "Grand Prix",
+    "subtitle": "Pferdestall: Deutsch → Französisch tippen",
+    "config": {
+      "list": "fr-stable",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    },
+    "requires": "fr-couleurs",
+    "passRatio": 0.7
+  },
+  {
+    "id": "es-cuadra",
+    "track": "spanish",
+    "type": "vocabulary",
+    "title": "En la cuadra",
+    "subtitle": "Im Pferdestall: Spanisch → Deutsch",
+    "config": {
+      "list": "es-stable",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    }
+  },
+  {
+    "id": "es-hola",
+    "track": "spanish",
+    "type": "vocabulary",
+    "title": "¡Hola!",
+    "subtitle": "Hallo & Tschüss auf Spanisch",
+    "config": {
+      "list": "es-hello",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 8
+    },
+    "requires": "es-cuadra"
+  },
+  {
+    "id": "es-numeros",
+    "track": "spanish",
+    "type": "vocabulary",
+    "title": "Uno, dos, tres",
+    "subtitle": "Zahlen bis 12",
+    "config": {
+      "list": "es-numbers",
+      "direction": "to-de",
+      "mode": "choice",
+      "count": 10
+    },
+    "requires": "es-hola"
+  },
+  {
+    "id": "es-colores",
+    "track": "spanish",
+    "type": "vocabulary",
+    "title": "Los colores",
+    "subtitle": "Farben: Deutsch → Spanisch tippen",
+    "config": {
+      "list": "es-colors",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    },
+    "requires": "es-numeros"
+  },
+  {
+    "id": "es-gran-premio",
+    "track": "spanish",
+    "type": "vocabulary",
+    "title": "Gran Premio",
+    "subtitle": "Pferdestall: Deutsch → Spanisch tippen",
+    "config": {
+      "list": "es-stable",
+      "direction": "from-de",
+      "mode": "input",
+      "count": 8
+    },
+    "requires": "es-colores",
+    "passRatio": 0.7
   }
 ]

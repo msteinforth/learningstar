@@ -3,9 +3,11 @@ import { isCorrectAnswer } from '../game/answers'
 import { summarize } from '../game/progress'
 import { createRng } from '../game/random'
 import { maxTaskPoints, taskPoints } from '../game/scoring'
+import { playSound } from '../game/sound'
 import { generateTasks } from '../game/tasks'
 import type { Mission, MissionResult, Player, TaskResult } from '../game/types'
 import { Horseshoe } from './Icons'
+import { SoundToggle } from './SoundToggle'
 
 interface Props {
   mission: Mission
@@ -47,19 +49,24 @@ export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
 
   const check = (given: string) => {
     if (feedback && feedback.kind !== 'retry') return
-    if (isCorrectAnswer(given, task.answer, task.alternatives)) {
+    // Options are compared exactly: a wrong spelling may differ only in details.
+    const correct = task.mode === 'choice' ? given === task.answer : isCorrectAnswer(given, task.answer, task.alternatives)
+    if (correct) {
       const earned = taskPoints(task.basePoints, attempt, msSince(startedAt.current))
       setResults([...results, { key: task.key, correct: true, points: earned }])
       setFeedback({ kind: 'correct', points: earned })
+      playSound('correct')
     } else if (attempt === 1) {
       setAttempt(2)
       setWrongChoices([given])
       setInput('')
       setFeedback({ kind: 'retry' })
+      playSound('retry')
     } else {
       setWrongChoices([...wrongChoices, given])
       setResults([...results, { key: task.key, correct: false, points: 0 }])
       setFeedback({ kind: 'solution' })
+      playSound('wrong')
     }
   }
 
@@ -91,9 +98,12 @@ export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
         <button className="button ghost" onClick={onCancel}>
           ✕ Abbrechen
         </button>
-        <span className="points-badge" aria-label={`${points} Hufeisen in dieser Runde`}>
-          <span className="points">
-            <Horseshoe /> {points}
+        <span className="topbar-end">
+          <SoundToggle />
+          <span className="points-badge" aria-label={`${points} Hufeisen in dieser Runde`}>
+            <span className="points">
+              <Horseshoe /> {points}
+            </span>
           </span>
         </span>
       </header>

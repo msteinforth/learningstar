@@ -1,6 +1,7 @@
-export type MissionType = 'multiplication' | 'vocabulary'
+export type MissionType = 'multiplication' | 'vocabulary' | 'quiz'
 export type AnswerMode = 'choice' | 'input'
-export type Direction = 'en-de' | 'de-en'
+/** Translate the foreign word into German, or the German word into the foreign language. */
+export type Direction = 'to-de' | 'from-de'
 
 export interface MultiplicationConfig {
   /** Rows of the times table to practise, e.g. [7] for the 7-times table. */
@@ -13,6 +14,13 @@ export interface VocabularyConfig {
   /** Key into the vocabulary lists in src/data/vocabulary.json. */
   list: string
   direction: Direction
+  mode: AnswerMode
+  count: number
+}
+
+export interface QuizConfig {
+  /** Key into the question banks in src/data/quiz.json. */
+  bank: string
   mode: AnswerMode
   count: number
 }
@@ -32,6 +40,7 @@ interface MissionBase {
 export type Mission =
   | (MissionBase & { type: 'multiplication'; config: MultiplicationConfig })
   | (MissionBase & { type: 'vocabulary'; config: VocabularyConfig })
+  | (MissionBase & { type: 'quiz'; config: QuizConfig })
 
 export interface Task {
   /** Stable key of the underlying item, used to remember mistakes (e.g. "7x8", "en:horse"). */

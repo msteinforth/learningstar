@@ -1,4 +1,4 @@
-import { missions } from './missions'
+import { findTrack, missions, tracks } from './missions'
 import type { ItemSlot, Player, PlayerExtras } from './types'
 
 // --- Extras & wallet ----------------------------------------------------------
@@ -51,6 +51,15 @@ const passedCount = (player: Player, list = missions) => list.filter((mission) =
 const goldCount = (player: Player) => Object.values(player.missions).filter((progress) => progress.bestRosettes >= 3).length
 const playCount = (player: Player) => Object.values(player.missions).reduce((sum, progress) => sum + progress.plays, 0)
 
+// Ids of the first two stay as they were, earned badges are stored by id.
+const CHAMPIONS = [
+  { id: 'einmaleins-profi', track: 'math', title: '1×1-Profi', icon: '🧮' },
+  { id: 'deutsch-profi', track: 'german', title: 'Dressur-Star', icon: '📖' },
+  { id: 'englisch-profi', track: 'english', title: 'English Rider', icon: '💂' },
+  { id: 'franzoesisch-profi', track: 'french', title: 'Champion de France', icon: '🥐' },
+  { id: 'spanisch-profi', track: 'spanish', title: 'Campeón de España', icon: '💃' },
+]
+
 export const BADGES: Badge[] = [
   { id: 'erster-ritt', title: 'Erster Ausritt', description: 'Spiele deine erste Mission.', icon: '🐣', progress: (p) => ({ current: playCount(p), target: 1 }) },
   { id: 'erste-schleife', title: 'Erste Schleife', description: 'Bestehe eine Mission.', icon: '🎀', progress: (p) => ({ current: passedCount(p), target: 1 }) },
@@ -62,19 +71,19 @@ export const BADGES: Badge[] = [
   { id: 'serie-7', title: 'Wochen-Held', description: 'Spiele 7 Tage hintereinander.', icon: '🌟', progress: (p) => ({ current: extrasOf(p).streak.days, target: 7 }) },
   { id: 'hufeisen-100', title: 'Hufeisen-Sammler', description: 'Sammle 100 Hufeisen.', icon: '🧲', progress: (p) => ({ current: p.totalPoints, target: 100 }) },
   { id: 'hufeisen-500', title: 'Hufeisen-Schatz', description: 'Sammle 500 Hufeisen.', icon: '💰', progress: (p) => ({ current: p.totalPoints, target: 500 }) },
+  ...CHAMPIONS.map(({ id, track, title, icon }) => ({
+    id,
+    title,
+    description: `Bestehe alle Missionen im ${findTrack(track)?.title ?? track}.`,
+    icon,
+    progress: (p: Player) => ({ current: passedCount(p, trackMissions(track)), target: trackMissions(track).length }),
+  })),
   {
-    id: 'einmaleins-profi',
-    title: '1×1-Profi',
-    description: 'Bestehe alle Missionen im Rechen-Parcours.',
-    icon: '🧮',
-    progress: (p) => ({ current: passedCount(p, trackMissions('math')), target: trackMissions('math').length }),
-  },
-  {
-    id: 'englisch-profi',
-    title: 'English Rider',
-    description: 'Bestehe alle Missionen im Englisch-Ausritt.',
-    icon: '💂',
-    progress: (p) => ({ current: passedCount(p, trackMissions('english')), target: trackMissions('english').length }),
+    id: 'allrounder',
+    title: 'Allround-Reiter',
+    description: 'Bestehe in jedem Turnier mindestens eine Mission.',
+    icon: '🎠',
+    progress: (p) => ({ current: tracks.filter((track) => passedCount(p, trackMissions(track.id)) > 0).length, target: tracks.length }),
   },
 ]
 

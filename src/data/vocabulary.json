@@ -1,69 +1,807 @@
 {
   "stable": {
     "title": "Im Pferdestall",
+    "language": "en",
     "words": [
-      { "en": "horse", "de": "das Pferd" },
-      { "en": "pony", "de": "das Pony" },
-      { "en": "foal", "de": "das Fohlen" },
-      { "en": "stable", "de": "der Stall" },
-      { "en": "saddle", "de": "der Sattel" },
-      { "en": "hay", "de": "das Heu" },
-      { "en": "carrot", "de": "die Karotte", "deAlt": ["die Möhre", "die Mohrrübe"] },
-      { "en": "apple", "de": "der Apfel" },
-      { "en": "tail", "de": "der Schweif", "deAlt": ["der Schwanz"] },
-      { "en": "mane", "de": "die Mähne" },
-      { "en": "to ride", "de": "reiten" },
-      { "en": "meadow", "de": "die Weide", "deAlt": ["die Wiese"] }
+      {
+        "word": "horse",
+        "de": "das Pferd"
+      },
+      {
+        "word": "pony",
+        "de": "das Pony"
+      },
+      {
+        "word": "foal",
+        "de": "das Fohlen"
+      },
+      {
+        "word": "stable",
+        "de": "der Stall"
+      },
+      {
+        "word": "saddle",
+        "de": "der Sattel"
+      },
+      {
+        "word": "hay",
+        "de": "das Heu"
+      },
+      {
+        "word": "carrot",
+        "de": "die Karotte",
+        "deAlt": [
+          "die Möhre",
+          "die Mohrrübe"
+        ]
+      },
+      {
+        "word": "apple",
+        "de": "der Apfel"
+      },
+      {
+        "word": "tail",
+        "de": "der Schweif",
+        "deAlt": [
+          "der Schwanz"
+        ]
+      },
+      {
+        "word": "mane",
+        "de": "die Mähne"
+      },
+      {
+        "word": "to ride",
+        "de": "reiten"
+      },
+      {
+        "word": "meadow",
+        "de": "die Weide",
+        "deAlt": [
+          "die Wiese"
+        ]
+      }
     ]
   },
   "animals": {
     "title": "Tiere",
+    "language": "en",
     "words": [
-      { "en": "dog", "de": "der Hund" },
-      { "en": "cat", "de": "die Katze" },
-      { "en": "cow", "de": "die Kuh" },
-      { "en": "pig", "de": "das Schwein" },
-      { "en": "sheep", "de": "das Schaf" },
-      { "en": "chicken", "de": "das Huhn" },
-      { "en": "rabbit", "de": "das Kaninchen", "deAlt": ["der Hase"] },
-      { "en": "bird", "de": "der Vogel" },
-      { "en": "mouse", "de": "die Maus" },
-      { "en": "duck", "de": "die Ente" },
-      { "en": "goat", "de": "die Ziege" },
-      { "en": "donkey", "de": "der Esel" }
+      {
+        "word": "dog",
+        "de": "der Hund"
+      },
+      {
+        "word": "cat",
+        "de": "die Katze"
+      },
+      {
+        "word": "cow",
+        "de": "die Kuh"
+      },
+      {
+        "word": "pig",
+        "de": "das Schwein"
+      },
+      {
+        "word": "sheep",
+        "de": "das Schaf"
+      },
+      {
+        "word": "chicken",
+        "de": "das Huhn"
+      },
+      {
+        "word": "rabbit",
+        "de": "das Kaninchen",
+        "deAlt": [
+          "der Hase"
+        ]
+      },
+      {
+        "word": "bird",
+        "de": "der Vogel"
+      },
+      {
+        "word": "mouse",
+        "de": "die Maus"
+      },
+      {
+        "word": "duck",
+        "de": "die Ente"
+      },
+      {
+        "word": "goat",
+        "de": "die Ziege"
+      },
+      {
+        "word": "donkey",
+        "de": "der Esel"
+      }
     ]
   },
   "colors": {
     "title": "Farben",
+    "language": "en",
     "words": [
-      { "en": "red", "de": "rot" },
-      { "en": "blue", "de": "blau" },
-      { "en": "green", "de": "grün" },
-      { "en": "yellow", "de": "gelb" },
-      { "en": "black", "de": "schwarz" },
-      { "en": "white", "de": "weiß" },
-      { "en": "brown", "de": "braun" },
-      { "en": "grey", "de": "grau", "enAlt": ["gray"] },
-      { "en": "orange", "de": "orange" },
-      { "en": "pink", "de": "rosa", "deAlt": ["pink"] },
-      { "en": "purple", "de": "lila", "deAlt": ["violett"] }
+      {
+        "word": "red",
+        "de": "rot"
+      },
+      {
+        "word": "blue",
+        "de": "blau"
+      },
+      {
+        "word": "green",
+        "de": "grün"
+      },
+      {
+        "word": "yellow",
+        "de": "gelb"
+      },
+      {
+        "word": "black",
+        "de": "schwarz"
+      },
+      {
+        "word": "white",
+        "de": "weiß"
+      },
+      {
+        "word": "brown",
+        "de": "braun"
+      },
+      {
+        "word": "grey",
+        "de": "grau",
+        "wordAlt": [
+          "gray"
+        ]
+      },
+      {
+        "word": "orange",
+        "de": "orange"
+      },
+      {
+        "word": "pink",
+        "de": "rosa",
+        "deAlt": [
+          "pink"
+        ]
+      },
+      {
+        "word": "purple",
+        "de": "lila",
+        "deAlt": [
+          "violett"
+        ]
+      }
     ]
   },
   "school": {
     "title": "In der Schule",
+    "language": "en",
     "words": [
-      { "en": "book", "de": "das Buch" },
-      { "en": "pencil", "de": "der Bleistift" },
-      { "en": "teacher", "de": "der Lehrer", "deAlt": ["die Lehrerin"] },
-      { "en": "desk", "de": "der Tisch", "deAlt": ["das Pult", "der Schreibtisch"] },
-      { "en": "ruler", "de": "das Lineal" },
-      { "en": "rubber", "de": "der Radiergummi", "enAlt": ["eraser"] },
-      { "en": "school bag", "de": "die Schultasche", "enAlt": ["schoolbag"], "deAlt": ["der Schulranzen", "der Ranzen"] },
-      { "en": "homework", "de": "die Hausaufgaben", "deAlt": ["die Hausaufgabe"] },
-      { "en": "friend", "de": "der Freund", "deAlt": ["die Freundin"] },
-      { "en": "to read", "de": "lesen" },
-      { "en": "to write", "de": "schreiben" },
-      { "en": "break", "de": "die Pause" }
+      {
+        "word": "book",
+        "de": "das Buch"
+      },
+      {
+        "word": "pencil",
+        "de": "der Bleistift"
+      },
+      {
+        "word": "teacher",
+        "de": "der Lehrer",
+        "deAlt": [
+          "die Lehrerin"
+        ]
+      },
+      {
+        "word": "desk",
+        "de": "der Tisch",
+        "deAlt": [
+          "das Pult",
+          "der Schreibtisch"
+        ]
+      },
+      {
+        "word": "ruler",
+        "de": "das Lineal"
+      },
+      {
+        "word": "rubber",
+        "de": "der Radiergummi",
+        "wordAlt": [
+          "eraser"
+        ]
+      },
+      {
+        "word": "school bag",
+        "de": "die Schultasche",
+        "wordAlt": [
+          "schoolbag"
+        ],
+        "deAlt": [
+          "der Schulranzen",
+          "der Ranzen"
+        ]
+      },
+      {
+        "word": "homework",
+        "de": "die Hausaufgaben",
+        "deAlt": [
+          "die Hausaufgabe"
+        ]
+      },
+      {
+        "word": "friend",
+        "de": "der Freund",
+        "deAlt": [
+          "die Freundin"
+        ]
+      },
+      {
+        "word": "to read",
+        "de": "lesen"
+      },
+      {
+        "word": "to write",
+        "de": "schreiben"
+      },
+      {
+        "word": "break",
+        "de": "die Pause"
+      }
+    ]
+  },
+  "fr-stable": {
+    "title": "Au haras – Im Pferdestall",
+    "language": "fr",
+    "words": [
+      {
+        "word": "le cheval",
+        "de": "das Pferd"
+      },
+      {
+        "word": "le poney",
+        "de": "das Pony"
+      },
+      {
+        "word": "le poulain",
+        "de": "das Fohlen"
+      },
+      {
+        "word": "l'écurie",
+        "de": "der Stall"
+      },
+      {
+        "word": "la selle",
+        "de": "der Sattel"
+      },
+      {
+        "word": "le foin",
+        "de": "das Heu"
+      },
+      {
+        "word": "la carotte",
+        "de": "die Karotte",
+        "deAlt": [
+          "die Möhre"
+        ]
+      },
+      {
+        "word": "la pomme",
+        "de": "der Apfel"
+      },
+      {
+        "word": "la crinière",
+        "de": "die Mähne"
+      },
+      {
+        "word": "la queue",
+        "de": "der Schweif",
+        "deAlt": [
+          "der Schwanz"
+        ]
+      },
+      {
+        "word": "monter à cheval",
+        "de": "reiten"
+      },
+      {
+        "word": "la prairie",
+        "de": "die Weide",
+        "deAlt": [
+          "die Wiese"
+        ]
+      }
+    ]
+  },
+  "fr-hello": {
+    "title": "Bonjour ! – Hallo!",
+    "language": "fr",
+    "words": [
+      {
+        "word": "bonjour",
+        "de": "guten Tag",
+        "deAlt": [
+          "hallo",
+          "guten Morgen"
+        ]
+      },
+      {
+        "word": "salut",
+        "de": "hallo",
+        "deAlt": [
+          "tschüss"
+        ]
+      },
+      {
+        "word": "au revoir",
+        "de": "auf Wiedersehen",
+        "deAlt": [
+          "tschüss"
+        ]
+      },
+      {
+        "word": "merci",
+        "de": "danke"
+      },
+      {
+        "word": "s'il te plaît",
+        "de": "bitte",
+        "wordAlt": [
+          "sil te plait",
+          "s il te plait"
+        ]
+      },
+      {
+        "word": "oui",
+        "de": "ja"
+      },
+      {
+        "word": "non",
+        "de": "nein"
+      },
+      {
+        "word": "bonne nuit",
+        "de": "gute Nacht"
+      },
+      {
+        "word": "pardon",
+        "de": "Entschuldigung",
+        "deAlt": [
+          "Verzeihung"
+        ]
+      },
+      {
+        "word": "à bientôt",
+        "de": "bis bald"
+      }
+    ]
+  },
+  "fr-numbers": {
+    "title": "Les nombres – Zahlen",
+    "language": "fr",
+    "words": [
+      {
+        "word": "un",
+        "de": "eins",
+        "deAlt": [
+          "1"
+        ]
+      },
+      {
+        "word": "deux",
+        "de": "zwei",
+        "deAlt": [
+          "2"
+        ]
+      },
+      {
+        "word": "trois",
+        "de": "drei",
+        "deAlt": [
+          "3"
+        ]
+      },
+      {
+        "word": "quatre",
+        "de": "vier",
+        "deAlt": [
+          "4"
+        ]
+      },
+      {
+        "word": "cinq",
+        "de": "fünf",
+        "deAlt": [
+          "5"
+        ]
+      },
+      {
+        "word": "six",
+        "de": "sechs",
+        "deAlt": [
+          "6"
+        ]
+      },
+      {
+        "word": "sept",
+        "de": "sieben",
+        "deAlt": [
+          "7"
+        ]
+      },
+      {
+        "word": "huit",
+        "de": "acht",
+        "deAlt": [
+          "8"
+        ]
+      },
+      {
+        "word": "neuf",
+        "de": "neun",
+        "deAlt": [
+          "9"
+        ]
+      },
+      {
+        "word": "dix",
+        "de": "zehn",
+        "deAlt": [
+          "10"
+        ]
+      },
+      {
+        "word": "onze",
+        "de": "elf",
+        "deAlt": [
+          "11"
+        ]
+      },
+      {
+        "word": "douze",
+        "de": "zwölf",
+        "deAlt": [
+          "12"
+        ]
+      }
+    ]
+  },
+  "fr-colors": {
+    "title": "Les couleurs – Farben",
+    "language": "fr",
+    "words": [
+      {
+        "word": "rouge",
+        "de": "rot"
+      },
+      {
+        "word": "bleu",
+        "de": "blau"
+      },
+      {
+        "word": "vert",
+        "de": "grün"
+      },
+      {
+        "word": "jaune",
+        "de": "gelb"
+      },
+      {
+        "word": "noir",
+        "de": "schwarz"
+      },
+      {
+        "word": "blanc",
+        "de": "weiß"
+      },
+      {
+        "word": "marron",
+        "de": "braun",
+        "wordAlt": [
+          "brun"
+        ]
+      },
+      {
+        "word": "gris",
+        "de": "grau"
+      },
+      {
+        "word": "orange",
+        "de": "orange"
+      },
+      {
+        "word": "rose",
+        "de": "rosa",
+        "deAlt": [
+          "pink"
+        ]
+      },
+      {
+        "word": "violet",
+        "de": "lila",
+        "deAlt": [
+          "violett"
+        ]
+      }
+    ]
+  },
+  "es-stable": {
+    "title": "En la cuadra – Im Pferdestall",
+    "language": "es",
+    "words": [
+      {
+        "word": "el caballo",
+        "de": "das Pferd"
+      },
+      {
+        "word": "el poni",
+        "de": "das Pony"
+      },
+      {
+        "word": "el potro",
+        "de": "das Fohlen"
+      },
+      {
+        "word": "la cuadra",
+        "de": "der Stall",
+        "wordAlt": [
+          "el establo"
+        ]
+      },
+      {
+        "word": "la silla de montar",
+        "de": "der Sattel"
+      },
+      {
+        "word": "el heno",
+        "de": "das Heu"
+      },
+      {
+        "word": "la zanahoria",
+        "de": "die Karotte",
+        "deAlt": [
+          "die Möhre"
+        ]
+      },
+      {
+        "word": "la manzana",
+        "de": "der Apfel"
+      },
+      {
+        "word": "la crin",
+        "de": "die Mähne"
+      },
+      {
+        "word": "la cola",
+        "de": "der Schweif",
+        "deAlt": [
+          "der Schwanz"
+        ]
+      },
+      {
+        "word": "montar a caballo",
+        "de": "reiten"
+      },
+      {
+        "word": "el prado",
+        "de": "die Weide",
+        "deAlt": [
+          "die Wiese"
+        ]
+      }
+    ]
+  },
+  "es-hello": {
+    "title": "¡Hola! – Hallo!",
+    "language": "es",
+    "words": [
+      {
+        "word": "hola",
+        "de": "hallo"
+      },
+      {
+        "word": "adiós",
+        "de": "tschüss",
+        "deAlt": [
+          "auf Wiedersehen"
+        ]
+      },
+      {
+        "word": "gracias",
+        "de": "danke"
+      },
+      {
+        "word": "por favor",
+        "de": "bitte"
+      },
+      {
+        "word": "sí",
+        "de": "ja"
+      },
+      {
+        "word": "no",
+        "de": "nein"
+      },
+      {
+        "word": "buenos días",
+        "de": "guten Morgen",
+        "deAlt": [
+          "guten Tag"
+        ]
+      },
+      {
+        "word": "buenas noches",
+        "de": "gute Nacht"
+      },
+      {
+        "word": "perdón",
+        "de": "Entschuldigung",
+        "deAlt": [
+          "Verzeihung"
+        ]
+      },
+      {
+        "word": "hasta luego",
+        "de": "bis später",
+        "deAlt": [
+          "bis bald"
+        ]
+      }
+    ]
+  },
+  "es-numbers": {
+    "title": "Los números – Zahlen",
+    "language": "es",
+    "words": [
+      {
+        "word": "uno",
+        "de": "eins",
+        "deAlt": [
+          "1"
+        ]
+      },
+      {
+        "word": "dos",
+        "de": "zwei",
+        "deAlt": [
+          "2"
+        ]
+      },
+      {
+        "word": "tres",
+        "de": "drei",
+        "deAlt": [
+          "3"
+        ]
+      },
+      {
+        "word": "cuatro",
+        "de": "vier",
+        "deAlt": [
+          "4"
+        ]
+      },
+      {
+        "word": "cinco",
+        "de": "fünf",
+        "deAlt": [
+          "5"
+        ]
+      },
+      {
+        "word": "seis",
+        "de": "sechs",
+        "deAlt": [
+          "6"
+        ]
+      },
+      {
+        "word": "siete",
+        "de": "sieben",
+        "deAlt": [
+          "7"
+        ]
+      },
+      {
+        "word": "ocho",
+        "de": "acht",
+        "deAlt": [
+          "8"
+        ]
+      },
+      {
+        "word": "nueve",
+        "de": "neun",
+        "deAlt": [
+          "9"
+        ]
+      },
+      {
+        "word": "diez",
+        "de": "zehn",
+        "deAlt": [
+          "10"
+        ]
+      },
+      {
+        "word": "once",
+        "de": "elf",
+        "deAlt": [
+          "11"
+        ]
+      },
+      {
+        "word": "doce",
+        "de": "zwölf",
+        "deAlt": [
+          "12"
+        ]
+      }
+    ]
+  },
+  "es-colors": {
+    "title": "Los colores – Farben",
+    "language": "es",
+    "words": [
+      {
+        "word": "rojo",
+        "de": "rot"
+      },
+      {
+        "word": "azul",
+        "de": "blau"
+      },
+      {
+        "word": "verde",
+        "de": "grün"
+      },
+      {
+        "word": "amarillo",
+        "de": "gelb"
+      },
+      {
+        "word": "negro",
+        "de": "schwarz"
+      },
+      {
+        "word": "blanco",
+        "de": "weiß"
+      },
+      {
+        "word": "marrón",
+        "de": "braun"
+      },
+      {
+        "word": "gris",
+        "de": "grau"
+      },
+      {
+        "word": "naranja",
+        "de": "orange"
+      },
+      {
+        "word": "rosa",
+        "de": "rosa",
+        "deAlt": [
+          "pink"
+        ]
+      },
+      {
+        "word": "morado",
+        "de": "lila",
+        "deAlt": [
+          "violett"
+        ],
+        "wordAlt": [
+          "violeta"
+        ]
+      }
     ]
   }
 }

@@ -1,20 +1,43 @@
+import quizData from '../data/quiz.json'
 import vocabularyData from '../data/vocabulary.json'
 import { type Rng, shuffle, weightedPick } from './random'
-import type { Mission, MultiplicationConfig, Task, VocabularyConfig } from './types'
+import type { Mission, MultiplicationConfig, QuizConfig, Task, VocabularyConfig } from './types'
+
+export type Language = 'en' | 'fr' | 'es'
+
+export const LANGUAGE_NAMES: Record<Language, string> = { en: 'Englisch', fr: 'Französisch', es: 'Spanisch' }
 
 export interface VocabularyWord {
-  en: string
+  /** The word in the foreign language. */
+  word: string
   de: string
-  enAlt?: string[]
+  wordAlt?: string[]
   deAlt?: string[]
 }
 
 export interface VocabularyList {
   title: string
+  language: Language
   words: VocabularyWord[]
 }
 
-export const vocabularyLists: Record<string, VocabularyList> = vocabularyData
+export const vocabularyLists = vocabularyData as Record<string, VocabularyList>
+
+export interface QuizQuestion {
+  prompt: string
+  answer: string
+  /** Answer options for "choice" mode; other answers from the bank are used when missing. */
+  options?: string[]
+  alternatives?: string[]
+}
+
+export interface QuizBank {
+  title: string
+  hint: string
+  questions: QuizQuestion[]
+}
+
+export const quizBanks = quizData as Record<string, QuizBank>
 
 type Mistakes = Record<string, number>
 
@@ -27,6 +50,8 @@ export function generateTasks(mission: Mission, rng: Rng, mistakes: Mistakes = {
       return multiplicationTasks(mission.config, rng, mistakes)
     case 'vocabulary':
       return vocabularyTasks(mission.config, rng, mistakes)
+    case 'quiz':
+      return quizTasks(mission.config, rng, mistakes)
   }
 }
 
@@ -78,9 +103,9 @@ function multiplicationTasks(config: MultiplicationConfig, rng: Rng, mistakes: M
 function vocabularyTasks(config: VocabularyConfig, rng: Rng, mistakes: Mistakes): Task[] {
   const list = vocabularyLists[config.list]
   if (!list) throw new Error(`Unbekannte Vokabelliste: ${config.list}`)
-  const toGerman = config.direction === 'en-de'
-  const keyOf = (word: VocabularyWord) => `vocab:${config.list}:${word.en}`
-  const target = (word: VocabularyWord) => (toGerman ? word.de : word.en)
+  const toGerman = config.direction === 'to-de'
+  const keyOf = (word: VocabularyWord) => `vocab:${config.list}:${word.word}`
+  const target = (word: VocabularyWord) => (toGerman ? word.de : word.word)
 
   return weightedPick(list.words, config.count, (word) => mistakeWeight(mistakes, keyOf(word)), rng).map((word) => {
     const answer = target(word)
@@ -90,13 +115,38 @@ function vocabularyTasks(config: VocabularyConfig, rng: Rng, mistakes: Mistakes)
     ).slice(0, 3)
     return {
       key: keyOf(word),
-      prompt: toGerman ? word.en : word.de,
-      hint: toGerman ? 'Was heißt das auf Deutsch?' : 'Was heißt das auf Englisch?',
+      prompt: toGerman ? word.word : word.de,
+      hint: `Was heißt das auf ${toGerman ? 'Deutsch' : LANGUAGE_NAMES[list.language]}?`,
       answer,
-      alternatives: (toGerman ? word.deAlt : word.enAlt) ?? [],
+      alternatives: (toGerman ? word.deAlt : word.wordAlt) ?? [],
       mode: config.mode,
       inputKind: 'text',
       choices: config.mode === 'choice' ? shuffle([answer, ...distractors], rng) : [],
+      basePoints: config.mode === 'choice' ? 1 : 2,
+    }
+  })
+}
+
+// --- Quiz (e.g. German grammar) ------------------------------------------------------
+
+function quizTasks(config: QuizConfig, rng: Rng, mistakes: Mistakes): Task[] {
+  const bank = quizBanks[config.bank]
+  if (!bank) throw new Error(`Unbekannter Fragenpool: ${config.bank}`)
+  const keyOf = (question: QuizQuestion) => `quiz:${config.bank}:${question.prompt}`
+  const allAnswers = [...new Set(bank.questions.map((question) => question.answer))]
+
+  return weightedPick(bank.questions, config.count, (question) => mistakeWeight(mistakes, keyOf(question)), rng).map((question) => {
+    const options = question.options ?? [question.answer, ...shuffle(allAnswers.filter((answer) => answer !== question.answer), rng).slice(0, 3)]
+    return {
+      key: keyOf(question),
+      prompt: question.prompt,
+      hint: bank.hint,
+      answer: question.answer,
+      alternatives: question.alternatives ?? [],
+      mode: config.mode,
+      inputKind: 'text',
+      // Grammar options like der/die/das keep their natural order.
+      choices: config.mode === 'choice' ? (question.options?.length === 3 ? question.options : shuffle(options, rng)) : [],
       basePoints: config.mode === 'choice' ? 1 : 2,
     }
   })

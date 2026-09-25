@@ -1,0 +1,714 @@
+{
+  "artikel": {
+    "title": "Der, die oder das?",
+    "hint": "Welcher Artikel passt?",
+    "questions": [
+      {
+        "prompt": "Hund",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Katze",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Pferd",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Sattel",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Mähne",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Fohlen",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Stall",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Wiese",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Heu",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Tisch",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Schule",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Buch",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Apfel",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Blume",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Haus",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Baum",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Sonne",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Auto",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Löffel",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Gabel",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Messer",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Mond",
+        "answer": "der",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Brot",
+        "answer": "das",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      },
+      {
+        "prompt": "Tür",
+        "answer": "die",
+        "options": [
+          "der",
+          "die",
+          "das"
+        ]
+      }
+    ]
+  },
+  "mehrzahl": {
+    "title": "Einzahl und Mehrzahl",
+    "hint": "Wie heißt die Mehrzahl?",
+    "questions": [
+      {
+        "prompt": "der Hund",
+        "answer": "die Hunde",
+        "options": [
+          "die Hunde",
+          "die Hunden",
+          "die Hunds",
+          "die Hünde"
+        ]
+      },
+      {
+        "prompt": "das Pferd",
+        "answer": "die Pferde",
+        "options": [
+          "die Pferde",
+          "die Pferder",
+          "die Pferds",
+          "die Pferden"
+        ]
+      },
+      {
+        "prompt": "die Maus",
+        "answer": "die Mäuse",
+        "options": [
+          "die Mäuse",
+          "die Mausen",
+          "die Mause",
+          "die Mäuser"
+        ]
+      },
+      {
+        "prompt": "der Apfel",
+        "answer": "die Äpfel",
+        "options": [
+          "die Äpfel",
+          "die Apfeln",
+          "die Äpfels",
+          "die Apfels"
+        ]
+      },
+      {
+        "prompt": "das Buch",
+        "answer": "die Bücher",
+        "options": [
+          "die Bücher",
+          "die Buche",
+          "die Buchs",
+          "die Büchen"
+        ]
+      },
+      {
+        "prompt": "das Kind",
+        "answer": "die Kinder",
+        "options": [
+          "die Kinder",
+          "die Kinde",
+          "die Kinds",
+          "die Kindern"
+        ]
+      },
+      {
+        "prompt": "der Baum",
+        "answer": "die Bäume",
+        "options": [
+          "die Bäume",
+          "die Baume",
+          "die Baumen",
+          "die Bäumer"
+        ]
+      },
+      {
+        "prompt": "das Haus",
+        "answer": "die Häuser",
+        "options": [
+          "die Häuser",
+          "die Hause",
+          "die Häuse",
+          "die Hausen"
+        ]
+      },
+      {
+        "prompt": "die Katze",
+        "answer": "die Katzen",
+        "options": [
+          "die Katzen",
+          "die Katze",
+          "die Kätze",
+          "die Katzes"
+        ]
+      },
+      {
+        "prompt": "der Stall",
+        "answer": "die Ställe",
+        "options": [
+          "die Ställe",
+          "die Stalle",
+          "die Stalls",
+          "die Ställer"
+        ]
+      },
+      {
+        "prompt": "das Fohlen",
+        "answer": "die Fohlen",
+        "options": [
+          "die Fohlen",
+          "die Fohlens",
+          "die Fohlene",
+          "die Föhlen"
+        ]
+      },
+      {
+        "prompt": "der Sattel",
+        "answer": "die Sättel",
+        "options": [
+          "die Sättel",
+          "die Satteln",
+          "die Sattels",
+          "die Sättele"
+        ]
+      },
+      {
+        "prompt": "der Vogel",
+        "answer": "die Vögel",
+        "options": [
+          "die Vögel",
+          "die Vogeln",
+          "die Vogels",
+          "die Vögels"
+        ]
+      },
+      {
+        "prompt": "die Mutter",
+        "answer": "die Mütter",
+        "options": [
+          "die Mütter",
+          "die Muttern",
+          "die Mutters",
+          "die Mütteren"
+        ]
+      },
+      {
+        "prompt": "das Auto",
+        "answer": "die Autos",
+        "options": [
+          "die Autos",
+          "die Auton",
+          "die Autoe",
+          "die Autoer"
+        ]
+      },
+      {
+        "prompt": "die Blume",
+        "answer": "die Blumen",
+        "options": [
+          "die Blumen",
+          "die Blume",
+          "die Blümen",
+          "die Blumes"
+        ]
+      }
+    ]
+  },
+  "rechtschreibung": {
+    "title": "Richtig geschrieben",
+    "hint": "Wie schreibt man es richtig?",
+    "questions": [
+      {
+        "prompt": "🚲",
+        "answer": "Fahrrad",
+        "options": [
+          "Fahrrad",
+          "Farrad",
+          "Fahrad",
+          "Fahrrat"
+        ]
+      },
+      {
+        "prompt": "🐴",
+        "answer": "Pferd",
+        "options": [
+          "Pferd",
+          "Pfert",
+          "Ferd",
+          "Pferdt"
+        ]
+      },
+      {
+        "prompt": "🐦",
+        "answer": "Vogel",
+        "options": [
+          "Vogel",
+          "Fogel",
+          "Vohgel",
+          "Vogl"
+        ]
+      },
+      {
+        "prompt": "🏫",
+        "answer": "Schule",
+        "options": [
+          "Schule",
+          "Schuhle",
+          "Schulle",
+          "Schuele"
+        ]
+      },
+      {
+        "prompt": "🧀",
+        "answer": "Käse",
+        "options": [
+          "Käse",
+          "Kese",
+          "Kässe",
+          "Käße"
+        ]
+      },
+      {
+        "prompt": "👢",
+        "answer": "Stiefel",
+        "options": [
+          "Stiefel",
+          "Stifel",
+          "Stiefl",
+          "Schtiefel"
+        ]
+      },
+      {
+        "prompt": "🦷",
+        "answer": "Zahn",
+        "options": [
+          "Zahn",
+          "Zan",
+          "Zahnn",
+          "Tsahn"
+        ]
+      },
+      {
+        "prompt": "⏰",
+        "answer": "Uhr",
+        "options": [
+          "Uhr",
+          "Ur",
+          "Uhhr",
+          "Uhre"
+        ]
+      },
+      {
+        "prompt": "🦊",
+        "answer": "Fuchs",
+        "options": [
+          "Fuchs",
+          "Fuks",
+          "Fux",
+          "Fuchz"
+        ]
+      },
+      {
+        "prompt": "🐄",
+        "answer": "Kuh",
+        "options": [
+          "Kuh",
+          "Ku",
+          "Kuhh",
+          "Khu"
+        ]
+      },
+      {
+        "prompt": "☂️",
+        "answer": "Regenschirm",
+        "options": [
+          "Regenschirm",
+          "Regenschierm",
+          "Regenshirm",
+          "Regenschirmm"
+        ]
+      },
+      {
+        "prompt": "🍞",
+        "answer": "Brot",
+        "options": [
+          "Brot",
+          "Brod",
+          "Broht",
+          "Prot"
+        ]
+      },
+      {
+        "prompt": "🦒",
+        "answer": "Giraffe",
+        "options": [
+          "Giraffe",
+          "Girafe",
+          "Giraf",
+          "Schiraffe"
+        ]
+      },
+      {
+        "prompt": "🌳",
+        "answer": "Wald",
+        "options": [
+          "Wald",
+          "Walt",
+          "Wahld",
+          "Waldt"
+        ]
+      },
+      {
+        "prompt": "🐟",
+        "answer": "Fisch",
+        "options": [
+          "Fisch",
+          "Fiesch",
+          "Fish",
+          "Visch"
+        ]
+      }
+    ]
+  },
+  "wortarten": {
+    "title": "Wortarten",
+    "hint": "Welche Wortart ist das?",
+    "questions": [
+      {
+        "prompt": "laufen",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "schnell",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Pferd",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "springen",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "braun",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Sattel",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "lesen",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "groß",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Freund",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "reiten",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "lustig",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Wiese",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "müde",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "schreiben",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Schule",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "fröhlich",
+        "answer": "Adjektiv",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "füttern",
+        "answer": "Verb",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      },
+      {
+        "prompt": "Stall",
+        "answer": "Nomen",
+        "options": [
+          "Nomen",
+          "Verb",
+          "Adjektiv"
+        ]
+      }
+    ]
+  }
+}

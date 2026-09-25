@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { isCorrectAnswer } from './answers'
-import { missions } from './missions'
+import { findMission, missions, tracks } from './missions'
 import { applyResult, createPlayer, isUnlocked, summarize } from './progress'
 import { createRng } from './random'
 import { isPassed, maxTaskPoints, rosettesFor, taskPoints } from './scoring'
-import { generateTasks, multiplicationBasePoints, vocabularyLists } from './tasks'
+import { generateTasks, multiplicationBasePoints, quizBanks, vocabularyLists } from './tasks'
 
 describe('taskPoints', () => {
   it('gives the base points plus a speed bonus, capped at 3', () => {
@@ -48,6 +48,15 @@ describe('isCorrectAnswer', () => {
   it('accepts umlaut spellings and alternatives', () => {
     expect(isCorrectAnswer('Maehne', 'die Mähne')).toBe(true)
     expect(isCorrectAnswer('Möhre', 'die Karotte', ['die Möhre'])).toBe(true)
+  })
+
+  it('accepts French and Spanish answers without accents or articles', () => {
+    expect(isCorrectAnswer('ecurie', "l'écurie")).toBe(true)
+    expect(isCorrectAnswer('Cheval', 'le cheval')).toBe(true)
+    expect(isCorrectAnswer('adios', 'adiós')).toBe(true)
+    expect(isCorrectAnswer('el prado', 'el prado')).toBe(true)
+    expect(isCorrectAnswer('Que tal?', '¿qué tal?')).toBe(true)
+    expect(isCorrectAnswer('cheval', 'le poney')).toBe(false)
   })
 
   it('rejects wrong or empty answers', () => {
@@ -107,13 +116,47 @@ describe('generateTasks', () => {
 })
 
 describe('mission data', () => {
-  it('references existing missions and vocabulary lists', () => {
+  it('references existing missions, tournaments, vocabulary lists and quiz banks', () => {
     const ids = new Set(missions.map((mission) => mission.id))
     expect(ids.size).toBe(missions.length)
     for (const mission of missions) {
-      if (mission.requires) expect(ids).toContain(mission.requires)
+      expect(tracks.map((track) => track.id)).toContain(mission.track)
+      if (mission.requires) expect(findMission(mission.requires)?.track).toBe(mission.track)
       if (mission.type === 'vocabulary') expect(vocabularyLists[mission.config.list]).toBeDefined()
+      if (mission.type === 'quiz') expect(quizBanks[mission.config.bank]).toBeDefined()
     }
+  })
+
+  it('has one open start mission and several missions per tournament', () => {
+    for (const track of tracks) {
+      const trackMissions = missions.filter((mission) => mission.track === track.id)
+      expect(trackMissions.length).toBeGreaterThanOrEqual(4)
+      expect(trackMissions.filter((mission) => !mission.requires)).toHaveLength(1)
+    }
+  })
+
+  it('keeps quiz answers among their options', () => {
+    for (const bank of Object.values(quizBanks)) {
+      for (const question of bank.questions) {
+        if (question.options) expect(question.options).toContain(question.answer)
+        if (question.options) expect(new Set(question.options).size).toBe(question.options.length)
+      }
+    }
+  })
+
+  it('asks German grammar with der/die/das in fixed order', () => {
+    const mission = findMission('de-artikel')!
+    for (const task of generateTasks(mission, createRng(3))) {
+      expect(task.choices).toEqual(['der', 'die', 'das'])
+      expect(task.hint).toBe('Welcher Artikel passt?')
+    }
+  })
+
+  it('names the target language in vocabulary hints', () => {
+    const [task] = generateTasks(findMission('fr-couleurs')!, createRng(1))
+    expect(task.hint).toBe('Was heißt das auf Französisch?')
+    const [spanish] = generateTasks(findMission('es-cuadra')!, createRng(1))
+    expect(spanish.hint).toBe('Was heißt das auf Deutsch?')
   })
 })
 

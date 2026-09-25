@@ -1,14 +1,21 @@
 # 🐴 LearningStar
 
-Ein Lernspiel im Browser für Kinder von 8 bis 12 Jahren – mit 1×1-Aufgaben und
-Englisch-Vokabeln im Pferde-Look.
+Ein Lernspiel im Browser für Kinder von 8 bis 12 Jahren im Pferde-Look – mit
+Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
 
 ## So funktioniert das Spiel
 
 - **Stall**: Jedes Kind legt ein eigenes Profil mit Tier und Farbe an.
-- **Hof**: Die Missionen liegen auf zwei Wegen, dem *Rechen-Parcours* (1×1)
-  und dem *Englisch-Ausritt* (Vokabeln). Wer eine Mission besteht, schaltet
-  die nächste frei.
+- **Turniere**: Jedes Fach ist ein eigenes Reitturnier mit einem Weg aus
+  Missionen. Wer eine Mission besteht, schaltet die nächste frei.
+
+  | Turnier | Fach | Inhalte |
+  |---|---|---|
+  | 🧮 Mathe-Springturnier | Mathe | 1×1 von leicht bis gemischt |
+  | 📖 Deutsch-Dressur | Deutsch | der/die/das, Mehrzahl, Rechtschreibung, Wortarten |
+  | 🇬🇧 Englisch-Geländeritt | Englisch | Pferdestall, Tiere, Farben, Schule |
+  | 🇫🇷 Grand Prix de Paris | Französisch | Pferdestall, Begrüßung, Zahlen, Farben |
+  | 🇪🇸 Spanische Hofreitschule | Spanisch | Pferdestall, Begrüßung, Zahlen, Farben |
 - **Hufeisen (1–3 pro Aufgabe)**:
   - Grundpunkte nach Schwierigkeit: beim 1×1 bringen 2, 5 und 10 einen Punkt,
     3 und 4 zwei, 6 bis 9 drei. Bei Vokabeln bringt Auswählen einen Punkt,
@@ -19,6 +26,9 @@ Englisch-Vokabeln im Pferde-Look.
   Silber, Gold), gemessen an den erreichbaren Hufeisen. Ab 60 % gilt eine
   Mission als bestanden, bei einzelnen Missionen gilt eine höhere Grenze.
 - **Wiederholung**: Falsch beantwortete Aufgaben kommen später häufiger dran.
+- **Sounds** 🔊: Töne für Buttons, richtige und falsche Antworten, Einkäufe,
+  Abzeichen und den Zieleinlauf, direkt im Browser erzeugt (keine
+  Audiodateien). Über den Lautsprecher-Knopf stummschaltbar.
 - **Abzeichen** 🏅: 12 Abzeichen für Meilensteine, z. B. erste Mission,
   fehlerfreier Ritt, 3 bzw. 7 Tage in Folge gespielt oder einen ganzen Weg
   geschafft. Der Fortschritt zu jedem Abzeichen ist sichtbar.
@@ -119,7 +129,8 @@ einem privaten Browserfenster öffnet.
 ## Eigene Missionen anlegen
 
 Missionen stehen in [`src/data/missions.json`](src/data/missions.json),
-Vokabellisten in [`src/data/vocabulary.json`](src/data/vocabulary.json).
+Vokabellisten in [`src/data/vocabulary.json`](src/data/vocabulary.json) und
+Fragen (z. B. für Deutsch) in [`src/data/quiz.json`](src/data/quiz.json).
 
 ```json
 {
@@ -136,16 +147,24 @@ Vokabellisten in [`src/data/vocabulary.json`](src/data/vocabulary.json).
 
 | Feld | Bedeutung |
 |---|---|
-| `track` | `math` oder `english`, legt den Weg auf der Karte fest |
-| `type` | `multiplication` oder `vocabulary` |
+| `track` | Turnier: `math`, `german`, `english`, `french` oder `spanish` |
+| `type` | `multiplication`, `vocabulary` oder `quiz` |
 | `requires` | Mission, die vorher bestanden sein muss (optional) |
 | `passRatio` | Anteil der Hufeisen zum Bestehen (Standard 0.6) |
 | `config.mode` | `choice` (auswählen) oder `input` (tippen) |
-| `config.list` / `config.direction` | Nur für Vokabeln: Listenname und `en-de` oder `de-en` |
+| `config.list` / `config.direction` | Vokabeln: Listenname und `to-de` (Fremdsprache → Deutsch) oder `from-de` |
+| `config.bank` | Quiz: Name des Fragenpools in `quiz.json` |
 
-Bei Vokabeln werden Groß- und Kleinschreibung, Artikel („das Pferd“ oder
-„Pferd“), „to“ bei Verben sowie ae/oe/ue statt ä/ö/ü toleriert. Weitere
-richtige Antworten lassen sich über `deAlt` bzw. `enAlt` angeben.
+Jede Vokabelliste hat eine Sprache (`en`, `fr` oder `es`) und Wörter der Form
+`{ "word": "le cheval", "de": "das Pferd" }`. Beim Tippen werden
+Groß- und Kleinschreibung, Artikel („das Pferd“ oder „Pferd“, „l'écurie“ oder
+„écurie“), fehlende Akzente (é, ñ …), Satzzeichen sowie ae/oe/ue statt ä/ö/ü
+toleriert. Weitere richtige Antworten lassen sich über `deAlt` bzw. `wordAlt`
+angeben.
+
+Eine Quiz-Frage hat die Form `{ "prompt": "Hund", "answer": "der", "options":
+["der", "die", "das"] }`. Ohne `options` werden falsche Antworten aus den
+anderen Fragen des Pools gewählt.
 
 ## Aufbau
 

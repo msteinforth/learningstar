@@ -12,6 +12,7 @@ import { backendConfigured, lazyRpc } from './game/backend'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
 import { createPlayer } from './game/progress'
 import { buyItem, equipItem, newBadges } from './game/rewards'
+import { playSound } from './game/sound'
 import { FamilyPlayerStore, LocalPlayerStore, type PlayerStore } from './game/storage'
 import type { Mission, MissionResult, Player } from './game/types'
 
@@ -59,6 +60,7 @@ export default function App() {
   const [localCount, setLocalCount] = useState(0)
   const [activeId, setActiveId] = useState<string | null>(readActivePlayerId)
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
+  const [tournamentId, setTournamentId] = useState<string | null>(null)
 
   const [reloads, setReloads] = useState(0)
   const load = useCallback(() => setReloads((count) => count + 1), [])
@@ -79,6 +81,21 @@ export default function App() {
       active = false
     }
   }, [store, localStore, reloads])
+
+  // Every new screen (and every tournament) starts at the top.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [screen.name, tournamentId])
+
+  // A soft "plop" for every button; answers, purchases etc. add their own sounds.
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const button = (event.target as Element | null)?.closest?.('button')
+      if (button && !button.disabled && !button.classList.contains('choice')) playSound('click')
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [])
 
   // Pick up progress made on other devices when the app comes back into view.
   useEffect(() => {
@@ -105,7 +122,10 @@ export default function App() {
     selectPlayer(created)
   }
 
-  const start = (mission: Mission) => setScreen({ name: 'play', mission, run: Date.now() })
+  const start = (mission: Mission) => {
+    setTournamentId(mission.track)
+    setScreen({ name: 'play', mission, run: Date.now() })
+  }
 
   const save = async (before: Player, result: MissionResult) => {
     const setSave = (state: SaveState) =>
@@ -114,7 +134,9 @@ export default function App() {
     try {
       const updated = await store.recordResult(before.id, result)
       replacePlayer(updated)
-      setSave({ status: 'saved', badges: newBadges(before, updated) })
+      const badges = newBadges(before, updated)
+      if (badges.length > 0) setTimeout(() => playSound('badge'), 1200)
+      setSave({ status: 'saved', badges })
     } catch (error) {
       setSave({ status: 'error', message: error instanceof Error ? error.message : String(error) })
     }
@@ -124,6 +146,7 @@ export default function App() {
     if (!player) return
     const firstPass = result.passed && !player.missions[mission.id]?.passed
     setScreen({ name: 'result', mission, result, firstPass, save: { status: 'saving' } })
+    playSound(result.passed ? 'finish' : 'wrong')
     save(player, result)
   }
 
@@ -192,6 +215,8 @@ export default function App() {
         'map',
         <MissionMap
           player={player}
+          tournamentId={tournamentId}
+          onSelectTournament={setTournamentId}
           onStart={start}
           onSwitchPlayer={() => {
             writeActivePlayerId(null)
@@ -205,7 +230,10 @@ export default function App() {
         'shop',
         <Shop
           player={player}
-          onBuy={(item) => updateExtras((current) => buyItem(current, item.id))}
+          onBuy={async (item) => {
+            await updateExtras((current) => buyItem(current, item.id))
+            playSound('coin')
+          }}
           onEquip={(slot, itemId) => updateExtras((current) => equipItem(current, slot, itemId))}
         />,
       )
