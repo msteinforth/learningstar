@@ -1,6 +1,7 @@
 import { missions } from '../game/missions'
 import type { Badge } from '../game/rewards'
 import type { Mission, MissionResult, Player } from '../game/types'
+import { PlayerHorse } from './Avatar'
 import { Confetti } from './Confetti'
 import { Points, Rosettes } from './Icons'
 
@@ -30,7 +31,8 @@ export function MissionResultView({ mission, result, player, firstPass, save, on
       {result.passed && <Confetti pieces={result.rosettes * 30} />}
       <section className="card result-card">
         <span className="result-hero" aria-hidden="true">
-          {result.passed ? (result.rosettes === 3 ? '🏆' : player.avatar) : '🐴'}
+          <PlayerHorse avatar={player.avatar} width={150} running={result.passed} />
+          {result.rosettes === 3 && <span className="result-trophy">🏆</span>}
         </span>
         <p className="result-kicker">{mission.title}</p>
         <h1>{result.passed ? HEADLINES[result.rosettes] : HEADLINES[0]}</h1>

@@ -2,7 +2,7 @@ import { missions, tracks } from '../game/missions'
 import { isUnlocked } from '../game/progress'
 import { walletOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
-import { Avatar } from './Avatar'
+import { Avatar, PlayerHorse } from './Avatar'
 import { Points, Rosettes } from './Icons'
 import { SoundToggle } from './SoundToggle'
 
@@ -144,7 +144,7 @@ export function MissionMap({ player, tournamentId, onSelectTournament, onStart, 
                       >
                         {isCurrent && (
                           <span className="here" aria-hidden="true">
-                            {player.avatar}
+                            <PlayerHorse avatar={player.avatar} width={58} />
                           </span>
                         )}
                         <span aria-hidden="true">{!unlocked ? '🔒' : progress?.passed ? '★' : i + 1}</span>

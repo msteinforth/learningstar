@@ -6,6 +6,7 @@ import { maxTaskPoints, taskPoints } from '../game/scoring'
 import { playSound } from '../game/sound'
 import { generateTasks } from '../game/tasks'
 import type { Mission, MissionResult, Player, TaskResult } from '../game/types'
+import { PlayerHorse } from './Avatar'
 import { Horseshoe } from './Icons'
 import { SoundToggle } from './SoundToggle'
 
@@ -21,7 +22,7 @@ type Feedback = { kind: 'correct'; points: number } | { kind: 'retry' } | { kind
 const msSince = (start: number) => performance.now() - start
 
 const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!', 'Wie ein Profi!']
-const CORRECT_EMOJI = ['🎉', '⭐', '🥕', '🏆', '🌈', '🐴']
+const CORRECT_EMOJI = ['🎉', '⭐', '🥕', '🏆', '🌈', '🍎']
 
 export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
   const [tasks] = useState(() => generateTasks(mission, createRng(Date.now()), player.mistakes))
@@ -125,7 +126,7 @@ export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
             </span>
           ))}
           <span className={`runner ${step > 0 ? (step % 2 ? 'jump' : 'jump-again') : ''}`} style={{ left: `${progress * 100}%` }} aria-hidden="true">
-            {player.avatar}
+            <PlayerHorse avatar={player.avatar} width={60} running />
           </span>
         </div>
         <span className="finish-flag" aria-hidden="true">

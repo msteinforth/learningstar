@@ -2,6 +2,8 @@ import { type CSSProperties, type FormEvent, useState } from 'react'
 import type { Player } from '../game/types'
 import { AVATARS, COLORS } from '../game/avatars'
 import { Avatar } from './Avatar'
+import { HORSES, horseFor } from '../game/horses'
+import { HorseHead, HorseSide } from './Horse'
 import { Points } from './Icons'
 
 interface Props {
@@ -73,9 +75,7 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
   return (
     <main className="screen">
       <header className="hero">
-        <span className="logo-horse" aria-hidden="true">
-          🐴
-        </span>
+        <HorseSide horse={HORSES[4]} width={150} running className="logo-horse" />
         <h1 className="logo">
           Learning<span className="logo-star">★</span>Star
         </h1>
@@ -108,11 +108,19 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
             <input value={name} onChange={(event) => setName(event.target.value)} maxLength={20} autoFocus placeholder="z. B. Lena" />
           </label>
           <fieldset>
-            <legend>Dein Tier</legend>
+            <legend>Dein Pferd</legend>
             <div className="options">
               {AVATARS.map((option) => (
-                <button type="button" key={option} className={`option ${option === avatar ? 'selected' : ''}`} onClick={() => setAvatar(option)} aria-pressed={option === avatar}>
-                  {option}
+                <button
+                  type="button"
+                  key={option}
+                  className={`option horse-option ${option === avatar ? 'selected' : ''}`}
+                  onClick={() => setAvatar(option)}
+                  aria-pressed={option === avatar}
+                  aria-label={horseFor(option)?.name}
+                  title={horseFor(option)?.name}
+                >
+                  <HorseHead horse={horseFor(option)!} size="100%" />
                 </button>
               ))}
             </div>
@@ -135,7 +143,10 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
           </fieldset>
           <div className="preview">
             <Avatar player={{ avatar, color }} size={72} />
-            <strong>{name.trim() || 'Dein Name'}</strong>
+            <span className="preview-text">
+              <strong>{name.trim() || 'Dein Name'}</strong>
+              <small>{horseFor(avatar)?.name}</small>
+            </span>
           </div>
           <div className="actions">
             {players.length > 0 && (
