@@ -19,6 +19,14 @@ Englisch-Vokabeln im Pferde-Look.
   Silber, Gold), gemessen an den erreichbaren Hufeisen. Ab 60 % gilt eine
   Mission als bestanden, bei einzelnen Missionen gilt eine höhere Grenze.
 - **Wiederholung**: Falsch beantwortete Aufgaben kommen später häufiger dran.
+- **Abzeichen** 🏅: 12 Abzeichen für Meilensteine, z. B. erste Mission,
+  fehlerfreier Ritt, 3 bzw. 7 Tage in Folge gespielt oder einen ganzen Weg
+  geschafft. Der Fortschritt zu jedem Abzeichen ist sichtbar.
+- **Hufeisen-Laden** 🛍️: Gesammelte Hufeisen lassen sich gegen Kopfschmuck,
+  tierische Freunde und Hintergründe für das eigene Tier eintauschen. Manche
+  Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
+  Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
+  Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
 - **Familien-Rangliste** 🏆: Wer hat diese Woche die meisten Hufeisen gesammelt?
   Die Wochenwertung beginnt jeden Montag neu, daneben gibt es eine Gesamtwertung.
   Mit einer *Familie* spielen die Kinder auf verschiedenen Geräten und sehen
@@ -77,11 +85,16 @@ eine gemeinsame Rangliste braucht die Familie einen kleinen Server. Dafür wird
 6. Auf jedem weiteren Gerät dort **„Familie beitreten“** wählen und den
    angezeigten Familien-Code (z. B. `K7PM-3XQA`) eingeben.
 
+**Nach Updates:** Wenn sich `supabase/schema.sql` ändert (z. B. für den
+Hufeisen-Laden), den Inhalt einfach erneut im SQL Editor ausführen. Das Skript
+lässt vorhandene Daten unverändert.
+
 **Wie das abgesichert ist:** Die Kinder brauchen kein Login. Der Familien-Code
 funktioniert wie ein Schlüssel: Nur wer ihn kennt, sieht die Spieler der Familie
 und kann Punkte eintragen. Die Tabellen selbst sind für die App gesperrt, alle
 Zugriffe laufen über Datenbankfunktionen, die den Code prüfen und
-unplausible Punktzahlen ablehnen. Gespeichert werden nur Vorname, Tier, Farbe
+unplausible Punktzahlen ablehnen. Im Laden kann nicht mehr ausgegeben werden,
+als gesammelt wurde. Gespeichert werden nur Vorname, Tier, Farbe
 und Spielstand.
 
 Punkte werden auf dem Server addiert. Spielt ein Kind auf zwei Geräten, geht
@@ -139,8 +152,10 @@ richtige Antworten lassen sich über `deAlt` bzw. `enAlt` angeben.
 ```
 src/
   data/        Missionen und Vokabellisten (JSON)
-  game/        Spiellogik ohne UI: Aufgaben, Punkte, Fortschritt, Speicherung
-  components/  Bildschirme: Stall, Hof, Parcours, Ergebnis, Rangliste, Familie
+  game/        Spiellogik ohne UI: Aufgaben, Punkte, Fortschritt, Abzeichen & Laden
+               (rewards.ts), Speicherung
+  components/  Bildschirme: Stall, Hof, Parcours, Ergebnis, Laden, Abzeichen,
+               Rangliste, Familie
 supabase/      Datenbankschema für den Familien-Server
 dev/           Lokaler Test-Server und Tests des Schemas
 ```

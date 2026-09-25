@@ -26,6 +26,9 @@ create table if not exists public.players (
   updated_at timestamptz not null default now()
 );
 
+-- Abzeichen, Tagesserie und Einkäufe im Shop (ausgegebene Hufeisen, Besitz, Angezogenes).
+alter table public.players add column if not exists extras jsonb not null default '{}'::jsonb;
+
 create index if not exists players_family_idx on public.players (family_id);
 
 -- Jede gespielte Mission, damit sich z. B. die Punkte der Woche berechnen lassen.
@@ -89,8 +92,28 @@ as $$
     'createdAt', p.created_at,
     'totalPoints', p.total_points,
     'missions', p.missions,
-    'mistakes', p.mistakes
+    'mistakes', p.mistakes,
+    'extras', p.extras
   )
+$$;
+
+-- Prüft Abzeichen/Shop-Daten: Es darf nicht mehr ausgegeben werden, als gesammelt wurde.
+create or replace function public.ls_check_extras(p_extras jsonb, p_total_points integer)
+returns void
+language plpgsql
+immutable
+set search_path = ''
+as $$
+declare
+  v_spent integer := coalesce((p_extras ->> 'spent')::integer, 0);
+begin
+  if jsonb_typeof(p_extras) <> 'object' or pg_column_size(p_extras) > 50000 then
+    raise exception 'invalid_extras' using errcode = '22023';
+  end if;
+  if v_spent < 0 or v_spent > p_total_points then
+    raise exception 'not_enough_points' using errcode = '22023';
+  end if;
+end;
 $$;
 
 -- --- Öffentliche Funktionen ------------------------------------------------
@@ -158,7 +181,12 @@ declare
   v_family uuid := public.ls_family_id(p_code);
   v_player public.players;
 begin
-  insert into public.players (id, family_id, name, avatar, color, created_at, total_points, missions, mistakes)
+  perform public.ls_check_extras(
+    coalesce(p_player -> 'extras', '{}'::jsonb),
+    greatest(coalesce((p_player ->> 'totalPoints')::int, 0), 0)
+  );
+
+  insert into public.players (id, family_id, name, avatar, color, created_at, total_points, missions, mistakes, extras)
   values (
     (p_player ->> 'id')::uuid,
     v_family,
@@ -168,7 +196,8 @@ begin
     coalesce((p_player ->> 'createdAt')::timestamptz, now()),
     greatest(coalesce((p_player ->> 'totalPoints')::int, 0), 0),
     coalesce(p_player -> 'missions', '{}'::jsonb),
-    coalesce(p_player -> 'mistakes', '{}'::jsonb)
+    coalesce(p_player -> 'mistakes', '{}'::jsonb),
+    coalesce(p_player -> 'extras', '{}'::jsonb)
   )
   on conflict (id) do nothing;
 
@@ -201,13 +230,16 @@ $$;
 
 -- Speichert das Ergebnis einer Mission: Die Punkte werden auf dem Server
 -- addiert, damit keine verloren gehen, wenn ein Kind auf zwei Geräten spielt.
+drop function if exists public.save_progress(text, uuid, text, integer, jsonb, jsonb);
+
 create or replace function public.save_progress(
   p_code text,
   p_player_id uuid,
   p_mission_id text,
   p_points integer,
   p_missions jsonb,
-  p_mistakes jsonb
+  p_mistakes jsonb,
+  p_extras jsonb default '{}'::jsonb
 )
 returns jsonb
 language plpgsql
@@ -227,6 +259,7 @@ begin
   set total_points = total_points + p_points,
       missions = p_missions,
       mistakes = p_mistakes,
+      extras = p_extras,
       updated_at = now()
   where id = p_player_id and family_id = v_family
   returning * into v_player;
@@ -234,9 +267,37 @@ begin
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
+  perform public.ls_check_extras(v_player.extras, v_player.total_points);
 
   insert into public.point_events (family_id, player_id, mission_id, points)
   values (v_family, p_player_id, p_mission_id, p_points);
+
+  return public.ls_player_json(v_player);
+end;
+$$;
+
+-- Speichert Abzeichen und Shop-Einkäufe (ohne Punkte zu verändern).
+create or replace function public.save_extras(p_code text, p_player_id uuid, p_extras jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_player public.players;
+begin
+  update public.players
+  set extras = p_extras,
+      updated_at = now()
+  where id = p_player_id and family_id = v_family
+  returning * into v_player;
+
+  if v_player.id is null then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  perform public.ls_check_extras(v_player.extras, v_player.total_points);
 
   return public.ls_player_json(v_player);
 end;
@@ -264,6 +325,7 @@ as $$
       'avatar', p.avatar,
       'color', p.color,
       'totalPoints', p.total_points,
+      'extras', jsonb_build_object('equipped', coalesce(p.extras -> 'equipped', '{}'::jsonb)),
       'weekPoints', coalesce((
         select sum(e.points) from public.point_events e, week
         where e.player_id = p.id and e.created_at >= week.starts_at
@@ -283,7 +345,8 @@ revoke execute on function
   public.list_players(text),
   public.create_player(text, jsonb),
   public.get_player(text, uuid),
-  public.save_progress(text, uuid, text, integer, jsonb, jsonb),
+  public.save_progress(text, uuid, text, integer, jsonb, jsonb, jsonb),
+  public.save_extras(text, uuid, jsonb),
   public.leaderboard(text)
 from public;
 
@@ -292,8 +355,9 @@ from public;
 revoke execute on function
   public.ls_normalize_code(text),
   public.ls_family_id(text),
-  public.ls_player_json(public.players)
-from anon, authenticated;
+  public.ls_player_json(public.players),
+  public.ls_check_extras(jsonb, integer)
+from public, anon, authenticated;
 
 grant execute on function
   public.create_family(text),
@@ -301,6 +365,7 @@ grant execute on function
   public.list_players(text),
   public.create_player(text, jsonb),
   public.get_player(text, uuid),
-  public.save_progress(text, uuid, text, integer, jsonb, jsonb),
+  public.save_progress(text, uuid, text, integer, jsonb, jsonb, jsonb),
+  public.save_extras(text, uuid, jsonb),
   public.leaderboard(text)
 to anon, authenticated;

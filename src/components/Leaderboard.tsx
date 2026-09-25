@@ -8,13 +8,12 @@ interface Props {
   store: PlayerStore
   player: Player
   familyName: string | null
-  onBack: () => void
 }
 
 type Period = 'week' | 'total'
 type State = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; entries: LeaderboardEntry[] }
 
-export function Leaderboard({ store, player, familyName, onBack }: Props) {
+export function Leaderboard({ store, player, familyName }: Props) {
   const [period, setPeriod] = useState<Period>('week')
   const [state, setState] = useState<State>({ status: 'loading' })
   const [reload, setReload] = useState(0)
@@ -43,9 +42,7 @@ export function Leaderboard({ store, player, familyName, onBack }: Props) {
   return (
     <main className="screen">
       <header className="topbar">
-        <button className="button pill" onClick={onBack}>
-          ← Zum Hof
-        </button>
+        <span />
         <button className="button pill" onClick={refresh} disabled={state.status === 'loading'} aria-label="Aktualisieren">
           ↻ Aktualisieren
         </button>

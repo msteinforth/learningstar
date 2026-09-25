@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { Badges } from './components/Badges'
+import { BottomNav, type NavTarget } from './components/BottomNav'
 import { FamilySettings } from './components/FamilySettings'
 import { Leaderboard } from './components/Leaderboard'
 import { MissionMap } from './components/MissionMap'
 import { MissionPlay } from './components/MissionPlay'
 import { MissionResultView, type SaveState } from './components/MissionResultView'
 import { PlayerSelect } from './components/PlayerSelect'
+import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
 import { createPlayer } from './game/progress'
+import { buyItem, equipItem, newBadges } from './game/rewards'
 import { FamilyPlayerStore, LocalPlayerStore, type PlayerStore } from './game/storage'
 import type { Mission, MissionResult, Player } from './game/types'
 
 type Screen =
   | { name: 'players' }
-  | { name: 'map' }
-  | { name: 'leaderboard' }
+  | { name: NavTarget }
   | { name: 'family' }
   | { name: 'play'; mission: Mission; run: number }
   | { name: 'result'; mission: Mission; result: MissionResult; firstPass: boolean; save: SaveState }
@@ -104,13 +107,14 @@ export default function App() {
 
   const start = (mission: Mission) => setScreen({ name: 'play', mission, run: Date.now() })
 
-  const save = async (playerId: string, result: MissionResult) => {
+  const save = async (before: Player, result: MissionResult) => {
     const setSave = (state: SaveState) =>
       setScreen((current) => (current.name === 'result' && current.result === result ? { ...current, save: state } : current))
     setSave({ status: 'saving' })
     try {
-      replacePlayer(await store.recordResult(playerId, result))
-      setSave({ status: 'saved' })
+      const updated = await store.recordResult(before.id, result)
+      replacePlayer(updated)
+      setSave({ status: 'saved', badges: newBadges(before, updated) })
     } catch (error) {
       setSave({ status: 'error', message: error instanceof Error ? error.message : String(error) })
     }
@@ -120,7 +124,12 @@ export default function App() {
     if (!player) return
     const firstPass = result.passed && !player.missions[mission.id]?.passed
     setScreen({ name: 'result', mission, result, firstPass, save: { status: 'saving' } })
-    save(player.id, result)
+    save(player, result)
+  }
+
+  const updateExtras = async (update: (current: Player) => Player) => {
+    if (!player) return
+    replacePlayer(await store.updateExtras(player.id, update))
   }
 
   const enterFamily = async (joined: Family, takeLocalPlayers: boolean) => {
@@ -170,22 +179,40 @@ export default function App() {
     )
   }
 
+  const withNav = (active: NavTarget, content: ReactNode) => (
+    <>
+      {content}
+      <BottomNav active={active} onNavigate={(target) => setScreen({ name: target })} />
+    </>
+  )
+
   switch (screen.name) {
     case 'map':
-      return (
+      return withNav(
+        'map',
         <MissionMap
           player={player}
           onStart={start}
-          onLeaderboard={() => setScreen({ name: 'leaderboard' })}
           onSwitchPlayer={() => {
             writeActivePlayerId(null)
             setScreen({ name: 'players' })
             load()
           }}
-        />
+        />,
       )
+    case 'shop':
+      return withNav(
+        'shop',
+        <Shop
+          player={player}
+          onBuy={(item) => updateExtras((current) => buyItem(current, item.id))}
+          onEquip={(slot, itemId) => updateExtras((current) => equipItem(current, slot, itemId))}
+        />,
+      )
+    case 'badges':
+      return withNav('badges', <Badges player={player} />)
     case 'leaderboard':
-      return <Leaderboard store={store} player={player} familyName={family?.name ?? null} onBack={() => setScreen({ name: 'map' })} />
+      return withNav('leaderboard', <Leaderboard store={store} player={player} familyName={family?.name ?? null} />)
     case 'play':
       return (
         <MissionPlay
@@ -204,7 +231,7 @@ export default function App() {
           player={player}
           firstPass={screen.firstPass}
           save={screen.save}
-          onRetrySave={() => save(player.id, screen.result)}
+          onRetrySave={() => save(player, screen.result)}
           onReplay={() => start(screen.mission)}
           onBack={() => setScreen({ name: 'map' })}
           onNext={start}

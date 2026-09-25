@@ -1,6 +1,6 @@
 import { call, type Rpc } from './backend'
 import { applyResult } from './progress'
-import type { MissionResult, Player } from './types'
+import type { MissionResult, Player, PlayerExtras } from './types'
 
 export interface LeaderboardEntry {
   playerId: string
@@ -10,6 +10,8 @@ export interface LeaderboardEntry {
   totalPoints: number
   /** Points collected since Monday 0:00. */
   weekPoints: number
+  /** For showing the avatar with its hat, buddy and background. */
+  extras?: Partial<PlayerExtras>
 }
 
 /**
@@ -22,6 +24,8 @@ export interface PlayerStore {
   create(player: Player): Promise<Player>
   /** Stores a finished mission and returns the updated player. */
   recordResult(playerId: string, result: MissionResult): Promise<Player>
+  /** Changes badges, shop items etc. (everything except points) and returns the updated player. */
+  updateExtras(playerId: string, update: (player: Player) => Player): Promise<Player>
   leaderboard(): Promise<LeaderboardEntry[]>
 }
 
@@ -78,6 +82,14 @@ export class LocalPlayerStore implements PlayerStore {
     return updated
   }
 
+  async updateExtras(playerId: string, update: (player: Player) => Player): Promise<Player> {
+    const player = this.read<Player>(PLAYERS_KEY).find((candidate) => candidate.id === playerId)
+    if (!player) throw new Error(`Unbekannter Spieler: ${playerId}`)
+    const updated = { ...player, extras: update(player).extras }
+    this.writePlayer(updated)
+    return updated
+  }
+
   async leaderboard(): Promise<LeaderboardEntry[]> {
     const weekStart = startOfWeek(this.now()).getTime()
     const events = this.read<PointEvent>(EVENTS_KEY).filter((event) => new Date(event.at).getTime() >= weekStart)
@@ -89,6 +101,7 @@ export class LocalPlayerStore implements PlayerStore {
         color: player.color,
         totalPoints: player.totalPoints,
         weekPoints: events.filter((event) => event.playerId === player.id).reduce((sum, event) => sum + event.points, 0),
+        extras: { equipped: player.extras?.equipped ?? {} },
       })),
     )
   }
@@ -143,7 +156,13 @@ export class FamilyPlayerStore implements PlayerStore {
       p_points: result.points,
       p_missions: updated.missions,
       p_mistakes: updated.mistakes,
+      p_extras: updated.extras ?? {},
     })
+  }
+
+  async updateExtras(playerId: string, update: (player: Player) => Player): Promise<Player> {
+    const current = await call<Player>(this.rpc, 'get_player', { p_code: this.code, p_player_id: playerId })
+    return call(this.rpc, 'save_extras', { p_code: this.code, p_player_id: playerId, p_extras: update(current).extras ?? {} })
   }
 
   leaderboard(): Promise<LeaderboardEntry[]> {

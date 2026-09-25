@@ -3,6 +3,7 @@ import { BackendError } from '../src/game/backend.ts'
 import { createFamily, joinFamily, moveIntoFamily } from '../src/game/family.ts'
 import { missions } from '../src/game/missions.ts'
 import { createPlayer, summarize } from '../src/game/progress.ts'
+import { buyItem, extrasOf, walletOf } from '../src/game/rewards.ts'
 import { FamilyPlayerStore } from '../src/game/storage.ts'
 import { createPgliteBackend, type Rpc } from './pglite-rpc.ts'
 
@@ -37,6 +38,25 @@ describe('FamilyPlayerStore against the Supabase schema', () => {
 
     const board = await tablet.leaderboard()
     expect(board).toEqual([expect.objectContaining({ name: 'Lena', weekPoints: 4, totalPoints: 4 })])
+  })
+
+  it('stores badges and shop purchases on the server', async () => {
+    const family = await createFamily(rpc, 'Shopping')
+    const store = new FamilyPlayerStore(rpc, family.code)
+    const mia = await store.create(createPlayer('Mia', '🦄', '#a560f0'))
+    const mission = missions[0]
+    const played = await store.recordResult(mia.id, summarize(mission, [{ key: 'a', correct: true, points: 3 }], 3))
+    expect(Object.keys(extrasOf(played).badges)).toContain('fehlerfrei')
+
+    const unchanged = await store.updateExtras(mia.id, (player) => ({ ...player, totalPoints: 999, extras: { ...extrasOf(player), spent: 0 } }))
+    expect(unchanged.totalPoints).toBe(3) // points can't be changed this way
+
+    // Spending more than was collected is refused by the server.
+    await expect(store.updateExtras(mia.id, (player) => buyItem({ ...player, totalPoints: 100 }, 'hat-bow'))).rejects.toThrow()
+
+    const [entry] = await store.leaderboard()
+    expect(entry.extras).toEqual({ equipped: {} })
+    expect(walletOf(unchanged)).toBe(3)
   })
 
   it('moves local players into a family with their points', async () => {

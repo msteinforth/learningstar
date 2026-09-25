@@ -1,9 +1,10 @@
 import { missions } from '../game/missions'
+import type { Badge } from '../game/rewards'
 import type { Mission, MissionResult, Player } from '../game/types'
 import { Confetti } from './Confetti'
 import { Points, Rosettes } from './Icons'
 
-export type SaveState = { status: 'saving' } | { status: 'saved' } | { status: 'error'; message: string }
+export type SaveState = { status: 'saving' } | { status: 'saved'; badges: Badge[] } | { status: 'error'; message: string }
 
 interface Props {
   mission: Mission
@@ -61,6 +62,18 @@ export function MissionResultView({ mission, result, player, firstPass, save, on
             </button>
           </div>
         )}
+        {save.status === 'saved' &&
+          save.badges.map((badge, i) => (
+            <div key={badge.id} className="new-badge" style={{ animationDelay: `${0.8 + i * 0.3}s` }}>
+              <span className="medal" aria-hidden="true">
+                {badge.icon}
+              </span>
+              <span>
+                <small>Neues Abzeichen!</small>
+                <strong>{badge.title}</strong>
+              </span>
+            </div>
+          ))}
         {firstPass && nextMission && (
           <p className="unlock">
             🔓 Neue Mission freigeschaltet: <strong>{nextMission.title}</strong>

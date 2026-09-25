@@ -60,6 +60,19 @@ export interface MissionProgress {
   lastPlayedAt: string
 }
 
+export type ItemSlot = 'hat' | 'buddy' | 'background'
+
+/** Rewards: badges, a daily streak and things bought in the shop. */
+export interface PlayerExtras {
+  /** Horseshoes spent in the shop (total collected minus spent = what is left). */
+  spent: number
+  owned: string[]
+  equipped: Partial<Record<ItemSlot, string>>
+  /** Badge id → date it was earned (ISO). */
+  badges: Record<string, string>
+  streak: { days: number; lastDay: string | null }
+}
+
 export interface Player {
   id: string
   name: string
@@ -70,6 +83,8 @@ export interface Player {
   missions: Record<string, MissionProgress>
   /** Number of mistakes per task key – tricky items are asked more often. */
   mistakes: Record<string, number>
+  /** Missing for profiles created before rewards existed; read it via `extrasOf`. */
+  extras?: PlayerExtras
 }
 
 export interface TaskResult {

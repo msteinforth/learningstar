@@ -1,5 +1,6 @@
 import { missions, tracks } from '../game/missions'
 import { isUnlocked } from '../game/progress'
+import { walletOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
 import { Avatar } from './Avatar'
 import { Points, Rosettes } from './Icons'
@@ -7,7 +8,6 @@ import { Points, Rosettes } from './Icons'
 interface Props {
   player: Player
   onStart: (mission: Mission) => void
-  onLeaderboard: () => void
   onSwitchPlayer: () => void
 }
 
@@ -27,7 +27,7 @@ function trailPath(points: { x: number; y: number }[]): string {
     .join(' ')
 }
 
-export function MissionMap({ player, onStart, onLeaderboard, onSwitchPlayer }: Props) {
+export function MissionMap({ player, onStart, onSwitchPlayer }: Props) {
   return (
     <main className="screen">
       <header className="topbar">
@@ -35,13 +35,8 @@ export function MissionMap({ player, onStart, onLeaderboard, onSwitchPlayer }: P
           <Avatar player={player} size={44} />
           <span>{player.name}</span>
         </button>
-        <span className="topbar-end">
-          <span className="points-badge">
-            <Points value={player.totalPoints} />
-          </span>
-          <button className="button pill" onClick={onLeaderboard} aria-label="Rangliste">
-            🏆
-          </button>
+        <span className="points-badge" title="Hufeisen im Beutel">
+          <Points value={walletOf(player)} />
         </span>
       </header>
 

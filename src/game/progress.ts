@@ -1,3 +1,4 @@
+import { awardBadges, extrasOf, nextStreak } from './rewards'
 import { isPassed, rosettesFor } from './scoring'
 import type { Mission, MissionResult, Player, TaskResult } from './types'
 
@@ -30,8 +31,10 @@ export function applyResult(player: Player, result: MissionResult, now = new Dat
       if (mistakes[task.key] <= 0) delete mistakes[task.key]
     }
   }
-  return {
+  const extras = extrasOf(player)
+  const updated: Player = {
     ...player,
+    extras: { ...extras, streak: nextStreak(extras.streak, now) },
     totalPoints: player.totalPoints + result.points,
     mistakes,
     missions: {
@@ -46,6 +49,7 @@ export function applyResult(player: Player, result: MissionResult, now = new Dat
       },
     },
   }
+  return awardBadges(updated, now)
 }
 
 export function createPlayer(name: string, avatar: string, color: string, now = new Date()): Player {

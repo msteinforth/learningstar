@@ -89,6 +89,16 @@ describe('supabase schema', () => {
     ])
   })
 
+  it('refuses to spend more horseshoes than were collected', async () => {
+    await ok(backend.rpc, 'create_player', { p_code: code, p_player: player(LENA, 'Lena', { totalPoints: 30 }) })
+    const bow = { spent: 20, owned: ['hat-bow'], equipped: { hat: 'hat-bow' } }
+    expect(await ok(backend.rpc, 'save_extras', { p_code: code, p_player_id: LENA, p_extras: bow })).toMatchObject({ extras: bow })
+    const { error } = await backend.rpc('save_extras', { p_code: code, p_player_id: LENA, p_extras: { ...bow, spent: 31 } })
+    expect(error?.message).toBe('not_enough_points')
+    const imported = await backend.rpc('create_player', { p_code: code, p_player: player(TOM, 'Tom', { totalPoints: 5, extras: { spent: 50 } }) })
+    expect(imported.error?.message).toBe('not_enough_points')
+  })
+
   it('rejects implausible point values', async () => {
     await ok(backend.rpc, 'create_player', { p_code: code, p_player: player(LENA, 'Lena') })
     for (const points of [-5, 1000]) {
@@ -99,7 +109,7 @@ describe('supabase schema', () => {
   })
 
   it('blocks direct table access and helper functions for the public role', async () => {
-    const attempts = ['select * from players', 'select * from families', `select public.ls_family_id('${code}')`]
+    const attempts = ['select * from players', 'select * from families', `select public.ls_family_id('${code}')`, `select public.ls_check_extras('{}', 0)`]
     for (const sql of attempts) {
       await expect(
         backend.db.transaction(async (tx) => {
