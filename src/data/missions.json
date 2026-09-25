@@ -1,0 +1,92 @@
+[
+  {
+    "id": "1x1-aufwaermen",
+    "track": "math",
+    "type": "multiplication",
+    "title": "Aufwärmrunde",
+    "subtitle": "1×1 mit 2, 5 und 10",
+    "config": { "factors": [2, 5, 10], "count": 10, "mode": "choice" }
+  },
+  {
+    "id": "1x1-reihe-3-4",
+    "track": "math",
+    "type": "multiplication",
+    "title": "Kleiner Parcours",
+    "subtitle": "Die 3er- und 4er-Reihe",
+    "requires": "1x1-aufwaermen",
+    "config": { "factors": [3, 4], "count": 10 }
+  },
+  {
+    "id": "1x1-reihe-6-7",
+    "track": "math",
+    "type": "multiplication",
+    "title": "Über den Wassergraben",
+    "subtitle": "Die 6er- und 7er-Reihe",
+    "requires": "1x1-reihe-3-4",
+    "config": { "factors": [6, 7], "count": 10 }
+  },
+  {
+    "id": "1x1-reihe-8-9",
+    "track": "math",
+    "type": "multiplication",
+    "title": "Hohe Hürden",
+    "subtitle": "Die 8er- und 9er-Reihe",
+    "requires": "1x1-reihe-6-7",
+    "config": { "factors": [8, 9], "count": 10 }
+  },
+  {
+    "id": "1x1-turnier",
+    "track": "math",
+    "type": "multiplication",
+    "title": "Großes Turnier",
+    "subtitle": "Das ganze 1×1 gemischt",
+    "requires": "1x1-reihe-8-9",
+    "passRatio": 0.7,
+    "config": { "factors": [2, 3, 4, 5, 6, 7, 8, 9], "count": 15 }
+  },
+  {
+    "id": "en-stall-waehlen",
+    "track": "english",
+    "type": "vocabulary",
+    "title": "Im Pferdestall",
+    "subtitle": "Englisch → Deutsch, auswählen",
+    "config": { "list": "stable", "direction": "en-de", "mode": "choice", "count": 8 }
+  },
+  {
+    "id": "en-stall-tippen",
+    "track": "english",
+    "type": "vocabulary",
+    "title": "Stall-Profi",
+    "subtitle": "Deutsch → Englisch, selbst tippen",
+    "requires": "en-stall-waehlen",
+    "config": { "list": "stable", "direction": "de-en", "mode": "input", "count": 8 }
+  },
+  {
+    "id": "en-tiere-waehlen",
+    "track": "english",
+    "type": "vocabulary",
+    "title": "Auf dem Bauernhof",
+    "subtitle": "Tiere: Englisch → Deutsch",
+    "requires": "en-stall-tippen",
+    "config": { "list": "animals", "direction": "en-de", "mode": "choice", "count": 8 }
+  },
+  {
+    "id": "en-farben-tippen",
+    "track": "english",
+    "type": "vocabulary",
+    "title": "Bunte Schabracken",
+    "subtitle": "Farben: Deutsch → Englisch tippen",
+    "requires": "en-tiere-waehlen",
+    "config": { "list": "colors", "direction": "de-en", "mode": "input", "count": 8 }
+  },
+  {
+    "id": "en-schule-tippen",
+    "track": "english",
+    "type": "vocabulary",
+    "title": "Reitschule",
+    "subtitle": "Schulwörter: Deutsch → Englisch tippen",
+    "requires": "en-farben-tippen",
+    "passRatio": 0.7,
+    "config": { "list": "school", "direction": "de-en", "mode": "input", "count": 10 }
+  }
+]

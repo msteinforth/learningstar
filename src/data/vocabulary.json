@@ -1,0 +1,69 @@
+{
+  "stable": {
+    "title": "Im Pferdestall",
+    "words": [
+      { "en": "horse", "de": "das Pferd" },
+      { "en": "pony", "de": "das Pony" },
+      { "en": "foal", "de": "das Fohlen" },
+      { "en": "stable", "de": "der Stall" },
+      { "en": "saddle", "de": "der Sattel" },
+      { "en": "hay", "de": "das Heu" },
+      { "en": "carrot", "de": "die Karotte", "deAlt": ["die Möhre", "die Mohrrübe"] },
+      { "en": "apple", "de": "der Apfel" },
+      { "en": "tail", "de": "der Schweif", "deAlt": ["der Schwanz"] },
+      { "en": "mane", "de": "die Mähne" },
+      { "en": "to ride", "de": "reiten" },
+      { "en": "meadow", "de": "die Weide", "deAlt": ["die Wiese"] }
+    ]
+  },
+  "animals": {
+    "title": "Tiere",
+    "words": [
+      { "en": "dog", "de": "der Hund" },
+      { "en": "cat", "de": "die Katze" },
+      { "en": "cow", "de": "die Kuh" },
+      { "en": "pig", "de": "das Schwein" },
+      { "en": "sheep", "de": "das Schaf" },
+      { "en": "chicken", "de": "das Huhn" },
+      { "en": "rabbit", "de": "das Kaninchen", "deAlt": ["der Hase"] },
+      { "en": "bird", "de": "der Vogel" },
+      { "en": "mouse", "de": "die Maus" },
+      { "en": "duck", "de": "die Ente" },
+      { "en": "goat", "de": "die Ziege" },
+      { "en": "donkey", "de": "der Esel" }
+    ]
+  },
+  "colors": {
+    "title": "Farben",
+    "words": [
+      { "en": "red", "de": "rot" },
+      { "en": "blue", "de": "blau" },
+      { "en": "green", "de": "grün" },
+      { "en": "yellow", "de": "gelb" },
+      { "en": "black", "de": "schwarz" },
+      { "en": "white", "de": "weiß" },
+      { "en": "brown", "de": "braun" },
+      { "en": "grey", "de": "grau", "enAlt": ["gray"] },
+      { "en": "orange", "de": "orange" },
+      { "en": "pink", "de": "rosa", "deAlt": ["pink"] },
+      { "en": "purple", "de": "lila", "deAlt": ["violett"] }
+    ]
+  },
+  "school": {
+    "title": "In der Schule",
+    "words": [
+      { "en": "book", "de": "das Buch" },
+      { "en": "pencil", "de": "der Bleistift" },
+      { "en": "teacher", "de": "der Lehrer", "deAlt": ["die Lehrerin"] },
+      { "en": "desk", "de": "der Tisch", "deAlt": ["das Pult", "der Schreibtisch"] },
+      { "en": "ruler", "de": "das Lineal" },
+      { "en": "rubber", "de": "der Radiergummi", "enAlt": ["eraser"] },
+      { "en": "school bag", "de": "die Schultasche", "enAlt": ["schoolbag"], "deAlt": ["der Schulranzen", "der Ranzen"] },
+      { "en": "homework", "de": "die Hausaufgaben", "deAlt": ["die Hausaufgabe"] },
+      { "en": "friend", "de": "der Freund", "deAlt": ["die Freundin"] },
+      { "en": "to read", "de": "lesen" },
+      { "en": "to write", "de": "schreiben" },
+      { "en": "break", "de": "die Pause" }
+    ]
+  }
+}
