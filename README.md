@@ -34,6 +34,28 @@ npm run lint
 npm run build   # Produktions-Build nach dist/
 ```
 
+## Online stellen (GitHub Pages)
+
+Der Workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+prüft die App bei jedem Push auf `main` (bzw. den aktuellen Standard-Branch)
+mit Lint und Tests, baut sie und veröffentlicht sie unter
+`https://<benutzername>.github.io/learningstar/`.
+
+Einmalig einzurichten:
+
+1. **Settings → Pages → Build and deployment → Source: „GitHub Actions“** wählen.
+   Für ein *privates* Repository ist GitHub Pages nur mit einem kostenpflichtigen
+   GitHub-Plan (z. B. Pro) verfügbar; alternativ das Repository öffentlich machen.
+2. Optional für die Familien-Rangliste: unter **Settings → Secrets and variables →
+   Actions** die Secrets `VITE_SUPABASE_URL` und `VITE_SUPABASE_KEY` anlegen
+   (Werte wie in `.env.local`). Ohne sie läuft die Online-Version im Ein-Geräte-Modus.
+3. Unter **Actions → Deploy to GitHub Pages → Run workflow** den ersten Lauf
+   starten (oder einfach etwas pushen).
+
+Die Seite ist öffentlich erreichbar. Die Spielstände sind trotzdem geschützt:
+Ohne Familien-Code sieht niemand eure Spieler. Auf Tablet oder Handy lässt sich
+die Seite über „Zum Home-Bildschirm hinzufügen“ wie eine App starten.
+
 ## Familien-Rangliste über mehrere Geräte
 
 Ohne weitere Einrichtung speichert jedes Gerät seine Spieler nur für sich. Für
