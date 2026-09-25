@@ -7,10 +7,11 @@ import { Points, Rosettes } from './Icons'
 interface Props {
   player: Player
   onStart: (mission: Mission) => void
+  onLeaderboard: () => void
   onSwitchPlayer: () => void
 }
 
-export function MissionMap({ player, onStart, onSwitchPlayer }: Props) {
+export function MissionMap({ player, onStart, onLeaderboard, onSwitchPlayer }: Props) {
   return (
     <main className="screen">
       <header className="topbar">
@@ -18,7 +19,12 @@ export function MissionMap({ player, onStart, onSwitchPlayer }: Props) {
           <Avatar player={player} size={40} />
           <span>{player.name}</span>
         </button>
-        <Points value={player.totalPoints} />
+        <span className="topbar-end">
+          <Points value={player.totalPoints} />
+          <button className="button secondary small" onClick={onLeaderboard}>
+            🏆 Rangliste
+          </button>
+        </span>
       </header>
 
       {tracks.map((track) => {

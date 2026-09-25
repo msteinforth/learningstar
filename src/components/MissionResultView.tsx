@@ -2,12 +2,16 @@ import { missions } from '../game/missions'
 import type { Mission, MissionResult, Player } from '../game/types'
 import { Points, Rosettes } from './Icons'
 
+export type SaveState = { status: 'saving' } | { status: 'saved' } | { status: 'error'; message: string }
+
 interface Props {
   mission: Mission
   result: MissionResult
   player: Player
   /** Whether this run passed the mission for the first time. */
   firstPass: boolean
+  save: SaveState
+  onRetrySave: () => void
   onReplay: () => void
   onBack: () => void
   onNext: (mission: Mission) => void
@@ -15,7 +19,7 @@ interface Props {
 
 const HEADLINES = ['Weiter üben – du schaffst das!', 'Geschafft!', 'Stark geritten!', 'Fehlerfreier Ritt!']
 
-export function MissionResultView({ mission, result, player, firstPass, onReplay, onBack, onNext }: Props) {
+export function MissionResultView({ mission, result, player, firstPass, save, onRetrySave, onReplay, onBack, onNext }: Props) {
   const correct = result.results.filter((task) => task.correct).length
   const nextMission = missions.find((candidate) => candidate.requires === mission.id)
 
@@ -40,11 +44,18 @@ export function MissionResultView({ mission, result, player, firstPass, onReplay
           </div>
           <div>
             <dt>Gesamt</dt>
-            <dd>
-              <Points value={player.totalPoints} />
-            </dd>
+            <dd>{save.status === 'saved' ? <Points value={player.totalPoints} /> : '…'}</dd>
           </div>
         </dl>
+        {save.status === 'saving' && <p className="hint">Hufeisen werden gespeichert …</p>}
+        {save.status === 'error' && (
+          <div className="notice error">
+            <p>Deine Hufeisen konnten noch nicht gespeichert werden. {save.message}</p>
+            <button className="button primary" onClick={onRetrySave}>
+              Nochmal speichern
+            </button>
+          </div>
+        )}
         {firstPass && nextMission && (
           <p className="unlock">
             🔓 Neue Mission freigeschaltet: <strong>{nextMission.title}</strong>
@@ -58,7 +69,7 @@ export function MissionResultView({ mission, result, player, firstPass, onReplay
           <button className="button secondary" onClick={onReplay}>
             Nochmal
           </button>
-          {result.passed && nextMission && (
+          {result.passed && nextMission && save.status === 'saved' && (
             <button className="button primary" onClick={() => onNext(nextMission)}>
               Nächste Mission
             </button>

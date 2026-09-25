@@ -586,3 +586,183 @@ legend {
     transition: none !important;
   }
 }
+
+/* --- Family & leaderboard ----------------------------------------------------- */
+
+.center {
+  text-align: center;
+}
+
+.button.small {
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+
+.button.danger {
+  background: var(--bad);
+  color: var(--primary-text);
+}
+
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.family-badge {
+  display: inline-block;
+  margin-top: 10px !important;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  font-weight: 800;
+  font-size: 0.95rem !important;
+  color: var(--text) !important;
+}
+
+.notice {
+  margin: 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice.error {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+  color: var(--bad);
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel h2 {
+  font-size: 1.3rem;
+}
+
+.panel p {
+  margin: 0;
+}
+
+.panel label:not(.checkbox) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.panel input:not([type='checkbox']) {
+  font: inherit;
+  font-size: 1.2rem;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  width: 100%;
+}
+
+.code-input {
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.checkbox input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+}
+
+.family-code {
+  font-size: clamp(1.8rem, 9vw, 2.6rem) !important;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg);
+  border: 2px dashed var(--border);
+  user-select: all;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--empty);
+}
+
+.tabs button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px;
+  background: none;
+  font-weight: 800;
+}
+
+.tabs button.active {
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+
+.ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.rank-row.me {
+  border-color: var(--primary);
+}
+
+.rank-row .player-name {
+  font-size: 1.15rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rank-row small {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.place {
+  width: 34px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  flex: none;
+}

@@ -19,6 +19,10 @@ Englisch-Vokabeln im Pferde-Look.
   Silber, Gold), gemessen an den erreichbaren Hufeisen. Ab 60 % gilt eine
   Mission als bestanden, bei einzelnen Missionen gilt eine höhere Grenze.
 - **Wiederholung**: Falsch beantwortete Aufgaben kommen später häufiger dran.
+- **Familien-Rangliste** 🏆: Wer hat diese Woche die meisten Hufeisen gesammelt?
+  Die Wochenwertung beginnt jeden Montag neu, daneben gibt es eine Gesamtwertung.
+  Mit einer *Familie* spielen die Kinder auf verschiedenen Geräten und sehen
+  eine gemeinsame Rangliste (siehe unten).
 
 ## Entwicklung
 
@@ -29,6 +33,53 @@ npm test        # Tests der Spiellogik
 npm run lint
 npm run build   # Produktions-Build nach dist/
 ```
+
+## Familien-Rangliste über mehrere Geräte
+
+Ohne weitere Einrichtung speichert jedes Gerät seine Spieler nur für sich. Für
+eine gemeinsame Rangliste braucht die Familie einen kleinen Server. Dafür wird
+[Supabase](https://supabase.com) genutzt, der kostenlose Tarif reicht aus.
+
+1. Bei Supabase ein Konto und ein neues Projekt anlegen. Als Region eine in
+   der EU wählen, z. B. Frankfurt.
+2. Im Projekt den **SQL Editor** öffnen, den Inhalt von
+   [`supabase/schema.sql`](supabase/schema.sql) einfügen und ausführen.
+3. Unter **Project Settings → API Keys** die Projekt-URL und den
+   *publishable* (bzw. *anon*) Key kopieren. **Nicht** den geheimen
+   *secret*/*service_role* Key verwenden.
+4. `.env.example` nach `.env.local` kopieren und die beiden Werte eintragen,
+   dann die App neu starten oder neu bauen.
+5. In der App im Stall auf **„Auf mehreren Geräten spielen“** tippen und eine
+   Familie gründen. Spieler, die schon auf dem Gerät sind, können mitgenommen
+   werden, ihre Hufeisen bleiben erhalten.
+6. Auf jedem weiteren Gerät dort **„Familie beitreten“** wählen und den
+   angezeigten Familien-Code (z. B. `K7PM-3XQA`) eingeben.
+
+**Wie das abgesichert ist:** Die Kinder brauchen kein Login. Der Familien-Code
+funktioniert wie ein Schlüssel: Nur wer ihn kennt, sieht die Spieler der Familie
+und kann Punkte eintragen. Die Tabellen selbst sind für die App gesperrt, alle
+Zugriffe laufen über Datenbankfunktionen, die den Code prüfen und
+unplausible Punktzahlen ablehnen. Gespeichert werden nur Vorname, Tier, Farbe
+und Spielstand.
+
+Punkte werden auf dem Server addiert. Spielt ein Kind auf zwei Geräten, geht
+also nichts verloren. Ist das Internet weg, zeigt das Ergebnis-Bild
+„Nochmal speichern“ an.
+
+### Lokal ausprobieren ohne Supabase-Konto
+
+`dev/backend.ts` startet einen Test-Server mit einer eingebetteten Postgres-
+Datenbank ([PGlite](https://pglite.dev)) und demselben Schema. Die Daten gehen
+beim Beenden verloren.
+
+```bash
+npm run dev:backend
+# in einem zweiten Terminal:
+VITE_SUPABASE_URL=http://localhost:54321 VITE_SUPABASE_KEY=dev npm run dev
+```
+
+Zwei Geräte lassen sich simulieren, indem man die App in einem normalen und
+einem privaten Browserfenster öffnet.
 
 ## Eigene Missionen anlegen
 
@@ -67,10 +118,11 @@ richtige Antworten lassen sich über `deAlt` bzw. `enAlt` angeben.
 src/
   data/        Missionen und Vokabellisten (JSON)
   game/        Spiellogik ohne UI: Aufgaben, Punkte, Fortschritt, Speicherung
-  components/  Bildschirme: Stall, Hof, Parcours, Ergebnis
+  components/  Bildschirme: Stall, Hof, Parcours, Ergebnis, Rangliste, Familie
+supabase/      Datenbankschema für den Familien-Server
+dev/           Lokaler Test-Server und Tests des Schemas
 ```
 
-Die Spielstände liegen im `localStorage` des Browsers. Die Speicherung läuft
-über die Schnittstelle `PlayerStore` (`src/game/storage.ts`), damit sie später
-gegen einen Server getauscht werden kann, zum Beispiel für eine gemeinsame
-Familien-Rangliste über mehrere Geräte.
+Die Speicherung läuft über die Schnittstelle `PlayerStore`
+(`src/game/storage.ts`). `LocalPlayerStore` speichert im `localStorage` des
+Browsers, `FamilyPlayerStore` über den Familien-Server.
