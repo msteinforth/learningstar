@@ -18,7 +18,8 @@ type Feedback = { kind: 'correct'; points: number } | { kind: 'retry' } | { kind
 
 const msSince = (start: number) => performance.now() - start
 
-const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!']
+const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!', 'Wie ein Profi!']
+const CORRECT_EMOJI = ['🎉', '⭐', '🥕', '🏆', '🌈', '🐴']
 
 export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
   const [tasks] = useState(() => generateTasks(mission, createRng(Date.now()), player.mistakes))
@@ -82,32 +83,51 @@ export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
   const answered = feedback !== null && feedback.kind !== 'retry'
   const progress = (index + (answered ? 1 : 0)) / tasks.length
 
+  const step = index + (answered ? 1 : 0)
+
   return (
-    <main className="screen play">
+    <main className={`screen play theme-${mission.track}`}>
       <header className="topbar">
         <button className="button ghost" onClick={onCancel}>
           ✕ Abbrechen
         </button>
-        <span className="points" aria-label={`${points} Hufeisen in dieser Runde`}>
-          <Horseshoe /> {points}
+        <span className="points-badge" aria-label={`${points} Hufeisen in dieser Runde`}>
+          <span className="points">
+            <Horseshoe /> {points}
+          </span>
         </span>
       </header>
 
       <div className="course" aria-label={`Aufgabe ${index + 1} von ${tasks.length}`}>
-        <div className="course-fill" style={{ width: `${progress * 100}%` }} />
-        {tasks.map((_, i) => (
-          <span key={i} className="hurdle" style={{ left: `${((i + 1) / tasks.length) * 100}%` }} aria-hidden="true" />
-        ))}
-        <span className="runner" style={{ left: `${progress * 100}%` }} aria-hidden="true">
-          {player.avatar}
+        <div className="course-lane">
+          <div className="course-fill" style={{ width: `calc(${progress * 100}% + 30px)` }} />
+          {tasks.map((_, i) => (
+            <span
+              key={i}
+              className={`hurdle ${i < step ? 'cleared' : ''}`}
+              style={{ left: `${((i + 0.5) / tasks.length) * 100}%` }}
+              aria-hidden="true"
+            >
+              <span className="bar" style={{ top: 4 }} />
+              <span className="bar" style={{ top: 14 }} />
+              <span className="post" style={{ left: 0 }} />
+              <span className="post" style={{ right: 0 }} />
+            </span>
+          ))}
+          <span className={`runner ${step > 0 ? (step % 2 ? 'jump' : 'jump-again') : ''}`} style={{ left: `${progress * 100}%` }} aria-hidden="true">
+            {player.avatar}
+          </span>
+        </div>
+        <span className="finish-flag" aria-hidden="true">
+          🏁
         </span>
       </div>
-      <p className="counter">
-        {mission.title} · Aufgabe {index + 1} von {tasks.length}
+      <p className="counter on-sky">
+        {mission.title} · Hürde {index + 1} von {tasks.length}
       </p>
 
-      <section className="card task" key={index}>
-        <p className="task-hint">{task.hint}</p>
+      <section className={`card task ${feedback?.kind === 'retry' ? 'shake' : ''}`} key={index}>
+        <p className="task-hint">{feedback?.kind === 'retry' ? 'Fast! Versuch es noch einmal 💪' : task.hint}</p>
         <p className="task-prompt">{task.prompt}</p>
 
         {task.mode === 'choice' ? (
@@ -143,33 +163,51 @@ export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
               placeholder="?"
             />
             {!answered && (
-              <button type="submit" className="button primary" disabled={!input.trim()}>
+              <button type="submit" className="button track" disabled={!input.trim()}>
                 Prüfen
               </button>
             )}
           </form>
         )}
-
-        <div className="feedback" role="status">
-          {feedback?.kind === 'correct' && (
-            <p className="good">
-              {CORRECT_PRAISE[index % CORRECT_PRAISE.length]} +{feedback.points} <Horseshoe size={18} />
-            </p>
-          )}
-          {feedback?.kind === 'retry' && <p className="hmm">Fast! Versuch es noch einmal.</p>}
-          {feedback?.kind === 'solution' && (
-            <p className="bad">
-              Richtig wäre: <strong>{task.answer}</strong>
-            </p>
-          )}
-        </div>
-
-        {answered && (
-          <button ref={nextRef} className="button primary" onClick={next}>
-            {index + 1 >= tasks.length ? 'Ins Ziel 🏁' : 'Weiter'}
-          </button>
-        )}
       </section>
+
+      {feedback?.kind === 'correct' && (
+        <span className="flying-points" key={`points-${index}`} aria-hidden="true">
+          +{feedback.points} <Horseshoe size={40} />
+        </span>
+      )}
+
+      <div role="status" aria-live="polite">
+        {answered && (
+          <div className={`feedback-sheet ${feedback?.kind === 'correct' ? 'good' : 'bad'}`}>
+            <div className="feedback-inner">
+              <span className="feedback-emoji" aria-hidden="true">
+                {feedback?.kind === 'correct' ? CORRECT_EMOJI[index % CORRECT_EMOJI.length] : '🙈'}
+              </span>
+              <span className="feedback-text">
+                {feedback?.kind === 'correct' ? (
+                  <>
+                    <strong>{CORRECT_PRAISE[index % CORRECT_PRAISE.length]}</strong>
+                    <span>
+                      +{feedback.points} Hufeisen für dich
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <strong>Nicht ganz!</strong>
+                    <span>
+                      Richtig ist: <b>{task.answer}</b>
+                    </span>
+                  </>
+                )}
+              </span>
+              <button ref={nextRef} className="button primary" onClick={next}>
+                {index + 1 >= tasks.length ? 'Ins Ziel 🏁' : 'Weiter'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   )
 }

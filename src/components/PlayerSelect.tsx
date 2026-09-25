@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react'
+import { type CSSProperties, type FormEvent, useState } from 'react'
 import type { Player } from '../game/types'
 import { AVATARS, COLORS } from '../game/avatars'
 import { Avatar } from './Avatar'
@@ -73,10 +73,13 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
   return (
     <main className="screen">
       <header className="hero">
-        <h1>
-          <span aria-hidden="true">🐴</span> LearningStar
+        <span className="logo-horse" aria-hidden="true">
+          🐴
+        </span>
+        <h1 className="logo">
+          Learning<span className="logo-star">★</span>Star
         </h1>
-        <p>Willkommen im Stall! Wer reitet heute?</p>
+        <p className="on-sky">Willkommen im Stall! Wer reitet heute?</p>
         {familyName && <p className="family-badge">🏡 {familyName}</p>}
       </header>
 
@@ -84,10 +87,12 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
         <ul className="player-list">
           {players.map((player) => (
             <li key={player.id}>
-              <button className="card player-card" onClick={() => onSelect(player)}>
-                <Avatar player={player} />
-                <span className="player-name">{player.name}</span>
-                <Points value={player.totalPoints} />
+              <button className="player-card" style={{ '--player': player.color } as CSSProperties} onClick={() => onSelect(player)}>
+                <Avatar player={player} size={64} />
+                <span className="player-name">
+                  {player.name}
+                  <Points value={player.totalPoints} />
+                </span>
               </button>
             </li>
           ))}
@@ -144,13 +149,13 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
           </div>
         </form>
       ) : (
-        <button className="button secondary" onClick={() => setWantsForm(true)}>
+        <button className="button primary new-player" onClick={() => setWantsForm(true)}>
           + Neuer Spieler
         </button>
       )}
 
       {onOpenFamily && (
-        <button className="button ghost" onClick={onOpenFamily}>
+        <button className="button pill new-player" onClick={onOpenFamily}>
           {familyName ? '🏡 Familien-Code anzeigen' : '🏡 Auf mehreren Geräten spielen'}
         </button>
       )}

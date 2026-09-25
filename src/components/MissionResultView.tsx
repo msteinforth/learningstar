@@ -1,5 +1,6 @@
 import { missions } from '../game/missions'
 import type { Mission, MissionResult, Player } from '../game/types'
+import { Confetti } from './Confetti'
 import { Points, Rosettes } from './Icons'
 
 export type SaveState = { status: 'saving' } | { status: 'saved' } | { status: 'error'; message: string }
@@ -24,11 +25,15 @@ export function MissionResultView({ mission, result, player, firstPass, save, on
   const nextMission = missions.find((candidate) => candidate.requires === mission.id)
 
   return (
-    <main className="screen result">
+    <main className={`screen result theme-${mission.track}`}>
+      {result.passed && <Confetti pieces={result.rosettes * 30} />}
       <section className="card result-card">
+        <span className="result-hero" aria-hidden="true">
+          {result.passed ? (result.rosettes === 3 ? '🏆' : player.avatar) : '🐴'}
+        </span>
         <p className="result-kicker">{mission.title}</p>
         <h1>{result.passed ? HEADLINES[result.rosettes] : HEADLINES[0]}</h1>
-        <Rosettes count={result.rosettes} size={56} />
+        <Rosettes count={result.rosettes} size={64} />
         <dl className="stats">
           <div>
             <dt>Hufeisen</dt>
@@ -71,7 +76,7 @@ export function MissionResultView({ mission, result, player, firstPass, save, on
           </button>
           {result.passed && nextMission && save.status === 'saved' && (
             <button className="button primary" onClick={() => onNext(nextMission)}>
-              Nächste Mission
+              Nächste Mission →
             </button>
           )}
         </div>

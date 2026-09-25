@@ -14,8 +14,6 @@ interface Props {
 type Period = 'week' | 'total'
 type State = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; entries: LeaderboardEntry[] }
 
-const MEDALS = ['🥇', '🥈', '🥉']
-
 export function Leaderboard({ store, player, familyName, onBack }: Props) {
   const [period, setPeriod] = useState<Period>('week')
   const [state, setState] = useState<State>({ status: 'loading' })
@@ -39,23 +37,23 @@ export function Leaderboard({ store, player, familyName, onBack }: Props) {
 
   const pointsOf = (entry: LeaderboardEntry) => (period === 'week' ? entry.weekPoints : entry.totalPoints)
   const ranked = state.status === 'ready' ? [...state.entries].sort((a, b) => pointsOf(b) - pointsOf(a)) : []
+  // Players with the same points share a place.
+  const placeOf = (entry: LeaderboardEntry) => ranked.findIndex((other) => pointsOf(other) === pointsOf(entry))
 
   return (
     <main className="screen">
       <header className="topbar">
-        <button className="button ghost" onClick={onBack}>
+        <button className="button pill" onClick={onBack}>
           ← Zum Hof
         </button>
-        <button className="button ghost" onClick={refresh} disabled={state.status === 'loading'}>
+        <button className="button pill" onClick={refresh} disabled={state.status === 'loading'} aria-label="Aktualisieren">
           ↻ Aktualisieren
         </button>
       </header>
 
-      <header className="hero">
-        <h1>
-          <span aria-hidden="true">🏆</span> Rangliste
-        </h1>
-        <p>{familyName ?? 'Alle Spieler auf diesem Gerät'}</p>
+      <header className="page-title">
+        <h1>🏆 Rangliste</h1>
+        <p className="on-sky">{familyName ?? 'Alle Spieler auf diesem Gerät'}</p>
       </header>
 
       <div className="tabs" role="tablist">
@@ -77,27 +75,54 @@ export function Leaderboard({ store, player, familyName, onBack }: Props) {
         </div>
       )}
       {state.status === 'ready' && (
-        <ol className="ranking">
-          {ranked.map((entry) => {
-            // Players with the same points share a place.
-            const place = ranked.findIndex((other) => pointsOf(other) === pointsOf(entry))
-            return (
-              <li key={entry.playerId} className={`card rank-row ${entry.playerId === player.id ? 'me' : ''}`}>
-                <span className="place" aria-label={`Platz ${place + 1}`}>
-                  {pointsOf(entry) > 0 && place < 3 ? MEDALS[place] : place + 1}
-                </span>
-                <Avatar player={entry} size={44} />
-                <span className="player-name">
-                  {entry.name}
-                  {entry.playerId === player.id && <small> (du)</small>}
-                </span>
-                <Points value={pointsOf(entry)} />
-              </li>
-            )
-          })}
-        </ol>
+        <>
+          <ol className="podium" aria-label="Siegertreppchen">
+            {ranked.slice(0, 3).map((entry, slot) => {
+              const place = placeOf(entry)
+              return (
+                <li key={entry.playerId} className={`podium-spot place-${slot + 1} ${entry.playerId === player.id ? 'me' : ''}`}>
+                  {slot === 0 && pointsOf(entry) > 0 && (
+                    <span className="crown" aria-hidden="true">
+                      👑
+                    </span>
+                  )}
+                  <Avatar player={entry} size={slot === 0 ? 72 : 58} />
+                  <span className="podium-name">
+                    {entry.name}
+                    {entry.playerId === player.id && <small> (du)</small>}
+                  </span>
+                  <span className="podium-block">
+                    <span className="place-number" aria-label={`Platz ${place + 1}`}>
+                      {place + 1}
+                    </span>
+                    <Points value={pointsOf(entry)} />
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+          {ranked.length > 3 && (
+            <ol className="ranking" start={4}>
+              {ranked.slice(3).map((entry) => (
+                <li key={entry.playerId} className={`card rank-row ${entry.playerId === player.id ? 'me' : ''}`}>
+                  <span className="place" aria-label={`Platz ${placeOf(entry) + 1}`}>
+                    {placeOf(entry) + 1}
+                  </span>
+                  <Avatar player={entry} size={44} />
+                  <span className="player-name">
+                    {entry.name}
+                    {entry.playerId === player.id && <small> (du)</small>}
+                  </span>
+                  <Points value={pointsOf(entry)} />
+                </li>
+              ))}
+            </ol>
+          )}
+        </>
       )}
-      {period === 'week' && state.status === 'ready' && <p className="hint center">Jeden Montag beginnt eine neue Woche – dann hat jeder wieder die Chance auf Platz 1!</p>}
+      {period === 'week' && state.status === 'ready' && (
+        <p className="leaderboard-hint">🗓️ Jeden Montag beginnt eine neue Woche – dann hat jeder wieder die Chance auf Platz 1!</p>
+      )}
     </main>
   )
 }
