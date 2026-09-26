@@ -18,6 +18,9 @@ export class BackendError extends Error {
 const MESSAGES: Record<string, string> = {
   family_not_found: 'Diesen Familien-Code gibt es nicht. Bitte prüfe die Eingabe.',
   player_not_found: 'Dieser Spieler gehört nicht zu deiner Familie.',
+  wrong_pin: 'Die PIN stimmt nicht.',
+  not_enough_points: 'Dafür reichen die Hufeisen nicht.',
+  invalid_content: 'Die Missionen konnten nicht gespeichert werden (zu groß oder fehlerhaft).',
 }
 
 export async function call<T>(rpc: Rpc, fn: string, args: Record<string, unknown>): Promise<T> {

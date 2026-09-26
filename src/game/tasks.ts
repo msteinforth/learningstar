@@ -1,19 +1,11 @@
 import quizData from '../data/quiz.json'
 import vocabularyData from '../data/vocabulary.json'
 import { type Rng, shuffle, weightedPick } from './random'
-import type { Mission, MultiplicationConfig, QuizConfig, Task, VocabularyConfig } from './types'
+import type { Language, Mission, MultiplicationConfig, QuizConfig, QuizQuestion, Task, VocabularyConfig, VocabularyWord } from './types'
 
-export type Language = 'en' | 'fr' | 'es'
+export type { Language, QuizQuestion, VocabularyWord }
 
 export const LANGUAGE_NAMES: Record<Language, string> = { en: 'Englisch', fr: 'Französisch', es: 'Spanisch' }
-
-export interface VocabularyWord {
-  /** The word in the foreign language. */
-  word: string
-  de: string
-  wordAlt?: string[]
-  deAlt?: string[]
-}
 
 export interface VocabularyList {
   title: string
@@ -22,14 +14,6 @@ export interface VocabularyList {
 }
 
 export const vocabularyLists = vocabularyData as Record<string, VocabularyList>
-
-export interface QuizQuestion {
-  prompt: string
-  answer: string
-  /** Answer options for "choice" mode; other answers from the bank are used when missing. */
-  options?: string[]
-  alternatives?: string[]
-}
 
 export interface QuizBank {
   title: string
@@ -101,7 +85,9 @@ function multiplicationTasks(config: MultiplicationConfig, rng: Rng, mistakes: M
 // --- Vocabulary --------------------------------------------------------------
 
 function vocabularyTasks(config: VocabularyConfig, rng: Rng, mistakes: Mistakes): Task[] {
-  const list = vocabularyLists[config.list]
+  const list: VocabularyList | undefined = config.words
+    ? { title: '', language: config.language ?? 'en', words: config.words }
+    : vocabularyLists[config.list]
   if (!list) throw new Error(`Unbekannte Vokabelliste: ${config.list}`)
   const toGerman = config.direction === 'to-de'
   const keyOf = (word: VocabularyWord) => `vocab:${config.list}:${word.word}`
@@ -130,7 +116,9 @@ function vocabularyTasks(config: VocabularyConfig, rng: Rng, mistakes: Mistakes)
 // --- Quiz (e.g. German grammar) ------------------------------------------------------
 
 function quizTasks(config: QuizConfig, rng: Rng, mistakes: Mistakes): Task[] {
-  const bank = quizBanks[config.bank]
+  const bank: QuizBank | undefined = config.questions
+    ? { title: '', hint: config.hint ?? 'Weißt du die Antwort?', questions: config.questions }
+    : quizBanks[config.bank]
   if (!bank) throw new Error(`Unbekannter Fragenpool: ${config.bank}`)
   const keyOf = (question: QuizQuestion) => `quiz:${config.bank}:${question.prompt}`
   const allAnswers = [...new Set(bank.questions.map((question) => question.answer))]

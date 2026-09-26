@@ -10,19 +10,43 @@ export interface MultiplicationConfig {
   mode?: AnswerMode
 }
 
+export type Language = 'en' | 'fr' | 'es'
+
+export interface VocabularyWord {
+  /** The word in the foreign language. */
+  word: string
+  de: string
+  wordAlt?: string[]
+  deAlt?: string[]
+}
+
+export interface QuizQuestion {
+  prompt: string
+  answer: string
+  /** Answer options for "choice" mode; other answers from the bank are used when missing. */
+  options?: string[]
+  alternatives?: string[]
+}
+
 export interface VocabularyConfig {
-  /** Key into the vocabulary lists in src/data/vocabulary.json. */
+  /** Key into the vocabulary lists in src/data/vocabulary.json (or the mission id for own lists). */
   list: string
   direction: Direction
   mode: AnswerMode
   count: number
+  /** Own word list, e.g. from the parents' area; used instead of `list`. */
+  words?: VocabularyWord[]
+  language?: Language
 }
 
 export interface QuizConfig {
-  /** Key into the question banks in src/data/quiz.json. */
+  /** Key into the question banks in src/data/quiz.json (or the mission id for own questions). */
   bank: string
   mode: AnswerMode
   count: number
+  /** Own questions, e.g. from the parents' area; used instead of `bank`. */
+  questions?: QuizQuestion[]
+  hint?: string
 }
 
 interface MissionBase {
@@ -35,6 +59,8 @@ interface MissionBase {
   requires?: string
   /** Share of the maximum points needed to pass (0–1). Defaults to 0.6. */
   passRatio?: number
+  /** Created by the parents in the app (always unlocked). */
+  custom?: boolean
 }
 
 export type Mission =

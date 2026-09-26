@@ -31,11 +31,12 @@ jobs:
         run: npm run build
       - name: Check family server
         # Asks for a family code that does not exist: "family_not_found" means
-        # the server is reachable and supabase/schema.sql is installed.
+        # the server is reachable and the current supabase/schema.sql is installed.
         continue-on-error: true
         run: |
           set -a; . ./.env.production; set +a
-          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/join_family" \
+          # get_family_content is the newest function: this also tells whether the latest schema.sql ran.
+          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/get_family_content" \
             -H "apikey: $VITE_SUPABASE_KEY" -H "Content-Type: application/json" \
             -d '{"p_code":"CHECK000"}')
           echo "$response"

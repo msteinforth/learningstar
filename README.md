@@ -37,6 +37,15 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
   Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
   Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
+- **Eltern-Bereich** 👨‍👩‍👧 (im Stall, mit PIN geschützt):
+  - **Eigene Missionen** anlegen, z. B. die Vokabeln für den nächsten Test
+    (`the saddle = der Sattel`), eigene Fragen (`Hauptstadt von Frankreich = Paris | Lyon | Nizza`)
+    oder bestimmte 1×1-Reihen. Sie erscheinen sofort mit ⭐ im gewählten Turnier
+    und sind immer freigeschaltet.
+  - **Fortschritt** jedes Kindes: Hufeisen, Abzeichen, Tagesserie, Stand je
+    Turnier und die Aufgaben, die noch schwerfallen.
+  - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
+    Hash gespeichert und nie an die App zurückgegeben.
 - **Familien-Rangliste** 🏆: Wer hat diese Woche die meisten Hufeisen gesammelt?
   Die Wochenwertung beginnt jeden Montag neu, daneben gibt es eine Gesamtwertung.
   Mit einer *Familie* spielen die Kinder auf verschiedenen Geräten und sehen

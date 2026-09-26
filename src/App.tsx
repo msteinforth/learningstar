@@ -6,9 +6,11 @@ import { Leaderboard } from './components/Leaderboard'
 import { MissionMap } from './components/MissionMap'
 import { MissionPlay } from './components/MissionPlay'
 import { MissionResultView, type SaveState } from './components/MissionResultView'
+import { ParentArea } from './components/ParentArea'
 import { PlayerSelect } from './components/PlayerSelect'
 import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
+import { type ContentStore, FamilyContentStore, LocalContentStore, type ParentContent } from './game/content'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
 import { createPlayer } from './game/progress'
 import { buyItem, equipItem, newBadges } from './game/rewards'
@@ -20,6 +22,7 @@ type Screen =
   | { name: 'players' }
   | { name: NavTarget }
   | { name: 'family' }
+  | { name: 'parents' }
   | { name: 'play'; mission: Mission; run: number }
   | { name: 'result'; mission: Mission; result: MissionResult; firstPass: boolean; save: SaveState }
 
@@ -62,6 +65,9 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
   const [tournamentId, setTournamentId] = useState<string | null>(null)
 
+  const contentStore: ContentStore = useMemo(() => (family ? new FamilyContentStore(lazyRpc, family.code) : new LocalContentStore()), [family])
+  const [content, setContent] = useState<ParentContent>({ hasPin: false, missions: [] })
+
   const [reloads, setReloads] = useState(0)
   const load = useCallback(() => setReloads((count) => count + 1), [])
 
@@ -77,10 +83,15 @@ export default function App() {
       }
       setLocalCount(local.status === 'fulfilled' ? local.value.length : 0)
     })
+    // The parents' missions are a bonus: without them the built-in tournaments still work.
+    contentStore.load().then(
+      (loaded) => active && setContent(loaded),
+      () => undefined,
+    )
     return () => {
       active = false
     }
-  }, [store, localStore, reloads])
+  }, [store, localStore, contentStore, reloads])
 
   // Every new screen (and every tournament) starts at the top.
   useEffect(() => {
@@ -188,9 +199,25 @@ export default function App() {
     )
   }
 
+  if (screen.name === 'parents') {
+    return (
+      <ParentArea
+        store={contentStore}
+        hasPin={content.hasPin}
+        customMissions={content.missions}
+        players={players ?? []}
+        onMissionsChanged={(missions) => setContent((current) => ({ ...current, missions }))}
+        onPinSet={() => setContent((current) => ({ ...current, hasPin: true }))}
+        onOpenFamily={backendConfigured ? () => setScreen({ name: 'family' }) : undefined}
+        onBack={() => setScreen({ name: 'players' })}
+      />
+    )
+  }
+
   if (!player || screen.name === 'players') {
     return (
       <PlayerSelect
+        onOpenParents={() => setScreen({ name: 'parents' })}
         players={players}
         loadError={loadError}
         familyName={family?.name ?? null}
@@ -215,6 +242,7 @@ export default function App() {
         'map',
         <MissionMap
           player={player}
+          customMissions={content.missions}
           tournamentId={tournamentId}
           onSelectTournament={setTournamentId}
           onStart={start}

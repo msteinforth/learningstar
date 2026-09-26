@@ -13,6 +13,10 @@ create table if not exists public.families (
   created_at timestamptz not null default now()
 );
 
+-- Eltern-Bereich: PIN (nur als SHA-256-Hash) und eigene Missionen der Familie.
+alter table public.families add column if not exists parent_pin_hash text;
+alter table public.families add column if not exists custom_missions jsonb not null default '[]'::jsonb;
+
 create table if not exists public.players (
   id uuid primary key,
   family_id uuid not null references public.families (id) on delete cascade,
@@ -303,6 +307,79 @@ begin
 end;
 $$;
 
+-- --- Eltern-Bereich ---------------------------------------------------------
+
+-- Eigene Missionen (für alle Geräte der Familie) und ob schon eine PIN gesetzt ist.
+create or replace function public.get_family_content(p_code text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object('hasPin', f.parent_pin_hash is not null, 'missions', f.custom_missions)
+  from public.families f
+  where f.id = public.ls_family_id(p_code)
+$$;
+
+create or replace function public.check_parent_pin(p_code text, p_pin_hash text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(f.parent_pin_hash = p_pin_hash, false)
+  from public.families f
+  where f.id = public.ls_family_id(p_code)
+$$;
+
+-- Setzt die erste PIN oder ändert sie (dann muss die alte PIN stimmen).
+create or replace function public.set_parent_pin(p_code text, p_old_pin_hash text, p_new_pin_hash text)
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+begin
+  if p_new_pin_hash is null or p_new_pin_hash !~ '^[0-9a-f]{64}$' then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  select parent_pin_hash into v_current from public.families where id = v_family for update;
+  if v_current is not null and v_current is distinct from p_old_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  update public.families set parent_pin_hash = p_new_pin_hash where id = v_family;
+end;
+$$;
+
+create or replace function public.save_custom_missions(p_code text, p_pin_hash text, p_missions jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+begin
+  select parent_pin_hash into v_current from public.families where id = v_family;
+  if v_current is null or v_current is distinct from p_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  if jsonb_typeof(p_missions) <> 'array' or jsonb_array_length(p_missions) > 100 or pg_column_size(p_missions) > 300000 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  update public.families set custom_missions = p_missions where id = v_family;
+  return p_missions;
+end;
+$$;
+
 -- Rangliste der Familie: Punkte seit Montag 0 Uhr (deutsche Zeit) und insgesamt.
 create or replace function public.leaderboard(p_code text)
 returns jsonb
@@ -347,7 +424,11 @@ revoke execute on function
   public.get_player(text, uuid),
   public.save_progress(text, uuid, text, integer, jsonb, jsonb, jsonb),
   public.save_extras(text, uuid, jsonb),
-  public.leaderboard(text)
+  public.leaderboard(text),
+  public.get_family_content(text),
+  public.check_parent_pin(text, text),
+  public.set_parent_pin(text, text, text),
+  public.save_custom_missions(text, text, jsonb)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -367,5 +448,9 @@ grant execute on function
   public.get_player(text, uuid),
   public.save_progress(text, uuid, text, integer, jsonb, jsonb, jsonb),
   public.save_extras(text, uuid, jsonb),
-  public.leaderboard(text)
+  public.leaderboard(text),
+  public.get_family_content(text),
+  public.check_parent_pin(text, text),
+  public.set_parent_pin(text, text, text),
+  public.save_custom_missions(text, text, jsonb)
 to anon, authenticated;

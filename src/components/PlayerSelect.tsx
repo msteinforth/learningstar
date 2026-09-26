@@ -16,9 +16,10 @@ interface Props {
   onCreate: (name: string, avatar: string, color: string) => Promise<void>
   /** Opens the family settings; missing when no family server is set up. */
   onOpenFamily?: () => void
+  onOpenParents: () => void
 }
 
-export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect, onCreate, onOpenFamily }: Props) {
+export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect, onCreate, onOpenFamily, onOpenParents }: Props) {
   const [wantsForm, setWantsForm] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -165,11 +166,16 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
         </button>
       )}
 
-      {onOpenFamily && (
-        <button className="button pill new-player" onClick={onOpenFamily}>
-          {familyName ? '🏡 Familien-Code anzeigen' : '🏡 Auf mehreren Geräten spielen'}
+      <div className="stall-links">
+        {onOpenFamily && (
+          <button className="button pill" onClick={onOpenFamily}>
+            {familyName ? '🏡 Familien-Code' : '🏡 Auf mehreren Geräten spielen'}
+          </button>
+        )}
+        <button className="button pill" onClick={onOpenParents}>
+          👨‍👩‍👧 Eltern-Bereich
         </button>
-      )}
+      </div>
     </main>
   )
 }

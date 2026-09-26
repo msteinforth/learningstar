@@ -8,6 +8,8 @@ import { SoundToggle } from './SoundToggle'
 
 interface Props {
   player: Player
+  /** Missions from the parents' area, shown after the built-in ones. */
+  customMissions: Mission[]
   /** Tournament whose path is shown; null shows the overview of all tournaments. */
   tournamentId: string | null
   onSelectTournament: (id: string | null) => void
@@ -31,8 +33,9 @@ function trailPath(points: { x: number; y: number }[]): string {
     .join(' ')
 }
 
-export function MissionMap({ player, tournamentId, onSelectTournament, onStart, onSwitchPlayer }: Props) {
+export function MissionMap({ player, customMissions, tournamentId, onSelectTournament, onStart, onSwitchPlayer }: Props) {
   const selected = tracks.find((track) => track.id === tournamentId)
+  const allMissions = [...missions, ...customMissions]
 
   return (
     <main className="screen">
@@ -57,7 +60,7 @@ export function MissionMap({ player, tournamentId, onSelectTournament, onStart, 
           </header>
           <ul className="tournament-grid">
             {tracks.map((track) => {
-              const trackMissions = missions.filter((mission) => mission.track === track.id)
+              const trackMissions = allMissions.filter((mission) => mission.track === track.id)
               const done = trackMissions.filter((mission) => player.missions[mission.id]?.passed).length
               const rosettes = trackMissions.reduce((sum, mission) => sum + (player.missions[mission.id]?.bestRosettes ?? 0), 0)
               return (
@@ -96,7 +99,7 @@ export function MissionMap({ player, tournamentId, onSelectTournament, onStart, 
       )}
 
       {tracks.filter((track) => track === selected).map((track) => {
-        const trackMissions = missions.filter((mission) => mission.track === track.id)
+        const trackMissions = allMissions.filter((mission) => mission.track === track.id)
         const done = trackMissions.filter((mission) => player.missions[mission.id]?.passed).length
         const current = trackMissions.find((mission) => isUnlocked(mission, player) && !player.missions[mission.id]?.passed)
         const height = TRAIL_PADDING + 64 + (trackMissions.length - 1) * STATION_SPACING
@@ -150,6 +153,7 @@ export function MissionMap({ player, tournamentId, onSelectTournament, onStart, 
                         <span aria-hidden="true">{!unlocked ? '🔒' : progress?.passed ? '★' : i + 1}</span>
                       </button>
                       <span className="station-label">
+                        {mission.custom && <em className="custom-tag">⭐ Eltern-Mission</em>}
                         <strong>{mission.title}</strong>
                         <span>{mission.subtitle}</span>
                         {progress && <Rosettes count={progress.bestRosettes} size={16} />}
