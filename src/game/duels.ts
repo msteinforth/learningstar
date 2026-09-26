@@ -104,6 +104,11 @@ export class LocalDuelStore implements DuelStore {
     return answered
   }
 
+  /** Forgets all duels of a deleted player. */
+  removePlayer(playerId: string): void {
+    this.write(this.read().filter((duel) => duel.challengerId !== playerId && duel.opponentId !== playerId))
+  }
+
   private read(): Duel[] {
     try {
       return sanitizeDuels(JSON.parse(this.storage.getItem(DUELS_KEY) ?? '[]'))

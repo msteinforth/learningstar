@@ -260,6 +260,15 @@ export default function App() {
         customMissions={content.missions}
         players={players ?? []}
         onMissionsChanged={(missions) => setContent((current) => ({ ...current, missions }))}
+        onPlayerDeleted={(playerId) => {
+          setPlayers((current) => (current ?? []).filter((existing) => existing.id !== playerId))
+          if (activeId === playerId) {
+            writeActivePlayerId(null)
+            setActiveId(null)
+          }
+          // Duels of the deleted child are gone too.
+          load()
+        }}
         onPinSet={() => setContent((current) => ({ ...current, hasPin: true }))}
         onOpenFamily={backendConfigured ? () => setScreen({ name: 'family' }) : undefined}
         onBack={() => setScreen({ name: 'players' })}

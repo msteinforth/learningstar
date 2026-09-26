@@ -106,6 +106,12 @@ export class LocalPlayerStore implements PlayerStore {
     )
   }
 
+  /** Removes one profile together with its points history. */
+  remove(playerId: string): void {
+    this.storage.setItem(PLAYERS_KEY, JSON.stringify(this.read<Player>(PLAYERS_KEY).filter((player) => player.id !== playerId)))
+    this.storage.setItem(EVENTS_KEY, JSON.stringify(this.read<PointEvent>(EVENTS_KEY).filter((event) => event.playerId !== playerId)))
+  }
+
   /** Removes all local profiles, e.g. after they were moved into a family. */
   clear(): void {
     this.storage.removeItem(PLAYERS_KEY)

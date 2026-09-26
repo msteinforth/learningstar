@@ -13,6 +13,7 @@ interface Props {
   customMissions: Mission[]
   players: Player[]
   onMissionsChanged: (missions: Mission[]) => void
+  onPlayerDeleted: (playerId: string) => void
   onPinSet: () => void
   onOpenFamily?: () => void
   onBack: () => void
@@ -24,7 +25,7 @@ const PIN_PATTERN = /^\d{4,6}$/
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-export function ParentArea({ store, hasPin, customMissions, players, onMissionsChanged, onPinSet, onOpenFamily, onBack }: Props) {
+export function ParentArea({ store, hasPin, customMissions, players, onMissionsChanged, onPlayerDeleted, onPinSet, onOpenFamily, onBack }: Props) {
   const [pin, setPin] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('missions')
 
@@ -63,7 +64,7 @@ export function ParentArea({ store, hasPin, customMissions, players, onMissionsC
             ))}
           </div>
           {tab === 'missions' && <MissionManager store={store} pin={pin} missions={customMissions} onChanged={onMissionsChanged} />}
-          {tab === 'progress' && <Progress players={players} customMissions={customMissions} />}
+          {tab === 'progress' && <Progress store={store} pin={pin} players={players} customMissions={customMissions} onDeleted={onPlayerDeleted} />}
           {tab === 'settings' && <Settings store={store} pin={pin} onPinChanged={setPin} onOpenFamily={onOpenFamily} />}
         </>
       )}
@@ -408,7 +409,37 @@ function MissionEditor({
 
 // --- Progress -------------------------------------------------------------------------------
 
-function Progress({ players, customMissions }: { players: Player[]; customMissions: Mission[] }) {
+function Progress({
+  store,
+  pin,
+  players,
+  customMissions,
+  onDeleted,
+}: {
+  store: ContentStore
+  pin: string
+  players: Player[]
+  customMissions: Mission[]
+  onDeleted: (playerId: string) => void
+}) {
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const remove = async (player: Player) => {
+    setBusy(true)
+    setError(null)
+    try {
+      await store.deletePlayer(pin, player.id)
+      setConfirmId(null)
+      onDeleted(player.id)
+    } catch (caught) {
+      setError(errorText(caught))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   if (players.length === 0) return <p className="card panel hint">Noch keine Spieler angelegt.</p>
   const allMissions = [...builtInMissions, ...customMissions]
   return (
@@ -469,6 +500,33 @@ function Progress({ players, customMissions }: { players: Player[]; customMissio
                 )
               })}
             </ul>
+            {confirmId === player.id ? (
+              <div className="notice error delete-confirm">
+                <p>
+                  <strong>{player.name} wirklich löschen?</strong> Alle Hufeisen, Abzeichen, Einkäufe und Duelle gehen auf allen Geräten verloren. Das lässt sich
+                  nicht rückgängig machen.
+                </p>
+                {error && <p>{error}</p>}
+                <div className="actions">
+                  <button className="button secondary" onClick={() => setConfirmId(null)} disabled={busy}>
+                    Abbrechen
+                  </button>
+                  <button className="button danger" onClick={() => remove(player)} disabled={busy}>
+                    Endgültig löschen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="button small secondary delete-player"
+                onClick={() => {
+                  setError(null)
+                  setConfirmId(player.id)
+                }}
+              >
+                🗑️ Spieler löschen
+              </button>
+            )}
             {tricky.length > 0 && (
               <div className="tricky">
                 <strong>Übt noch an:</strong>

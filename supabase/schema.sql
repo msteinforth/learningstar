@@ -397,6 +397,29 @@ begin
 end;
 $$;
 
+-- Löscht ein Kind mit allen Punkten, Abzeichen und Duellen (nur mit Eltern-PIN).
+create or replace function public.delete_player(p_code text, p_pin_hash text, p_player_id uuid)
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+begin
+  select parent_pin_hash into v_current from public.families where id = v_family;
+  if v_current is null or v_current is distinct from p_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  delete from public.players where id = p_player_id and family_id = v_family;
+  if not found then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
 -- --- Duelle ----------------------------------------------------------------
 
 create or replace function public.ls_check_duel_result(p_result jsonb)
@@ -563,7 +586,8 @@ revoke execute on function
   public.save_custom_missions(text, text, jsonb),
   public.list_duels(text),
   public.create_duel(text, jsonb),
-  public.answer_duel(text, uuid, uuid, jsonb)
+  public.answer_duel(text, uuid, uuid, jsonb),
+  public.delete_player(text, text, uuid)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -592,5 +616,6 @@ grant execute on function
   public.save_custom_missions(text, text, jsonb),
   public.list_duels(text),
   public.create_duel(text, jsonb),
-  public.answer_duel(text, uuid, uuid, jsonb)
+  public.answer_duel(text, uuid, uuid, jsonb),
+  public.delete_player(text, text, uuid)
 to anon, authenticated;

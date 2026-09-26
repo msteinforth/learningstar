@@ -50,6 +50,9 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
     und sind immer freigeschaltet.
   - **Fortschritt** jedes Kindes: Hufeisen, Abzeichen, Tagesserie, Stand je
     Turnier und die Aufgaben, die noch schwerfallen.
+  - **Spieler löschen** (mit Sicherheitsabfrage): entfernt ein Kind samt
+    Hufeisen, Abzeichen, Einkäufen und Duellen – mit Familie auf allen Geräten.
+    Der Server prüft dafür die Eltern-PIN.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
 - **Familien-Rangliste** 🏆: Wer hat diese Woche die meisten Hufeisen gesammelt?

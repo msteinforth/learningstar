@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { LocalContentStore, WrongPinError } from './content'
 import { buildMission, describeMistake, draftFromMission, draftProblems, emptyDraft, parseQuestions, parseVocabulary, sanitizeMissions } from './custom'
+import { createPlayer } from './progress'
 import { createRng } from './random'
+import { LocalPlayerStore } from './storage'
 import { generateTasks } from './tasks'
 
 class MemoryStorage {
@@ -97,5 +99,17 @@ describe('LocalContentStore', () => {
     const mission = buildMission({ ...emptyDraft('english'), title: 'Test', text: 'a = b\nc = d' })
     await store.saveMissions('2468', [mission])
     expect((await store.load()).missions).toEqual([mission])
+  })
+
+  it('deletes a child from this device only with the PIN', async () => {
+    const storage = new MemoryStorage() as unknown as Storage
+    const content = new LocalContentStore(storage)
+    const players = new LocalPlayerStore(storage)
+    await content.setPin(null, '2468')
+    const lena = await players.create(createPlayer('Lena', 'horse:bay', '#ff5a5f'))
+    await players.create(createPlayer('Tom', 'horse:grey', '#1cb0f6'))
+    await expect(content.deletePlayer('0000', lena.id)).rejects.toBeInstanceOf(WrongPinError)
+    await content.deletePlayer('2468', lena.id)
+    expect((await players.list()).map((player) => player.name)).toEqual(['Tom'])
   })
 })

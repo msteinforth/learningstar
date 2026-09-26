@@ -1,5 +1,7 @@
 import { call, type Rpc } from './backend'
 import { sanitizeMissions } from './custom'
+import { LocalDuelStore } from './duels'
+import { LocalPlayerStore } from './storage'
 import type { Mission } from './types'
 
 /** What the parents set up: their PIN (only whether one exists) and their own missions. */
@@ -14,6 +16,8 @@ export interface ContentStore {
   /** Sets the first PIN (`oldPin` null) or changes it. */
   setPin(oldPin: string | null, newPin: string): Promise<void>
   saveMissions(pin: string, missions: Mission[]): Promise<Mission[]>
+  /** Deletes a child with all points, badges, purchases and duels. */
+  deletePlayer(pin: string, playerId: string): Promise<void>
 }
 
 export class WrongPinError extends Error {
@@ -65,6 +69,12 @@ export class LocalContentStore implements ContentStore {
     return missions
   }
 
+  async deletePlayer(pin: string, playerId: string): Promise<void> {
+    if (!(await this.checkPin(pin))) throw new WrongPinError()
+    new LocalPlayerStore(this.storage).remove(playerId)
+    new LocalDuelStore(this.storage).removePlayer(playerId)
+  }
+
   private read(): LocalContent {
     try {
       const parsed = JSON.parse(this.storage.getItem(CONTENT_KEY) ?? 'null') as Partial<LocalContent> | null
@@ -112,6 +122,12 @@ export class FamilyContentStore implements ContentStore {
       call<unknown>(this.rpc, 'save_custom_missions', { p_code: this.code, p_pin_hash: await this.hash(pin), p_missions: missions }),
     )
     return sanitizeMissions(saved)
+  }
+
+  async deletePlayer(pin: string, playerId: string): Promise<void> {
+    await this.wrongPinAware(async () =>
+      call(this.rpc, 'delete_player', { p_code: this.code, p_pin_hash: await this.hash(pin), p_player_id: playerId }),
+    )
   }
 
   private hash(pin: string): Promise<string> {

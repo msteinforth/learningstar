@@ -2988,3 +2988,12 @@ legend {
   background: #fff3c4;
   color: #5a3d00;
 }
+
+.delete-player {
+  align-self: flex-start;
+}
+
+.delete-confirm {
+  align-items: stretch;
+  text-align: left;
+}
