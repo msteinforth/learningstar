@@ -5,6 +5,7 @@ import type { Duel, Mission, MissionResult, Player } from '../game/types'
 import { PlayerHorse } from './Avatar'
 import { Confetti } from './Confetti'
 import { Points, Rosettes } from './Icons'
+import { GameIcon } from './GameIcon'
 
 /** A mission played as part of a duel: either starting a challenge or answering one. */
 export type DuelPlay =
@@ -45,7 +46,7 @@ export function MissionResultView({ mission, result, player, firstPass, save, du
       <section className="card result-card">
         <span className="result-hero" aria-hidden="true">
           <PlayerHorse avatar={player.avatar} width={150} running={result.passed} />
-          {result.rosettes === 3 && <span className="result-trophy">🏆</span>}
+          {result.rosettes === 3 && <GameIcon name="trophy" className="result-trophy" size={56} />}
         </span>
         <p className="result-kicker">{mission.title}</p>
         <h1>{result.passed ? HEADLINES[result.rosettes] : HEADLINES[0]}</h1>
@@ -81,7 +82,7 @@ export function MissionResultView({ mission, result, player, firstPass, save, du
           save.badges.map((badge, i) => (
             <div key={badge.id} className="new-badge" style={{ animationDelay: `${0.8 + i * 0.3}s` }}>
               <span className="medal" aria-hidden="true">
-                {badge.icon}
+                <GameIcon name={badge.icon} size="72%" />
               </span>
               <span>
                 <small>Neues Abzeichen!</small>
@@ -92,14 +93,14 @@ export function MissionResultView({ mission, result, player, firstPass, save, du
         {duel && duelSave && <DuelSummary duel={duel} state={duelSave} player={player} players={players} onRetry={onRetryDuel} />}
         {firstPass && nextMission && (
           <p className="unlock">
-            🔓 Neue Mission freigeschaltet: <strong>{nextMission.title}</strong>
+            <GameIcon name="lock-open" className="inline-icon" /> Neue Mission freigeschaltet: <strong>{nextMission.title}</strong>
           </p>
         )}
         {!duel && !result.passed && <p className="hint">Sammle mindestens {Math.round((mission.passRatio ?? 0.6) * 100)} % der Hufeisen, um die nächste Mission freizuschalten.</p>}
         {duel ? (
           <div className="actions">
             <button className="button primary" onClick={onBack}>
-              ⚔️ Zu den Duellen
+              <GameIcon name="swords" className="inline-icon" /> Zu den Duellen
             </button>
           </div>
         ) : (
@@ -138,17 +139,20 @@ function DuelSummary({ duel, state, player, players, onRetry }: { duel: DuelPlay
   if (duel.kind === 'challenge') {
     return (
       <p className="duel-note">
-        ⚔️ Herausforderung an <strong>{duel.opponent.name}</strong> verschickt! {duel.opponent.name} muss {saved.challengerResult.points} Hufeisen schlagen.
+        <GameIcon name="swords" className="inline-icon" /> Herausforderung an <strong>{duel.opponent.name}</strong> verschickt! {duel.opponent.name} muss {saved.challengerResult.points} Hufeisen schlagen.
       </p>
     )
   }
   const outcome = duelOutcome(saved)
   const challenger = players.find((candidate) => candidate.id === saved.challengerId)
   const winnerId = outcome.status === 'done' ? outcome.winnerId : null
-  const verdict = winnerId === player.id ? '🏆 Du hast das Duell gewonnen!' : winnerId ? `${challenger?.name ?? 'Dein Gegner'} hat knapp gewonnen.` : '🤝 Unentschieden!'
+  const verdict = winnerId === player.id ? 'Du hast das Duell gewonnen!' : winnerId ? `${challenger?.name ?? 'Dein Gegner'} hat knapp gewonnen.` : 'Unentschieden!'
   return (
     <p className={`duel-note ${winnerId === player.id ? 'won' : ''}`}>
-      <strong>{verdict}</strong>
+      <strong>
+        {winnerId === player.id && <GameIcon name="trophy" className="inline-icon" />}
+        {outcome.status === 'done' && !winnerId && <GameIcon name="equal" className="inline-icon" />} {verdict}
+      </strong>
       <br />
       {challenger?.name ?? 'Gegner'}: {saved.challengerResult.points} · Du: {saved.opponentResult?.points ?? 0} Hufeisen
     </p>

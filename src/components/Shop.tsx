@@ -4,6 +4,7 @@ import type { ItemSlot, Player } from '../game/types'
 import { Avatar } from './Avatar'
 import { Confetti } from './Confetti'
 import { Horseshoe } from './Icons'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   player: Player
@@ -51,7 +52,9 @@ export function Shop({ player, onBuy, onEquip }: Props) {
     <main className="screen shop">
       {celebrate && <Confetti key={celebrate} pieces={40} />}
       <header className="page-title">
-        <h1>🛍️ Hufeisen-Laden</h1>
+        <h1>
+          <GameIcon name="bag" className="inline-icon" /> Hufeisen-Laden
+        </h1>
         <p className="on-sky">Mach dein Pferd schick!</p>
       </header>
 
@@ -79,7 +82,7 @@ export function Shop({ player, onBuy, onEquip }: Props) {
               setConfirmId(null)
             }}
           >
-            <span aria-hidden="true">{option.icon}</span> {option.title}
+            <GameIcon name={option.icon} className="inline-icon" /> {option.title}
           </button>
         ))}
       </div>
@@ -99,7 +102,7 @@ export function Shop({ player, onBuy, onEquip }: Props) {
           return (
             <li key={item.id} className={`card shop-item ${worn ? 'worn' : ''} ${celebrate === item.id ? 'just-bought' : ''} ${lockedBy ? 'locked' : ''}`}>
               <span className="item-look" style={item.slot === 'background' ? { background: item.look } : undefined} aria-hidden="true">
-                {item.slot === 'background' ? '' : item.look}
+                {item.slot === 'background' ? null : <GameIcon name={item.look} size="78%" />}
               </span>
               <strong>{item.name}</strong>
               {owned ? (
@@ -108,7 +111,7 @@ export function Shop({ player, onBuy, onEquip }: Props) {
                 </button>
               ) : lockedBy ? (
                 <span className="item-lock">
-                  🔒 Abzeichen „{lockedBy.title}“
+                  <GameIcon name="lock" className="inline-icon" /> Abzeichen „{lockedBy.title}“
                 </span>
               ) : (
                 <button

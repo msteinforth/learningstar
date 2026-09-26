@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { type Family, formatCode } from '../game/family'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   family: Family | null
@@ -58,7 +59,9 @@ export function FamilySettings({ family, localPlayers, onCreate, onJoin, onLeave
         </button>
       </header>
       <header className="page-title">
-        <h1>🏡 Familie</h1>
+        <h1>
+          <GameIcon name="house" className="inline-icon" /> Familie
+        </h1>
         <p className="on-sky">Mit einer Familie spielt ihr auf mehreren Geräten und seht eine gemeinsame Rangliste.</p>
       </header>
 

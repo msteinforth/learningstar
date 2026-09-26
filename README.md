@@ -1,4 +1,4 @@
-# 🐴 LearningStar
+# LearningStar
 
 Ein Lernspiel im Browser für Kinder von 8 bis 12 Jahren im Pferde-Look – mit
 Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
@@ -11,11 +11,11 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
 
   | Turnier | Fach | Inhalte |
   |---|---|---|
-  | 🧮 Mathe-Springturnier | Mathe | 1×1 von leicht bis gemischt |
-  | 📖 Deutsch-Dressur | Deutsch | der/die/das, Mehrzahl, Rechtschreibung, Wortarten |
-  | 🇬🇧 Englisch-Geländeritt | Englisch | Pferdestall, Tiere, Farben, Schule |
-  | 🇫🇷 Grand Prix de Paris | Französisch | Pferdestall, Begrüßung, Zahlen, Farben |
-  | 🇪🇸 Spanische Hofreitschule | Spanisch | Pferdestall, Begrüßung, Zahlen, Farben |
+  | Mathe-Springturnier | Mathe | 1×1 von leicht bis gemischt |
+  | Deutsch-Dressur | Deutsch | der/die/das, Mehrzahl, Rechtschreibung, Wortarten |
+  | Englisch-Geländeritt | Englisch | Pferdestall, Tiere, Farben, Schule |
+  | Grand Prix de Paris | Französisch | Pferdestall, Begrüßung, Zahlen, Farben |
+  | Spanische Hofreitschule | Spanisch | Pferdestall, Begrüßung, Zahlen, Farben |
 - **Hufeisen (1–3 pro Aufgabe)**:
   - Grundpunkte nach Schwierigkeit: beim 1×1 bringen 2, 5 und 10 einen Punkt,
     3 und 4 zwei, 6 bis 9 drei. Bei Vokabeln bringt Auswählen einen Punkt,
@@ -26,27 +26,27 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   Silber, Gold), gemessen an den erreichbaren Hufeisen. Ab 60 % gilt eine
   Mission als bestanden, bei einzelnen Missionen gilt eine höhere Grenze.
 - **Wiederholung**: Falsch beantwortete Aufgaben kommen später häufiger dran.
-- **Sounds** 🔊: Töne für Buttons, richtige und falsche Antworten, Einkäufe,
+- **Sounds**: Töne für Buttons, richtige und falsche Antworten, Einkäufe,
   Abzeichen und den Zieleinlauf, direkt im Browser erzeugt (keine
   Audiodateien). Über den Lautsprecher-Knopf stummschaltbar.
-- **Abzeichen** 🏅: 12 Abzeichen für Meilensteine, z. B. erste Mission,
+- **Abzeichen**: 12 Abzeichen für Meilensteine, z. B. erste Mission,
   fehlerfreier Ritt, 3 bzw. 7 Tage in Folge gespielt oder einen ganzen Weg
   geschafft. Der Fortschritt zu jedem Abzeichen ist sichtbar.
-- **Hufeisen-Laden** 🛍️: Gesammelte Hufeisen lassen sich gegen Kopfschmuck,
+- **Hufeisen-Laden**: Gesammelte Hufeisen lassen sich gegen Kopfschmuck,
   tierische Freunde und Hintergründe für das eigene Tier eintauschen. Manche
   Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
   Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
   Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
-- **Duelle** ⚔️: Ein Kind fordert ein Geschwisterkind heraus und spielt zuerst.
+- **Duelle**: Ein Kind fordert ein Geschwisterkind heraus und spielt zuerst.
   Das andere Kind bekommt später – auch auf einem anderen Gerät – genau dieselben
   Aufgaben; wer mehr Hufeisen holt, gewinnt (bei Gleichstand zählen die richtigen
   Antworten). Offene Herausforderungen zeigt ein roter Punkt in der Navigation.
   Duelle bringen normale Hufeisen, schalten aber keine Turnier-Stationen frei.
   Dazu gibt es die Abzeichen „Duell-Gewinner“ und „Duell-Champion“.
-- **Eltern-Bereich** 👨‍👩‍👧 (im Stall, mit PIN geschützt):
+- **Eltern-Bereich** (im Stall, mit PIN geschützt):
   - **Eigene Missionen** anlegen, z. B. die Vokabeln für den nächsten Test
     (`the saddle = der Sattel`), eigene Fragen (`Hauptstadt von Frankreich = Paris | Lyon | Nizza`)
-    oder bestimmte 1×1-Reihen. Sie erscheinen sofort mit ⭐ im gewählten Turnier
+    oder bestimmte 1×1-Reihen. Sie erscheinen sofort mit Stern im gewählten Turnier
     und sind immer freigeschaltet.
   - **Fortschritt** jedes Kindes: Hufeisen, Abzeichen, Tagesserie, Stand je
     Turnier und die Aufgaben, die noch schwerfallen.
@@ -55,7 +55,7 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
     Der Server prüft dafür die Eltern-PIN.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
-- **Familien-Rangliste** 🏆: Wer hat diese Woche die meisten Hufeisen gesammelt?
+- **Familien-Rangliste**: Wer hat diese Woche die meisten Hufeisen gesammelt?
   Die Wochenwertung beginnt jeden Montag neu, daneben gibt es eine Gesamtwertung.
   Mit einer *Familie* spielen die Kinder auf verschiedenen Geräten und sehen
   eine gemeinsame Rangliste (siehe unten).
@@ -194,9 +194,16 @@ src/
                (rewards.ts), Speicherung
   components/  Bildschirme: Stall, Hof, Parcours, Ergebnis, Laden, Abzeichen,
                Rangliste, Familie
+    icon-art/  Eigene gezeichnete Symbole (SVG) statt Emojis
 supabase/      Datenbankschema für den Familien-Server
 dev/           Lokaler Test-Server und Tests des Schemas
 ```
+
+Alle Bilder sind selbst gezeichnet: Pferde in `Horse.tsx`, alle übrigen Symbole
+(Turniere, Abzeichen, Laden-Artikel, Rechtschreib-Bilder, Navigation) in
+`components/icon-art/` und werden über `<GameIcon name="…" />` angezeigt. So sieht
+das Spiel auf jedem Gerät gleich aus. In Quizfragen zeigt der Prompt
+`img:<name>` ein Bild statt Text an (z. B. `img:bike`).
 
 Die Speicherung läuft über die Schnittstelle `PlayerStore`
 (`src/game/storage.ts`). `LocalPlayerStore` speichert im `localStorage` des

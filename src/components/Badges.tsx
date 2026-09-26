@@ -1,5 +1,6 @@
 import { BADGES, extrasOf } from '../game/rewards'
 import type { Player } from '../game/types'
+import { GameIcon } from './GameIcon'
 
 export function Badges({ player }: { player: Player }) {
   const earned = extrasOf(player).badges
@@ -9,7 +10,9 @@ export function Badges({ player }: { player: Player }) {
   return (
     <main className="screen">
       <header className="page-title">
-        <h1>🏅 Abzeichen</h1>
+        <h1>
+          <GameIcon name="medal" className="inline-icon" /> Abzeichen
+        </h1>
         <p className="on-sky">
           {count} von {BADGES.length} gesammelt
         </p>
@@ -17,7 +20,7 @@ export function Badges({ player }: { player: Player }) {
 
       {streak.days > 0 && (
         <p className="card streak">
-          <span aria-hidden="true">🔥</span> {streak.days === 1 ? 'Heute gespielt!' : `${streak.days} Tage in Folge gespielt!`}
+          <GameIcon name="fire" className="inline-icon" /> {streak.days === 1 ? 'Heute gespielt!' : `${streak.days} Tage in Folge gespielt!`}
         </p>
       )}
 
@@ -28,7 +31,7 @@ export function Badges({ player }: { player: Player }) {
           return (
             <li key={badge.id} className={`card badge ${earnedAt ? 'earned' : ''}`}>
               <span className="medal" aria-hidden="true">
-                {badge.icon}
+                <GameIcon name={badge.icon} size="70%" />
               </span>
               <strong>{badge.title}</strong>
               <span className="badge-text">{badge.description}</span>

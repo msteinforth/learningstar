@@ -2997,3 +2997,27 @@ legend {
   align-items: stretch;
   text-align: left;
 }
+
+/* ---------- Own icon set (GameIcon) ---------- */
+.game-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.game-icon > svg {
+  display: block;
+}
+
+.game-icon.inline-icon {
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: -0.3em;
+}
+
+.task-prompt .game-icon {
+  width: clamp(96px, 30vw, 140px);
+  height: clamp(96px, 30vw, 140px);
+  filter: drop-shadow(0 4px 0 var(--shadow-color));
+}

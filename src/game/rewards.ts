@@ -54,24 +54,24 @@ const playCount = (player: Player) => Object.values(player.missions).reduce((sum
 
 // Ids of the first two stay as they were, earned badges are stored by id.
 const CHAMPIONS = [
-  { id: 'einmaleins-profi', track: 'math', title: '1×1-Profi', icon: '🧮' },
-  { id: 'deutsch-profi', track: 'german', title: 'Dressur-Star', icon: '📖' },
-  { id: 'englisch-profi', track: 'english', title: 'English Rider', icon: '💂' },
-  { id: 'franzoesisch-profi', track: 'french', title: 'Champion de France', icon: '🥐' },
-  { id: 'spanisch-profi', track: 'spanish', title: 'Campeón de España', icon: '💃' },
+  { id: 'einmaleins-profi', track: 'math', title: '1×1-Profi', icon: 'abacus' },
+  { id: 'deutsch-profi', track: 'german', title: 'Dressur-Star', icon: 'book' },
+  { id: 'englisch-profi', track: 'english', title: 'English Rider', icon: 'guard-hat' },
+  { id: 'franzoesisch-profi', track: 'french', title: 'Champion de France', icon: 'croissant' },
+  { id: 'spanisch-profi', track: 'spanish', title: 'Campeón de España', icon: 'fan' },
 ]
 
 export const BADGES: Badge[] = [
-  { id: 'erster-ritt', title: 'Erster Ausritt', description: 'Spiele deine erste Mission.', icon: '🐣', progress: (p) => ({ current: playCount(p), target: 1 }) },
-  { id: 'erste-schleife', title: 'Erste Schleife', description: 'Bestehe eine Mission.', icon: '🎀', progress: (p) => ({ current: passedCount(p), target: 1 }) },
-  { id: 'fehlerfrei', title: 'Fehlerfreier Ritt', description: 'Hol dir 3 Schleifen in einer Mission.', icon: '✨', progress: (p) => ({ current: goldCount(p), target: 1 }) },
-  { id: 'gold-sammler', title: 'Gold-Sammler', description: 'Hol dir 3 Schleifen in 5 Missionen.', icon: '🏆', progress: (p) => ({ current: goldCount(p), target: 5 }) },
-  { id: 'fleissig', title: 'Fleißiges Pony', description: 'Spiele 10 Missionen.', icon: '🥕', progress: (p) => ({ current: playCount(p), target: 10 }) },
-  { id: 'marathon', title: 'Marathon-Reiter', description: 'Spiele 50 Missionen.', icon: '🏃', progress: (p) => ({ current: playCount(p), target: 50 }) },
-  { id: 'serie-3', title: 'Dranbleiber', description: 'Spiele 3 Tage hintereinander.', icon: '🔥', progress: (p) => ({ current: extrasOf(p).streak.days, target: 3 }) },
-  { id: 'serie-7', title: 'Wochen-Held', description: 'Spiele 7 Tage hintereinander.', icon: '🌟', progress: (p) => ({ current: extrasOf(p).streak.days, target: 7 }) },
-  { id: 'hufeisen-100', title: 'Hufeisen-Sammler', description: 'Sammle 100 Hufeisen.', icon: '🧲', progress: (p) => ({ current: p.totalPoints, target: 100 }) },
-  { id: 'hufeisen-500', title: 'Hufeisen-Schatz', description: 'Sammle 500 Hufeisen.', icon: '💰', progress: (p) => ({ current: p.totalPoints, target: 500 }) },
+  { id: 'erster-ritt', title: 'Erster Ausritt', description: 'Spiele deine erste Mission.', icon: 'chick', progress: (p) => ({ current: playCount(p), target: 1 }) },
+  { id: 'erste-schleife', title: 'Erste Schleife', description: 'Bestehe eine Mission.', icon: 'bow', progress: (p) => ({ current: passedCount(p), target: 1 }) },
+  { id: 'fehlerfrei', title: 'Fehlerfreier Ritt', description: 'Hol dir 3 Schleifen in einer Mission.', icon: 'sparkles', progress: (p) => ({ current: goldCount(p), target: 1 }) },
+  { id: 'gold-sammler', title: 'Gold-Sammler', description: 'Hol dir 3 Schleifen in 5 Missionen.', icon: 'trophy', progress: (p) => ({ current: goldCount(p), target: 5 }) },
+  { id: 'fleissig', title: 'Fleißiges Pony', description: 'Spiele 10 Missionen.', icon: 'carrot', progress: (p) => ({ current: playCount(p), target: 10 }) },
+  { id: 'marathon', title: 'Marathon-Reiter', description: 'Spiele 50 Missionen.', icon: 'lightning', progress: (p) => ({ current: playCount(p), target: 50 }) },
+  { id: 'serie-3', title: 'Dranbleiber', description: 'Spiele 3 Tage hintereinander.', icon: 'fire', progress: (p) => ({ current: extrasOf(p).streak.days, target: 3 }) },
+  { id: 'serie-7', title: 'Wochen-Held', description: 'Spiele 7 Tage hintereinander.', icon: 'star-shine', progress: (p) => ({ current: extrasOf(p).streak.days, target: 7 }) },
+  { id: 'hufeisen-100', title: 'Hufeisen-Sammler', description: 'Sammle 100 Hufeisen.', icon: 'horseshoe', progress: (p) => ({ current: p.totalPoints, target: 100 }) },
+  { id: 'hufeisen-500', title: 'Hufeisen-Schatz', description: 'Sammle 500 Hufeisen.', icon: 'treasure', progress: (p) => ({ current: p.totalPoints, target: 500 }) },
   ...CHAMPIONS.map(({ id, track, title, icon }) => ({
     id,
     title,
@@ -79,13 +79,13 @@ export const BADGES: Badge[] = [
     icon,
     progress: (p: Player) => ({ current: passedCount(p, trackMissions(track)), target: trackMissions(track).length }),
   })),
-  { id: 'duell-sieg', title: 'Duell-Gewinner', description: 'Gewinne ein Duell.', icon: '⚔️', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 1 }) },
-  { id: 'duell-champion', title: 'Duell-Champion', description: 'Gewinne 5 Duelle.', icon: '🤺', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 5 }) },
+  { id: 'duell-sieg', title: 'Duell-Gewinner', description: 'Gewinne ein Duell.', icon: 'swords', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 1 }) },
+  { id: 'duell-champion', title: 'Duell-Champion', description: 'Gewinne 5 Duelle.', icon: 'shield', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 5 }) },
   {
     id: 'allrounder',
     title: 'Allround-Reiter',
     description: 'Bestehe in jedem Turnier mindestens eine Mission.',
-    icon: '🎠',
+    icon: 'carousel',
     progress: (p) => ({ current: tracks.filter((track) => passedCount(p, trackMissions(track.id)) > 0).length, target: tracks.length }),
   },
 ]
@@ -118,7 +118,7 @@ export interface ShopItem {
   id: string
   slot: ItemSlot
   name: string
-  /** Emoji for hats and buddies, CSS background for backgrounds. */
+  /** Icon name (see components/icon-art) for hats and buddies, CSS background for backgrounds. */
   look: string
   price: number
   /** Only for sale once this badge was earned. */
@@ -126,27 +126,27 @@ export interface ShopItem {
 }
 
 export const SLOTS: { id: ItemSlot; title: string; icon: string }[] = [
-  { id: 'hat', title: 'Kopfschmuck', icon: '🎩' },
-  { id: 'buddy', title: 'Freunde', icon: '🐾' },
-  { id: 'background', title: 'Hintergründe', icon: '🌈' },
+  { id: 'hat', title: 'Kopfschmuck', icon: 'top-hat' },
+  { id: 'buddy', title: 'Freunde', icon: 'paw' },
+  { id: 'background', title: 'Hintergründe', icon: 'rainbow' },
 ]
 
 export const SHOP_ITEMS: ShopItem[] = [
-  { id: 'hat-bow', slot: 'hat', name: 'Schleife', look: '🎀', price: 20 },
-  { id: 'hat-cap', slot: 'hat', name: 'Kappe', look: '🧢', price: 30 },
-  { id: 'hat-flowers', slot: 'hat', name: 'Blumenkranz', look: '🌸', price: 40 },
-  { id: 'hat-tophat', slot: 'hat', name: 'Zylinder', look: '🎩', price: 60 },
-  { id: 'hat-party', slot: 'hat', name: 'Partyhut', look: '🥳', price: 80 },
-  { id: 'hat-grad', slot: 'hat', name: 'Doktorhut', look: '🎓', price: 100, requiresBadge: 'einmaleins-profi' },
-  { id: 'hat-crown', slot: 'hat', name: 'Krone', look: '👑', price: 200, requiresBadge: 'gold-sammler' },
+  { id: 'hat-bow', slot: 'hat', name: 'Schleife', look: 'bow', price: 20 },
+  { id: 'hat-cap', slot: 'hat', name: 'Kappe', look: 'cap', price: 30 },
+  { id: 'hat-flowers', slot: 'hat', name: 'Blumenkranz', look: 'flowers', price: 40 },
+  { id: 'hat-tophat', slot: 'hat', name: 'Zylinder', look: 'top-hat', price: 60 },
+  { id: 'hat-party', slot: 'hat', name: 'Partyhut', look: 'party-hat', price: 80 },
+  { id: 'hat-grad', slot: 'hat', name: 'Doktorhut', look: 'grad-cap', price: 100, requiresBadge: 'einmaleins-profi' },
+  { id: 'hat-crown', slot: 'hat', name: 'Krone', look: 'crown', price: 200, requiresBadge: 'gold-sammler' },
 
-  { id: 'buddy-carrot', slot: 'buddy', name: 'Karotte', look: '🥕', price: 15 },
-  { id: 'buddy-apple', slot: 'buddy', name: 'Apfel', look: '🍎', price: 15 },
-  { id: 'buddy-butterfly', slot: 'buddy', name: 'Schmetterling', look: '🦋', price: 40 },
-  { id: 'buddy-bird', slot: 'buddy', name: 'Vögelchen', look: '🐤', price: 50 },
-  { id: 'buddy-cat', slot: 'buddy', name: 'Stallkatze', look: '🐈', price: 80 },
-  { id: 'buddy-dog', slot: 'buddy', name: 'Hofhund', look: '🐕', price: 90 },
-  { id: 'buddy-star', slot: 'buddy', name: 'Glücksstern', look: '🌟', price: 120, requiresBadge: 'serie-7' },
+  { id: 'buddy-carrot', slot: 'buddy', name: 'Karotte', look: 'carrot', price: 15 },
+  { id: 'buddy-apple', slot: 'buddy', name: 'Apfel', look: 'apple', price: 15 },
+  { id: 'buddy-butterfly', slot: 'buddy', name: 'Schmetterling', look: 'butterfly', price: 40 },
+  { id: 'buddy-bird', slot: 'buddy', name: 'Vögelchen', look: 'bird', price: 50 },
+  { id: 'buddy-cat', slot: 'buddy', name: 'Stallkatze', look: 'cat', price: 80 },
+  { id: 'buddy-dog', slot: 'buddy', name: 'Hofhund', look: 'dog', price: 90 },
+  { id: 'buddy-star', slot: 'buddy', name: 'Glücksstern', look: 'star', price: 120, requiresBadge: 'serie-7' },
 
   { id: 'bg-meadow', slot: 'background', name: 'Frühlingswiese', look: 'linear-gradient(160deg, #b8f28b, #4fae3b)', price: 25 },
   { id: 'bg-sky', slot: 'background', name: 'Himmelblau', look: 'linear-gradient(160deg, #a8e6ff, #1cb0f6)', price: 25 },

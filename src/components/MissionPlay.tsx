@@ -9,6 +9,7 @@ import type { Mission, MissionResult, Player, TaskResult } from '../game/types'
 import { PlayerHorse } from './Avatar'
 import { Horseshoe } from './Icons'
 import { SoundToggle } from './SoundToggle'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   mission: Mission
@@ -24,7 +25,7 @@ type Feedback = { kind: 'correct'; points: number } | { kind: 'retry' } | { kind
 const msSince = (start: number) => performance.now() - start
 
 const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!', 'Wie ein Profi!']
-const CORRECT_EMOJI = ['🎉', '⭐', '🥕', '🏆', '🌈', '🍎']
+const CORRECT_ICONS = ['party', 'star', 'carrot', 'trophy', 'rainbow', 'apple']
 
 export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props) {
   const [tasks] = useState(() => (seed === undefined ? generateTasks(mission, createRng(Date.now()), player.mistakes) : generateTasks(mission, createRng(seed), {})))
@@ -131,17 +132,17 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
             <PlayerHorse avatar={player.avatar} width={60} running />
           </span>
         </div>
-        <span className="finish-flag" aria-hidden="true">
-          🏁
-        </span>
+        <GameIcon name="finish-flag" className="finish-flag" size={32} />
       </div>
       <p className="counter on-sky">
         {mission.title} · Hürde {index + 1} von {tasks.length}
       </p>
 
       <section className={`card task ${feedback?.kind === 'retry' ? 'shake' : ''}`} key={index}>
-        <p className="task-hint">{feedback?.kind === 'retry' ? 'Fast! Versuch es noch einmal 💪' : task.hint}</p>
-        <p className="task-prompt">{task.prompt}</p>
+        <p className="task-hint">{feedback?.kind === 'retry' ? 'Fast! Versuch es noch einmal!' : task.hint}</p>
+        <p className="task-prompt">
+          {task.prompt.startsWith('img:') ? <GameIcon name={task.prompt.slice(4)} size={120} title="Bild" /> : task.prompt}
+        </p>
 
         {task.mode === 'choice' ? (
           <div className="choices">
@@ -195,7 +196,7 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
           <div className={`feedback-sheet ${feedback?.kind === 'correct' ? 'good' : 'bad'}`}>
             <div className="feedback-inner">
               <span className="feedback-emoji" aria-hidden="true">
-                {feedback?.kind === 'correct' ? CORRECT_EMOJI[index % CORRECT_EMOJI.length] : '🙈'}
+                <GameIcon name={feedback?.kind === 'correct' ? CORRECT_ICONS[index % CORRECT_ICONS.length] : 'oops'} size={48} />
               </span>
               <span className="feedback-text">
                 {feedback?.kind === 'correct' ? (
@@ -215,7 +216,7 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
                 )}
               </span>
               <button ref={nextRef} className="button primary" onClick={next}>
-                {index + 1 >= tasks.length ? 'Ins Ziel 🏁' : 'Weiter'}
+                {index + 1 >= tasks.length ? 'Ins Ziel' : 'Weiter'}
               </button>
             </div>
           </div>

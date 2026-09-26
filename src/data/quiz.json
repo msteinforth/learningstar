@@ -392,7 +392,7 @@
     "hint": "Wie schreibt man es richtig?",
     "questions": [
       {
-        "prompt": "🚲",
+        "prompt": "img:bike",
         "answer": "Fahrrad",
         "options": [
           "Fahrrad",
@@ -402,7 +402,7 @@
         ]
       },
       {
-        "prompt": "🐴",
+        "prompt": "img:horse",
         "answer": "Pferd",
         "options": [
           "Pferd",
@@ -412,7 +412,7 @@
         ]
       },
       {
-        "prompt": "🐦",
+        "prompt": "img:bird",
         "answer": "Vogel",
         "options": [
           "Vogel",
@@ -422,7 +422,7 @@
         ]
       },
       {
-        "prompt": "🏫",
+        "prompt": "img:school",
         "answer": "Schule",
         "options": [
           "Schule",
@@ -432,7 +432,7 @@
         ]
       },
       {
-        "prompt": "🧀",
+        "prompt": "img:cheese",
         "answer": "Käse",
         "options": [
           "Käse",
@@ -442,7 +442,7 @@
         ]
       },
       {
-        "prompt": "👢",
+        "prompt": "img:boot",
         "answer": "Stiefel",
         "options": [
           "Stiefel",
@@ -452,7 +452,7 @@
         ]
       },
       {
-        "prompt": "🦷",
+        "prompt": "img:tooth",
         "answer": "Zahn",
         "options": [
           "Zahn",
@@ -462,7 +462,7 @@
         ]
       },
       {
-        "prompt": "⏰",
+        "prompt": "img:clock",
         "answer": "Uhr",
         "options": [
           "Uhr",
@@ -472,7 +472,7 @@
         ]
       },
       {
-        "prompt": "🦊",
+        "prompt": "img:fox",
         "answer": "Fuchs",
         "options": [
           "Fuchs",
@@ -482,7 +482,7 @@
         ]
       },
       {
-        "prompt": "🐄",
+        "prompt": "img:cow",
         "answer": "Kuh",
         "options": [
           "Kuh",
@@ -492,7 +492,7 @@
         ]
       },
       {
-        "prompt": "☂️",
+        "prompt": "img:umbrella",
         "answer": "Regenschirm",
         "options": [
           "Regenschirm",
@@ -502,7 +502,7 @@
         ]
       },
       {
-        "prompt": "🍞",
+        "prompt": "img:bread",
         "answer": "Brot",
         "options": [
           "Brot",
@@ -512,7 +512,7 @@
         ]
       },
       {
-        "prompt": "🦒",
+        "prompt": "img:giraffe",
         "answer": "Giraffe",
         "options": [
           "Giraffe",
@@ -522,7 +522,7 @@
         ]
       },
       {
-        "prompt": "🌳",
+        "prompt": "img:tree",
         "answer": "Wald",
         "options": [
           "Wald",
@@ -532,7 +532,7 @@
         ]
       },
       {
-        "prompt": "🐟",
+        "prompt": "img:fish",
         "answer": "Fisch",
         "options": [
           "Fisch",

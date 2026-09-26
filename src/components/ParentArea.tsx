@@ -6,6 +6,7 @@ import { BADGES, extrasOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
 import { Avatar } from './Avatar'
 import { Points } from './Icons'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   store: ContentStore
@@ -37,12 +38,14 @@ export function ParentArea({ store, hasPin, customMissions, players, onMissionsC
         </button>
         {pin && (
           <button className="button pill" onClick={() => setPin(null)}>
-            🔒 Sperren
+            <GameIcon name="lock" className="inline-icon" /> Sperren
           </button>
         )}
       </header>
       <header className="page-title">
-        <h1>👨‍👩‍👧 Eltern-Bereich</h1>
+        <h1>
+          <GameIcon name="family" className="inline-icon" /> Eltern-Bereich
+        </h1>
         <p className="on-sky">Missionen anlegen und Fortschritte ansehen</p>
       </header>
 
@@ -53,13 +56,13 @@ export function ParentArea({ store, hasPin, customMissions, players, onMissionsC
           <div className="tabs tabs-3" role="tablist">
             {(
               [
-                ['missions', '📝 Missionen'],
-                ['progress', '📈 Fortschritt'],
-                ['settings', '⚙️ Einstellungen'],
+                ['missions', 'pencil', 'Missionen'],
+                ['progress', 'chart', 'Fortschritt'],
+                ['settings', 'gear', 'Einstellungen'],
               ] as const
-            ).map(([id, label]) => (
+            ).map(([id, icon, label]) => (
               <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>
-                {label}
+                <GameIcon name={icon} className="inline-icon" /> {label}
               </button>
             ))}
           </div>
@@ -122,9 +125,7 @@ function PinGate({ store, hasPin, onUnlocked, onPinSet }: { store: ContentStore;
 
   return (
     <form className="card panel pin-gate" onSubmit={submit}>
-      <span className="lock-icon" aria-hidden="true">
-        🔐
-      </span>
+      <GameIcon name="lock" className="lock-icon" size={56} />
       {hasPin ? (
         <>
           <h2>Nur für Eltern</h2>
@@ -197,7 +198,7 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
       </button>
       {missions.length === 0 ? (
         <p className="card panel hint">
-          Noch keine eigenen Missionen. Lege z. B. die Vokabeln für den nächsten Test an – sie erscheinen sofort mit ⭐ im passenden Turnier.
+          Noch keine eigenen Missionen. Lege z. B. die Vokabeln für den nächsten Test an – sie erscheinen sofort mit Stern im passenden Turnier.
         </p>
       ) : (
         <ul className="custom-list">
@@ -206,7 +207,7 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
             return (
               <li key={mission.id} className={`card custom-item theme-${mission.track}`}>
                 <span className="custom-icon" aria-hidden="true">
-                  {track?.icon}
+                  {track && <GameIcon name={track.icon} size={30} />}
                 </span>
                 <span className="custom-text">
                   <strong>{mission.title}</strong>
@@ -235,7 +236,7 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
                       Bearbeiten
                     </button>
                     <button className="button small secondary" aria-label={`${mission.title} löschen`} onClick={() => setConfirmDelete(mission.id)}>
-                      🗑️
+                      <GameIcon name="trash" size={22} />
                     </button>
                   </span>
                 )}
@@ -306,7 +307,7 @@ function MissionEditor({
               aria-pressed={draft.track === track.id}
               onClick={() => set({ track: track.id, kind: kindsFor(track.id).includes(draft.kind) ? draft.kind : kindsFor(track.id)[0] })}
             >
-              {track.icon} {track.subject}
+              <GameIcon name={track.icon} className="inline-icon" /> {track.subject}
             </button>
           ))}
         </div>
@@ -473,12 +474,14 @@ function Progress({
               <div>
                 <dt>Abzeichen</dt>
                 <dd>
-                  🏅 {badgeCount}/{BADGES.length}
+                  <GameIcon name="medal" className="inline-icon" /> {badgeCount}/{BADGES.length}
                 </dd>
               </div>
               <div>
                 <dt>Serie</dt>
-                <dd>🔥 {extras.streak.days}</dd>
+                <dd>
+                  <GameIcon name="fire" className="inline-icon" /> {extras.streak.days}
+                </dd>
               </div>
             </dl>
             <ul className="track-progress">
@@ -488,7 +491,7 @@ function Progress({
                 return (
                   <li key={track.id} className={`theme-${track.id}`}>
                     <span>
-                      {track.icon} {track.subject}
+                      <GameIcon name={track.icon} className="inline-icon" /> {track.subject}
                     </span>
                     <span className="bar" aria-label={`${done} von ${trackMissions.length}`}>
                       <span style={{ width: `${(done / Math.max(1, trackMissions.length)) * 100}%` }} />
@@ -524,7 +527,7 @@ function Progress({
                   setConfirmId(player.id)
                 }}
               >
-                🗑️ Spieler löschen
+                <GameIcon name="trash" className="inline-icon" /> Spieler löschen
               </button>
             )}
             {tricky.length > 0 && (
@@ -584,7 +587,7 @@ function Settings({ store, pin, onPinChanged, onOpenFamily }: { store: ContentSt
           <h2>Familie</h2>
           <p>Familien-Code anzeigen, weitere Geräte verbinden oder dieses Gerät abmelden.</p>
           <button className="button secondary" onClick={onOpenFamily}>
-            🏡 Zur Familie
+            <GameIcon name="house" className="inline-icon" /> Zur Familie
           </button>
         </section>
       )}

@@ -35,8 +35,8 @@ const LEGACY: Record<string, string> = { '🐴': 'bay', '🦄': 'unicorn', '🐎
 
 export const HORSE_AVATAR_PREFIX = 'horse:'
 
-/** The horse for a stored avatar value ("horse:bay" or an old emoji), or undefined for other animals. */
-export function horseFor(avatar: string): HorseStyle | undefined {
+/** The horse for a stored avatar value ("horse:bay" or an old emoji); other old animals become a bay horse. */
+export function horseFor(avatar: string): HorseStyle {
   const id = avatar.startsWith(HORSE_AVATAR_PREFIX) ? avatar.slice(HORSE_AVATAR_PREFIX.length) : LEGACY[avatar]
-  return HORSES.find((horse) => horse.id === id)
+  return HORSES.find((horse) => horse.id === id) ?? HORSES[0]
 }

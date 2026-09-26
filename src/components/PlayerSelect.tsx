@@ -5,6 +5,7 @@ import { Avatar } from './Avatar'
 import { HORSES, horseFor } from '../game/horses'
 import { HorseHead, HorseSide } from './Horse'
 import { Points } from './Icons'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   /** null while loading. */
@@ -81,7 +82,9 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
           Learning<span className="logo-star">★</span>Star
         </h1>
         <p className="on-sky">Willkommen im Stall! Wer reitet heute?</p>
-        {familyName && <p className="family-badge">🏡 {familyName}</p>}
+        {familyName && <p className="family-badge">
+            <GameIcon name="house" className="inline-icon" /> {familyName}
+          </p>}
       </header>
 
       {players.length > 0 && (
@@ -169,11 +172,11 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
       <div className="stall-links">
         {onOpenFamily && (
           <button className="button pill" onClick={onOpenFamily}>
-            {familyName ? '🏡 Familien-Code' : '🏡 Auf mehreren Geräten spielen'}
+            <GameIcon name="house" className="inline-icon" /> {familyName ? 'Familien-Code' : 'Auf mehreren Geräten spielen'}
           </button>
         )}
         <button className="button pill" onClick={onOpenParents}>
-          👨‍👩‍👧 Eltern-Bereich
+          <GameIcon name="family" className="inline-icon" /> Eltern-Bereich
         </button>
       </div>
     </main>

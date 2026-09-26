@@ -5,6 +5,7 @@ import type { Mission, Player } from '../game/types'
 import { Avatar, PlayerHorse } from './Avatar'
 import { Points, Rosettes } from './Icons'
 import { SoundToggle } from './SoundToggle'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   player: Player
@@ -55,7 +56,9 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
       {!selected && (
         <>
           <header className="page-title">
-            <h1>🏇 Turniere</h1>
+            <h1>
+              <GameIcon name="horseshoe" className="inline-icon" /> Turniere
+            </h1>
             <p className="on-sky">Wähle dein Turnier!</p>
           </header>
           <ul className="tournament-grid">
@@ -67,7 +70,7 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
                 <li key={track.id}>
                   <button className={`tournament-card theme-${track.id} ${done === trackMissions.length ? 'complete' : ''}`} onClick={() => onSelectTournament(track.id)}>
                     <span className="tournament-icon" aria-hidden="true">
-                      {track.icon}
+                      <GameIcon name={track.icon} size="80%" />
                     </span>
                     <span className="tournament-text">
                       <small>{track.subject}</small>
@@ -76,13 +79,11 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
                         <span style={{ width: `${(done / trackMissions.length) * 100}%` }} />
                       </span>
                       <span className="tournament-meta">
-                        {done}/{trackMissions.length} geschafft · 🎀 {rosettes}
+                        {done}/{trackMissions.length} geschafft · <GameIcon name="bow" className="inline-icon" /> {rosettes}
                       </span>
                     </span>
                     {done === trackMissions.length && (
-                      <span className="tournament-trophy" aria-label="Turnier gewonnen">
-                        🏆
-                      </span>
+                      <GameIcon name="trophy" className="tournament-trophy" size={40} title="Turnier gewonnen" />
                     )}
                   </button>
                 </li>
@@ -110,7 +111,7 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
           <section key={track.id} className={`track theme-${track.id}`}>
             <header className="track-banner">
               <span className="track-icon" aria-hidden="true">
-                {track.icon}
+                <GameIcon name={track.icon} size="80%" />
               </span>
               <div>
                 <h2>{track.title}</h2>
@@ -150,10 +151,12 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
                             <PlayerHorse avatar={player.avatar} width={58} />
                           </span>
                         )}
-                        <span aria-hidden="true">{!unlocked ? '🔒' : progress?.passed ? '★' : i + 1}</span>
+                        <span aria-hidden="true">{!unlocked ? <GameIcon name="lock" size={34} /> : progress?.passed ? '★' : i + 1}</span>
                       </button>
                       <span className="station-label">
-                        {mission.custom && <em className="custom-tag">⭐ Eltern-Mission</em>}
+                        {mission.custom && <em className="custom-tag">
+                            <GameIcon name="star" className="inline-icon" /> Eltern-Mission
+                          </em>}
                         <strong>{mission.title}</strong>
                         <span>{mission.subtitle}</span>
                         {progress && <Rosettes count={progress.bestRosettes} size={16} />}

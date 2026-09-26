@@ -1,4 +1,5 @@
 import { findTrack, missions as builtInMissions } from './missions'
+import { quizBanks } from './tasks'
 import type { AnswerMode, Direction, Language, Mission, QuizQuestion, VocabularyWord } from './types'
 
 /** What the parents fill in when they create or edit a mission. */
@@ -207,7 +208,11 @@ export function describeMistake(key: string, customMissions: Mission[] = []): st
       return false
     })
     const track = mission ? findTrack(mission.track) : undefined
-    return track ? `${item} (${track.subject})` : item
+    // Picture questions ("img:bike") are shown by their answer word.
+    const label = item.startsWith('img:')
+      ? (quizBanks[source]?.questions ?? (mission?.type === 'quiz' ? mission.config.questions : undefined) ?? []).find((q) => q.prompt === item)?.answer ?? item.slice(4)
+      : item
+    return track ? `${label} (${track.subject})` : label
   }
   return key
 }

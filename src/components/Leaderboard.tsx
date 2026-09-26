@@ -3,6 +3,7 @@ import type { LeaderboardEntry, PlayerStore } from '../game/storage'
 import type { Player } from '../game/types'
 import { Avatar } from './Avatar'
 import { Points } from './Icons'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   store: PlayerStore
@@ -49,7 +50,9 @@ export function Leaderboard({ store, player, familyName }: Props) {
       </header>
 
       <header className="page-title">
-        <h1>🏆 Rangliste</h1>
+        <h1>
+          <GameIcon name="trophy" className="inline-icon" /> Rangliste
+        </h1>
         <p className="on-sky">{familyName ?? 'Alle Spieler auf diesem Gerät'}</p>
       </header>
 
@@ -79,9 +82,7 @@ export function Leaderboard({ store, player, familyName }: Props) {
               return (
                 <li key={entry.playerId} className={`podium-spot place-${slot + 1} ${entry.playerId === player.id ? 'me' : ''}`}>
                   {slot === 0 && pointsOf(entry) > 0 && (
-                    <span className="crown" aria-hidden="true">
-                      👑
-                    </span>
+                    <GameIcon name="crown" className="crown" size={40} />
                   )}
                   <Avatar player={entry} size={slot === 0 ? 72 : 58} />
                   <span className="podium-name">
@@ -118,7 +119,8 @@ export function Leaderboard({ store, player, familyName }: Props) {
         </>
       )}
       {period === 'week' && state.status === 'ready' && (
-        <p className="leaderboard-hint">🗓️ Jeden Montag beginnt eine neue Woche – dann hat jeder wieder die Chance auf Platz 1!</p>
+        <p className="leaderboard-hint">
+          <GameIcon name="calendar" className="inline-icon" /> Jeden Montag beginnt eine neue Woche – dann hat jeder wieder die Chance auf Platz 1!</p>
       )}
     </main>
   )

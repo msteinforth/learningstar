@@ -11,9 +11,9 @@ describe('horseFor', () => {
     }
   })
 
-  it('maps horse emojis from older profiles and leaves other animals alone', () => {
+  it('maps emojis from older profiles to horses', () => {
     expect(horseFor('🦄')?.id).toBe('unicorn')
     expect(horseFor('🐴')?.id).toBe('bay')
-    expect(horseFor('🐶')).toBeUndefined()
+    expect(horseFor('🐶').id).toBe('bay')
   })
 })

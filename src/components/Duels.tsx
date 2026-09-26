@@ -5,6 +5,7 @@ import { isUnlocked } from '../game/progress'
 import type { Duel, Mission, Player } from '../game/types'
 import { Avatar } from './Avatar'
 import { Horseshoe } from './Icons'
+import { GameIcon } from './GameIcon'
 
 interface Props {
   player: Player
@@ -22,7 +23,7 @@ function MissionLabel({ mission }: { mission: Mission }) {
   const track = findTrack(mission.track)
   return (
     <span className="duel-mission">
-      {track?.icon} {mission.title}
+      {track && <GameIcon name={track.icon} className="inline-icon" />} {mission.title}
     </span>
   )
 }
@@ -50,7 +51,9 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
         </button>
       </header>
       <header className="page-title">
-        <h1>⚔️ Duelle</h1>
+        <h1>
+          <GameIcon name="swords" className="inline-icon" /> Duelle
+        </h1>
         <p className="on-sky">Fordere deine Geschwister heraus – gleiche Aufgaben, wer holt mehr Hufeisen?</p>
       </header>
 
@@ -79,7 +82,7 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
                   </span>
                 </div>
                 <button className="button primary" onClick={() => onAnswer(duel)}>
-                  Annehmen ⚔️
+                  Annehmen <GameIcon name="swords" className="inline-icon" />
                 </button>
               </article>
             )
@@ -114,7 +117,7 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
             <div className="chip-row">
               {tracks.map((track) => (
                 <button key={track.id} className={`chip theme-${track.id} ${trackId === track.id ? 'selected' : ''}`} aria-pressed={trackId === track.id} onClick={() => setTrackId(track.id)}>
-                  {track.icon} {track.subject}
+                  <GameIcon name={track.icon} className="inline-icon" /> {track.subject}
                 </button>
               ))}
             </div>
@@ -178,14 +181,17 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
             ]
             return (
               <article key={duel.id} className={`card duel-result ${iWon ? 'won' : winnerId ? 'lost' : 'draw'}`}>
-                <span className="duel-verdict">{iWon ? '🏆 Gewonnen!' : winnerId ? 'Knapp daneben' : '🤝 Unentschieden'}</span>
+                <span className="duel-verdict">
+                  {iWon && <GameIcon name="trophy" className="inline-icon" />}
+                  {!winnerId && <GameIcon name="equal" className="inline-icon" />} {iWon ? 'Gewonnen!' : winnerId ? 'Knapp daneben' : 'Unentschieden'}
+                </span>
                 <MissionLabel mission={duel.mission} />
                 <div className="versus">
                   {sides.map((side, i) => {
                     const who = byId(side.id)
                     return (
                       <div key={side.id} className={`side ${winnerId === side.id ? 'winner' : ''}`}>
-                        {winnerId === side.id && <span className="crown">👑</span>}
+                        {winnerId === side.id && <GameIcon name="crown" className="crown" size={26} />}
                         {who && <Avatar player={who} size={52} />}
                         <span className="side-name">{who?.name ?? '?'}</span>
                         <span className="side-points">
@@ -198,7 +204,7 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
                 </div>
                 {other && (
                   <button className="button small secondary" onClick={() => onChallenge(other, duel.mission)}>
-                    🔁 Revanche
+                    <GameIcon name="repeat" className="inline-icon" /> Revanche
                   </button>
                 )}
               </article>
