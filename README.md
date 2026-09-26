@@ -64,9 +64,10 @@ Einmalig einzurichten:
 1. **Settings → Pages → Build and deployment → Source: „GitHub Actions“** wählen.
    Für ein *privates* Repository ist GitHub Pages nur mit einem kostenpflichtigen
    GitHub-Plan (z. B. Pro) verfügbar; alternativ das Repository öffentlich machen.
-2. Optional für die Familien-Rangliste: unter **Settings → Secrets and variables →
-   Actions** die Secrets `VITE_SUPABASE_URL` und `VITE_SUPABASE_KEY` anlegen
-   (Werte wie in `.env.local`). Ohne sie läuft die Online-Version im Ein-Geräte-Modus.
+2. Die Werte für den Familien-Server stehen in [`.env.production`](.env.production)
+   (Projekt-URL und *publishable* Key, beide öffentlich gedacht). Ohne diese Datei
+   läuft die Online-Version im Ein-Geräte-Modus. Der Workflow prüft bei jedem
+   Lauf, ob der Server erreichbar und das Schema eingerichtet ist.
 3. Unter **Actions → Deploy to GitHub Pages → Run workflow** den ersten Lauf
    starten (oder einfach etwas pushen).
 
@@ -87,8 +88,8 @@ eine gemeinsame Rangliste braucht die Familie einen kleinen Server. Dafür wird
 3. Unter **Project Settings → API Keys** die Projekt-URL und den
    *publishable* (bzw. *anon*) Key kopieren. **Nicht** den geheimen
    *secret*/*service_role* Key verwenden.
-4. `.env.example` nach `.env.local` kopieren und die beiden Werte eintragen,
-   dann die App neu starten oder neu bauen.
+4. Die beiden Werte in `.env.production` eintragen (für die Online-Version)
+   bzw. `.env.example` nach `.env.local` kopieren (für `npm run dev`).
 5. In der App im Stall auf **„Auf mehreren Geräten spielen“** tippen und eine
    Familie gründen. Spieler, die schon auf dem Gerät sind, können mitgenommen
    werden, ihre Hufeisen bleiben erhalten.

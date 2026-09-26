@@ -26,12 +26,25 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      # Supabase settings come from .env.production.
       - name: Build
         run: npm run build
-        env:
-          # Optional: without these the app runs in single-device mode.
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
+      - name: Check family server
+        # Asks for a family code that does not exist: "family_not_found" means
+        # the server is reachable and supabase/schema.sql is installed.
+        continue-on-error: true
+        run: |
+          set -a; . ./.env.production; set +a
+          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/join_family" \
+            -H "apikey: $VITE_SUPABASE_KEY" -H "Content-Type: application/json" \
+            -d '{"p_code":"CHECK000"}')
+          echo "$response"
+          if echo "$response" | grep -q family_not_found; then
+            echo "Familien-Server ist eingerichtet."
+          else
+            echo "::warning::Familien-Server antwortet unerwartet – ist supabase/schema.sql ausgeführt?"
+            exit 1
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
