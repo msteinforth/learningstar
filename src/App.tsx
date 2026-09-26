@@ -1,30 +1,33 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Badges } from './components/Badges'
+import { Duels } from './components/Duels'
 import { BottomNav, type NavTarget } from './components/BottomNav'
 import { FamilySettings } from './components/FamilySettings'
 import { Leaderboard } from './components/Leaderboard'
 import { MissionMap } from './components/MissionMap'
 import { MissionPlay } from './components/MissionPlay'
-import { MissionResultView, type SaveState } from './components/MissionResultView'
+import { type DuelPlay, type DuelSaveState, MissionResultView, type SaveState } from './components/MissionResultView'
 import { ParentArea } from './components/ParentArea'
 import { PlayerSelect } from './components/PlayerSelect'
 import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
 import { type ContentStore, FamilyContentStore, LocalContentStore, type ParentContent } from './game/content'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
+import { missions } from './game/missions'
 import { createPlayer } from './game/progress'
-import { buyItem, equipItem, newBadges } from './game/rewards'
+import { type DuelStore, duelWins, FamilyDuelStore, LocalDuelStore, newSeed, openChallenges, toDuelResult } from './game/duels'
+import { awardBadges, buyItem, equipItem, extrasOf, newBadges } from './game/rewards'
 import { playSound } from './game/sound'
 import { FamilyPlayerStore, LocalPlayerStore, type PlayerStore } from './game/storage'
-import type { Mission, MissionResult, Player } from './game/types'
+import type { Duel, Mission, MissionResult, Player } from './game/types'
 
 type Screen =
   | { name: 'players' }
   | { name: NavTarget }
   | { name: 'family' }
   | { name: 'parents' }
-  | { name: 'play'; mission: Mission; run: number }
-  | { name: 'result'; mission: Mission; result: MissionResult; firstPass: boolean; save: SaveState }
+  | { name: 'play'; mission: Mission; run: number; duel?: DuelPlay }
+  | { name: 'result'; mission: Mission; result: MissionResult; firstPass: boolean; save: SaveState; duel?: DuelPlay; duelSave?: DuelSaveState }
 
 const ACTIVE_PLAYER_KEY = 'learningstar.activePlayer'
 
@@ -68,6 +71,10 @@ export default function App() {
   const contentStore: ContentStore = useMemo(() => (family ? new FamilyContentStore(lazyRpc, family.code) : new LocalContentStore()), [family])
   const [content, setContent] = useState<ParentContent>({ hasPin: false, missions: [] })
 
+  const duelStore: DuelStore = useMemo(() => (family ? new FamilyDuelStore(lazyRpc, family.code) : new LocalDuelStore()), [family])
+  const [duels, setDuels] = useState<Duel[]>([])
+  const [duelError, setDuelError] = useState<string | null>(null)
+
   const [reloads, setReloads] = useState(0)
   const load = useCallback(() => setReloads((count) => count + 1), [])
 
@@ -88,10 +95,18 @@ export default function App() {
       (loaded) => active && setContent(loaded),
       () => undefined,
     )
+    duelStore.list().then(
+      (loaded) => {
+        if (!active) return
+        setDuels(loaded)
+        setDuelError(null)
+      },
+      (error: Error) => active && setDuelError(error.message),
+    )
     return () => {
       active = false
     }
-  }, [store, localStore, contentStore, reloads])
+  }, [store, localStore, contentStore, duelStore, reloads])
 
   // Every new screen (and every tournament) starts at the top.
   useEffect(() => {
@@ -121,6 +136,15 @@ export default function App() {
   const replacePlayer = (updated: Player) =>
     setPlayers((current) => [...(current ?? []).filter((existing) => existing.id !== updated.id), updated])
 
+  // Duel wins live in the duel list; mirror them into the player so duel badges get awarded.
+  const wins = player ? duelWins(duels, player.id) : 0
+  useEffect(() => {
+    if (!player || (extrasOf(player).duelWins ?? 0) === wins) return
+    store
+      .updateExtras(player.id, (current) => awardBadges({ ...current, extras: { ...extrasOf(current), duelWins: wins } }, new Date()))
+      .then(replacePlayer, () => undefined)
+  }, [player, wins, store])
+
   const selectPlayer = (selected: Player) => {
     setActiveId(selected.id)
     writeActivePlayerId(selected.id)
@@ -133,9 +157,35 @@ export default function App() {
     selectPlayer(created)
   }
 
-  const start = (mission: Mission) => {
-    setTournamentId(mission.track)
-    setScreen({ name: 'play', mission, run: Date.now() })
+  const start = (mission: Mission, duel?: DuelPlay) => {
+    if (!duel) setTournamentId(mission.track)
+    setScreen({ name: 'play', mission, run: Date.now(), duel })
+  }
+
+  const saveDuel = async (duel: DuelPlay, result: MissionResult) => {
+    const setDuelSave = (state: DuelSaveState) =>
+      setScreen((current) => (current.name === 'result' && current.result === result ? { ...current, duelSave: state } : current))
+    setDuelSave({ status: 'saving' })
+    try {
+      const outcome = toDuelResult(result)
+      const saved =
+        duel.kind === 'answer'
+          ? await duelStore.answer(duel.duel.id, duel.duel.opponentId, outcome)
+          : await duelStore.create({
+              id: crypto.randomUUID(),
+              mission: duel.mission,
+              seed: duel.seed,
+              challengerId: duel.challengerId,
+              opponentId: duel.opponent.id,
+              createdAt: new Date().toISOString(),
+              challengerResult: outcome,
+              opponentResult: null,
+            })
+      setDuels((current) => [saved, ...current.filter((existing) => existing.id !== saved.id)])
+      setDuelSave({ status: 'saved', duel: saved })
+    } catch (error) {
+      setDuelSave({ status: 'error', message: error instanceof Error ? error.message : String(error) })
+    }
   }
 
   const save = async (before: Player, result: MissionResult) => {
@@ -153,12 +203,15 @@ export default function App() {
     }
   }
 
-  const finish = (mission: Mission, result: MissionResult) => {
+  const finish = (mission: Mission, result: MissionResult, duel?: DuelPlay) => {
     if (!player) return
-    const firstPass = result.passed && !player.missions[mission.id]?.passed
-    setScreen({ name: 'result', mission, result, firstPass, save: { status: 'saving' } })
+    // Duels earn horseshoes but don't change the tournament path (no unlocking by duel).
+    const recorded = duel ? { ...result, missionId: `duel:${mission.id}` } : result
+    const firstPass = !duel && result.passed && !player.missions[mission.id]?.passed
+    setScreen({ name: 'result', mission, result: recorded, firstPass, save: { status: 'saving' }, duel, duelSave: duel ? { status: 'saving' } : undefined })
     playSound(result.passed ? 'finish' : 'wrong')
-    save(player, result)
+    save(player, recorded)
+    if (duel) saveDuel(duel, recorded)
   }
 
   const updateExtras = async (update: (current: Player) => Player) => {
@@ -232,7 +285,15 @@ export default function App() {
   const withNav = (active: NavTarget, content: ReactNode) => (
     <>
       {content}
-      <BottomNav active={active} onNavigate={(target) => setScreen({ name: target })} />
+      <BottomNav
+        active={active}
+        onNavigate={(target) => {
+          // Duels depend on what siblings did on other devices, so fetch fresh data.
+          if (target === 'duels') load()
+          setScreen({ name: target })
+        }}
+        hints={{ duels: openChallenges(duels, player.id).length }}
+      />
     </>
   )
 
@@ -269,14 +330,29 @@ export default function App() {
       return withNav('badges', <Badges player={player} />)
     case 'leaderboard':
       return withNav('leaderboard', <Leaderboard store={store} player={player} familyName={family?.name ?? null} />)
+    case 'duels':
+      return withNav(
+        'duels',
+        <Duels
+          player={player}
+          players={players ?? []}
+          duels={duels}
+          missions={[...missions, ...content.missions]}
+          loadError={duelError}
+          onReload={load}
+          onChallenge={(opponent, mission) => start(mission, { kind: 'challenge', mission, seed: newSeed(), challengerId: player.id, opponent })}
+          onAnswer={(duel) => start(duel.mission, { kind: 'answer', duel, seed: duel.seed })}
+        />,
+      )
     case 'play':
       return (
         <MissionPlay
           key={screen.run}
           mission={screen.mission}
           player={player}
-          onFinish={(result) => finish(screen.mission, result)}
-          onCancel={() => setScreen({ name: 'map' })}
+          seed={screen.duel?.seed}
+          onFinish={(result) => finish(screen.mission, result, screen.duel)}
+          onCancel={() => setScreen({ name: screen.duel ? 'duels' : 'map' })}
         />
       )
     case 'result':
@@ -287,9 +363,13 @@ export default function App() {
           player={player}
           firstPass={screen.firstPass}
           save={screen.save}
+          duel={screen.duel}
+          duelSave={screen.duelSave}
+          players={players ?? []}
           onRetrySave={() => save(player, screen.result)}
+          onRetryDuel={() => screen.duel && saveDuel(screen.duel, screen.result)}
           onReplay={() => start(screen.mission)}
-          onBack={() => setScreen({ name: 'map' })}
+          onBack={() => setScreen({ name: screen.duel ? 'duels' : 'map' })}
           onNext={start}
         />
       )

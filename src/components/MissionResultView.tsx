@@ -1,9 +1,17 @@
 import { missions } from '../game/missions'
+import { duelOutcome } from '../game/duels'
 import type { Badge } from '../game/rewards'
-import type { Mission, MissionResult, Player } from '../game/types'
+import type { Duel, Mission, MissionResult, Player } from '../game/types'
 import { PlayerHorse } from './Avatar'
 import { Confetti } from './Confetti'
 import { Points, Rosettes } from './Icons'
+
+/** A mission played as part of a duel: either starting a challenge or answering one. */
+export type DuelPlay =
+  | { kind: 'challenge'; mission: Mission; seed: number; challengerId: string; opponent: Player }
+  | { kind: 'answer'; duel: Duel; seed: number }
+
+export type DuelSaveState = { status: 'saving' } | { status: 'saved'; duel: Duel } | { status: 'error'; message: string }
 
 export type SaveState = { status: 'saving' } | { status: 'saved'; badges: Badge[] } | { status: 'error'; message: string }
 
@@ -14,7 +22,12 @@ interface Props {
   /** Whether this run passed the mission for the first time. */
   firstPass: boolean
   save: SaveState
+  duel?: DuelPlay
+  duelSave?: DuelSaveState
+  /** Everyone in the family (for names in duel results). */
+  players: Player[]
   onRetrySave: () => void
+  onRetryDuel: () => void
   onReplay: () => void
   onBack: () => void
   onNext: (mission: Mission) => void
@@ -22,7 +35,7 @@ interface Props {
 
 const HEADLINES = ['Weiter üben – du schaffst das!', 'Geschafft!', 'Stark geritten!', 'Fehlerfreier Ritt!']
 
-export function MissionResultView({ mission, result, player, firstPass, save, onRetrySave, onReplay, onBack, onNext }: Props) {
+export function MissionResultView({ mission, result, player, firstPass, save, duel, duelSave, players, onRetrySave, onRetryDuel, onReplay, onBack, onNext }: Props) {
   const correct = result.results.filter((task) => task.correct).length
   const nextMission = missions.find((candidate) => candidate.requires === mission.id)
 
@@ -76,26 +89,68 @@ export function MissionResultView({ mission, result, player, firstPass, save, on
               </span>
             </div>
           ))}
+        {duel && duelSave && <DuelSummary duel={duel} state={duelSave} player={player} players={players} onRetry={onRetryDuel} />}
         {firstPass && nextMission && (
           <p className="unlock">
             🔓 Neue Mission freigeschaltet: <strong>{nextMission.title}</strong>
           </p>
         )}
-        {!result.passed && <p className="hint">Sammle mindestens {Math.round((mission.passRatio ?? 0.6) * 100)} % der Hufeisen, um die nächste Mission freizuschalten.</p>}
-        <div className="actions">
-          <button className="button secondary" onClick={onBack}>
-            Zum Hof
-          </button>
-          <button className="button secondary" onClick={onReplay}>
-            Nochmal
-          </button>
-          {result.passed && nextMission && save.status === 'saved' && (
-            <button className="button primary" onClick={() => onNext(nextMission)}>
-              Nächste Mission →
+        {!duel && !result.passed && <p className="hint">Sammle mindestens {Math.round((mission.passRatio ?? 0.6) * 100)} % der Hufeisen, um die nächste Mission freizuschalten.</p>}
+        {duel ? (
+          <div className="actions">
+            <button className="button primary" onClick={onBack}>
+              ⚔️ Zu den Duellen
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="actions">
+            <button className="button secondary" onClick={onBack}>
+              Zum Hof
+            </button>
+            <button className="button secondary" onClick={onReplay}>
+              Nochmal
+            </button>
+            {result.passed && nextMission && save.status === 'saved' && (
+              <button className="button primary" onClick={() => onNext(nextMission)}>
+                Nächste Mission →
+              </button>
+            )}
+          </div>
+        )}
       </section>
     </main>
+  )
+}
+
+function DuelSummary({ duel, state, player, players, onRetry }: { duel: DuelPlay; state: DuelSaveState; player: Player; players: Player[]; onRetry: () => void }) {
+  if (state.status === 'saving') return <p className="hint">Duell wird gespeichert …</p>
+  if (state.status === 'error') {
+    return (
+      <div className="notice error">
+        <p>Das Duell konnte noch nicht gespeichert werden. {state.message}</p>
+        <button className="button primary" onClick={onRetry}>
+          Nochmal speichern
+        </button>
+      </div>
+    )
+  }
+  const saved = state.duel
+  if (duel.kind === 'challenge') {
+    return (
+      <p className="duel-note">
+        ⚔️ Herausforderung an <strong>{duel.opponent.name}</strong> verschickt! {duel.opponent.name} muss {saved.challengerResult.points} Hufeisen schlagen.
+      </p>
+    )
+  }
+  const outcome = duelOutcome(saved)
+  const challenger = players.find((candidate) => candidate.id === saved.challengerId)
+  const winnerId = outcome.status === 'done' ? outcome.winnerId : null
+  const verdict = winnerId === player.id ? '🏆 Du hast das Duell gewonnen!' : winnerId ? `${challenger?.name ?? 'Dein Gegner'} hat knapp gewonnen.` : '🤝 Unentschieden!'
+  return (
+    <p className={`duel-note ${winnerId === player.id ? 'won' : ''}`}>
+      <strong>{verdict}</strong>
+      <br />
+      {challenger?.name ?? 'Gegner'}: {saved.challengerResult.points} · Du: {saved.opponentResult?.points ?? 0} Hufeisen
+    </p>
   )
 }

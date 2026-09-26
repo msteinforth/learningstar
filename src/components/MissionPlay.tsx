@@ -13,6 +13,8 @@ import { SoundToggle } from './SoundToggle'
 interface Props {
   mission: Mission
   player: Player
+  /** Fixed seed (duels): both children get exactly the same tasks, independent of past mistakes. */
+  seed?: number
   onFinish: (result: MissionResult) => void
   onCancel: () => void
 }
@@ -24,8 +26,8 @@ const msSince = (start: number) => performance.now() - start
 const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!', 'Wie ein Profi!']
 const CORRECT_EMOJI = ['🎉', '⭐', '🥕', '🏆', '🌈', '🍎']
 
-export function MissionPlay({ mission, player, onFinish, onCancel }: Props) {
-  const [tasks] = useState(() => generateTasks(mission, createRng(Date.now()), player.mistakes))
+export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props) {
+  const [tasks] = useState(() => (seed === undefined ? generateTasks(mission, createRng(Date.now()), player.mistakes) : generateTasks(mission, createRng(seed), {})))
   const [index, setIndex] = useState(0)
   const [attempt, setAttempt] = useState(1)
   const [input, setInput] = useState('')

@@ -11,6 +11,7 @@ export function extrasOf(player: { extras?: Partial<PlayerExtras> }): PlayerExtr
     equipped: extras?.equipped ?? {},
     badges: extras?.badges ?? {},
     streak: extras?.streak ?? { days: 0, lastDay: null },
+    duelWins: extras?.duelWins ?? 0,
   }
 }
 
@@ -78,6 +79,8 @@ export const BADGES: Badge[] = [
     icon,
     progress: (p: Player) => ({ current: passedCount(p, trackMissions(track)), target: trackMissions(track).length }),
   })),
+  { id: 'duell-sieg', title: 'Duell-Gewinner', description: 'Gewinne ein Duell.', icon: '⚔️', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 1 }) },
+  { id: 'duell-champion', title: 'Duell-Champion', description: 'Gewinne 5 Duelle.', icon: '🤺', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 5 }) },
   {
     id: 'allrounder',
     title: 'Allround-Reiter',

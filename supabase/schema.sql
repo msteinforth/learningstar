@@ -47,11 +47,28 @@ create table if not exists public.point_events (
 
 create index if not exists point_events_family_time_idx on public.point_events (family_id, created_at);
 
+-- Duelle: zwei Kinder spielen nacheinander dieselben Aufgaben.
+create table if not exists public.duels (
+  id uuid primary key,
+  family_id uuid not null references public.families (id) on delete cascade,
+  challenger_id uuid not null references public.players (id) on delete cascade,
+  opponent_id uuid not null references public.players (id) on delete cascade,
+  mission jsonb not null,
+  seed bigint not null,
+  challenger_result jsonb not null,
+  opponent_result jsonb,
+  created_at timestamptz not null default now(),
+  check (challenger_id <> opponent_id)
+);
+
+create index if not exists duels_family_time_idx on public.duels (family_id, created_at desc);
+
 alter table public.families enable row level security;
 alter table public.players enable row level security;
 alter table public.point_events enable row level security;
+alter table public.duels enable row level security;
 
-revoke all on public.families, public.players, public.point_events from anon, authenticated;
+revoke all on public.families, public.players, public.point_events, public.duels from anon, authenticated;
 
 -- --- Hilfsfunktionen (nicht öffentlich) --------------------------------------
 
@@ -380,6 +397,121 @@ begin
 end;
 $$;
 
+-- --- Duelle ----------------------------------------------------------------
+
+create or replace function public.ls_check_duel_result(p_result jsonb)
+returns void
+language plpgsql
+immutable
+set search_path = ''
+as $$
+begin
+  if jsonb_typeof(p_result) <> 'object'
+    or jsonb_typeof(p_result -> 'points') <> 'number'
+    or (p_result ->> 'points')::numeric not between 0 and 100
+    or (p_result ->> 'maxPoints')::numeric not between 0 and 100 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+end;
+$$;
+
+create or replace function public.ls_duel_json(d public.duels)
+returns jsonb
+language sql
+stable
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'id', d.id,
+    'mission', d.mission,
+    'seed', d.seed,
+    'challengerId', d.challenger_id,
+    'opponentId', d.opponent_id,
+    'createdAt', d.created_at,
+    'challengerResult', d.challenger_result,
+    'opponentResult', d.opponent_result
+  )
+$$;
+
+-- Die letzten 50 Duelle der Familie, neueste zuerst.
+create or replace function public.list_duels(p_code text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(jsonb_agg(public.ls_duel_json(d) order by d.created_at desc), '[]'::jsonb)
+  from (
+    select * from public.duels
+    where family_id = public.ls_family_id(p_code)
+    order by created_at desc
+    limit 50
+  ) d
+$$;
+
+create or replace function public.create_duel(p_code text, p_duel jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_duel public.duels;
+begin
+  if (select count(*) from public.players
+      where family_id = v_family
+        and id in ((p_duel ->> 'challengerId')::uuid, (p_duel ->> 'opponentId')::uuid)) <> 2 then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  if pg_column_size(p_duel -> 'mission') > 100000 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  perform public.ls_check_duel_result(p_duel -> 'challengerResult');
+
+  insert into public.duels (id, family_id, challenger_id, opponent_id, mission, seed, challenger_result)
+  values (
+    (p_duel ->> 'id')::uuid,
+    v_family,
+    (p_duel ->> 'challengerId')::uuid,
+    (p_duel ->> 'opponentId')::uuid,
+    p_duel -> 'mission',
+    (p_duel ->> 'seed')::bigint,
+    p_duel -> 'challengerResult'
+  )
+  returning * into v_duel;
+  return public.ls_duel_json(v_duel);
+end;
+$$;
+
+-- Nur das herausgeforderte Kind kann antworten, und nur einmal.
+create or replace function public.answer_duel(p_code text, p_duel_id uuid, p_player_id uuid, p_result jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_duel public.duels;
+begin
+  perform public.ls_check_duel_result(p_result);
+  update public.duels
+  set opponent_result = p_result
+  where id = p_duel_id
+    and family_id = public.ls_family_id(p_code)
+    and opponent_id = p_player_id
+    and opponent_result is null
+  returning * into v_duel;
+  if v_duel.id is null then
+    raise exception 'duel_closed' using errcode = 'P0002';
+  end if;
+  return public.ls_duel_json(v_duel);
+end;
+$$;
+
 -- Rangliste der Familie: Punkte seit Montag 0 Uhr (deutsche Zeit) und insgesamt.
 create or replace function public.leaderboard(p_code text)
 returns jsonb
@@ -428,7 +560,10 @@ revoke execute on function
   public.get_family_content(text),
   public.check_parent_pin(text, text),
   public.set_parent_pin(text, text, text),
-  public.save_custom_missions(text, text, jsonb)
+  public.save_custom_missions(text, text, jsonb),
+  public.list_duels(text),
+  public.create_duel(text, jsonb),
+  public.answer_duel(text, uuid, uuid, jsonb)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -437,7 +572,9 @@ revoke execute on function
   public.ls_normalize_code(text),
   public.ls_family_id(text),
   public.ls_player_json(public.players),
-  public.ls_check_extras(jsonb, integer)
+  public.ls_check_extras(jsonb, integer),
+  public.ls_check_duel_result(jsonb),
+  public.ls_duel_json(public.duels)
 from public, anon, authenticated;
 
 grant execute on function
@@ -452,5 +589,8 @@ grant execute on function
   public.get_family_content(text),
   public.check_parent_pin(text, text),
   public.set_parent_pin(text, text, text),
-  public.save_custom_missions(text, text, jsonb)
+  public.save_custom_missions(text, text, jsonb),
+  public.list_duels(text),
+  public.create_duel(text, jsonb),
+  public.answer_duel(text, uuid, uuid, jsonb)
 to anon, authenticated;

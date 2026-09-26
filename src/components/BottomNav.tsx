@@ -1,13 +1,15 @@
-export type NavTarget = 'map' | 'shop' | 'badges' | 'leaderboard'
+export type NavTarget = 'map' | 'duels' | 'shop' | 'badges' | 'leaderboard'
 
 const ITEMS: { id: NavTarget; label: string; icon: string }[] = [
   { id: 'map', label: 'Hof', icon: '🗺️' },
+  { id: 'duels', label: 'Duelle', icon: '⚔️' },
   { id: 'shop', label: 'Laden', icon: '🛍️' },
   { id: 'badges', label: 'Abzeichen', icon: '🏅' },
   { id: 'leaderboard', label: 'Rangliste', icon: '🏆' },
 ]
 
-export function BottomNav({ active, onNavigate, badgeHint }: { active: NavTarget; onNavigate: (target: NavTarget) => void; badgeHint?: number }) {
+/** `hints` shows a small red counter on an item, e.g. open duel challenges. */
+export function BottomNav({ active, onNavigate, hints = {} }: { active: NavTarget; onNavigate: (target: NavTarget) => void; hints?: Partial<Record<NavTarget, number>> }) {
   return (
     <nav className="bottom-nav" aria-label="Hauptmenü">
       {ITEMS.map((item) => (
@@ -16,7 +18,11 @@ export function BottomNav({ active, onNavigate, badgeHint }: { active: NavTarget
             {item.icon}
           </span>
           {item.label}
-          {item.id === 'badges' && badgeHint ? <span className="nav-dot">{badgeHint}</span> : null}
+          {hints[item.id] ? (
+            <span className="nav-dot" aria-label={`${hints[item.id]} neu`}>
+              {hints[item.id]}
+            </span>
+          ) : null}
         </button>
       ))}
     </nav>

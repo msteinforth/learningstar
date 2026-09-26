@@ -106,6 +106,8 @@ export interface PlayerExtras {
   /** Badge id → date it was earned (ISO). */
   badges: Record<string, string>
   streak: { days: number; lastDay: string | null }
+  /** Number of duels won (kept up to date from the duel list). */
+  duelWins?: number
 }
 
 export interface Player {
@@ -135,4 +137,29 @@ export interface MissionResult {
   rosettes: number
   passed: boolean
   results: TaskResult[]
+}
+
+/** How one child did in a duel. */
+export interface DuelResult {
+  points: number
+  maxPoints: number
+  correct: number
+  total: number
+  finishedAt: string
+}
+
+/**
+ * Two children play exactly the same tasks (same mission and seed) one after
+ * the other; whoever collects more horseshoes wins.
+ */
+export interface Duel {
+  id: string
+  /** Snapshot, so the duel still works if a parents' mission is changed later. */
+  mission: Mission
+  seed: number
+  challengerId: string
+  opponentId: string
+  createdAt: string
+  challengerResult: DuelResult
+  opponentResult: DuelResult | null
 }

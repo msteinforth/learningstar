@@ -37,6 +37,12 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
   Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
   Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
+- **Duelle** ⚔️: Ein Kind fordert ein Geschwisterkind heraus und spielt zuerst.
+  Das andere Kind bekommt später – auch auf einem anderen Gerät – genau dieselben
+  Aufgaben; wer mehr Hufeisen holt, gewinnt (bei Gleichstand zählen die richtigen
+  Antworten). Offene Herausforderungen zeigt ein roter Punkt in der Navigation.
+  Duelle bringen normale Hufeisen, schalten aber keine Turnier-Stationen frei.
+  Dazu gibt es die Abzeichen „Duell-Gewinner“ und „Duell-Champion“.
 - **Eltern-Bereich** 👨‍👩‍👧 (im Stall, mit PIN geschützt):
   - **Eigene Missionen** anlegen, z. B. die Vokabeln für den nächsten Test
     (`the saddle = der Sattel`), eigene Fragen (`Hauptstadt von Frankreich = Paris | Lyon | Nizza`)

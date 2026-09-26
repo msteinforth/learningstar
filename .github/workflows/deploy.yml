@@ -35,8 +35,8 @@ jobs:
         continue-on-error: true
         run: |
           set -a; . ./.env.production; set +a
-          # get_family_content is the newest function: this also tells whether the latest schema.sql ran.
-          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/get_family_content" \
+          # list_duels is the newest function: this also tells whether the latest schema.sql ran.
+          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/list_duels" \
             -H "apikey: $VITE_SUPABASE_KEY" -H "Content-Type: application/json" \
             -d '{"p_code":"CHECK000"}')
           echo "$response"
