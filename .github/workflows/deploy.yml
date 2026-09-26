@@ -30,22 +30,36 @@ jobs:
       - name: Build
         run: npm run build
       - name: Check family server
-        # Asks for a family code that does not exist: "family_not_found" means
-        # the server is reachable and the current supabase/schema.sql is installed.
+        # Calls each server function with a family code that does not exist:
+        # "family_not_found" means the function is installed, anything else
+        # usually means the latest supabase/schema.sql has not been run yet.
         continue-on-error: true
         run: |
           set -a; . ./.env.production; set +a
-          # delete_player is the newest function: this also tells whether the latest schema.sql ran.
-          response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/delete_player" \
-            -H "apikey: $VITE_SUPABASE_KEY" -H "Content-Type: application/json" \
-            -d '{"p_code":"CHECK000","p_pin_hash":"x","p_player_id":"00000000-0000-0000-0000-000000000000"}')
-          echo "$response"
-          if echo "$response" | grep -q family_not_found; then
-            echo "Familien-Server ist eingerichtet."
-          else
-            echo "::warning::Familien-Server antwortet unerwartet – ist supabase/schema.sql ausgeführt?"
+          missing=""
+          check() {
+            response=$(curl -sS -X POST "$VITE_SUPABASE_URL/rest/v1/rpc/$1" \
+              -H "apikey: $VITE_SUPABASE_KEY" -H "Content-Type: application/json" -d "$2" 2>&1 || true)
+            if echo "$response" | grep -q family_not_found; then
+              echo "ok      $1"
+            else
+              echo "FEHLT   $1: $response"
+              missing="$missing $1"
+            fi
+          }
+          code='"p_code":"CHECK000"'
+          uuid='"00000000-0000-0000-0000-000000000000"'
+          check join_family "{$code}"
+          check list_players "{$code}"
+          check leaderboard "{$code}"
+          check get_family_content "{$code}"
+          check list_duels "{$code}"
+          check delete_player "{$code,\"p_pin_hash\":\"x\",\"p_player_id\":$uuid}"
+          if [ -n "$missing" ]; then
+            echo "::warning::Familien-Server: es fehlen$missing – bitte supabase/schema.sql erneut ausführen."
             exit 1
           fi
+          echo "Familien-Server ist vollständig eingerichtet."
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
