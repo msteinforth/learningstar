@@ -9,6 +9,7 @@ import { MissionPlay } from './components/MissionPlay'
 import { type DuelPlay, type DuelSaveState, MissionResultView, type SaveState } from './components/MissionResultView'
 import { ParentArea } from './components/ParentArea'
 import { PlayerSelect } from './components/PlayerSelect'
+import { ProfileEdit } from './components/ProfileEdit'
 import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
 import { type ContentStore, FamilyContentStore, LocalContentStore, type ParentContent } from './game/content'
@@ -27,6 +28,7 @@ type Screen =
   | { name: NavTarget }
   | { name: 'family' }
   | { name: 'parents' }
+  | { name: 'profile' }
   | { name: 'play'; mission: Mission; run: number; duel?: DuelPlay }
   | { name: 'result'; mission: Mission; result: MissionResult; firstPass: boolean; save: SaveState; duel?: DuelPlay; duelSave?: DuelSaveState }
 
@@ -87,6 +89,8 @@ export default function App() {
   const [localCount, setLocalCount] = useState(0)
   const [activeId, setActiveId] = useState<string | null>(readActivePlayerId)
   const [unlocked, setUnlocked] = useState<string[]>(readUnlocked)
+  // PINs entered in this session, only in memory: needed to save changes to a protected horse.
+  const [knownPins, setKnownPins] = useState<Record<string, string>>({})
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
   const [tournamentId, setTournamentId] = useState<string | null>(null)
 
@@ -156,7 +160,8 @@ export default function App() {
   // A horse with a PIN is only opened after the PIN was entered in this tab.
   const player = players?.find((candidate) => candidate.id === activeId && (!candidate.hasPin || unlocked.includes(candidate.id)))
 
-  const unlock = (playerId: string) => {
+  const unlock = (playerId: string, pin?: string) => {
+    if (pin) setKnownPins((current) => ({ ...current, [playerId]: pin }))
     const next = [...unlocked.filter((id) => id !== playerId), playerId]
     setUnlocked(next)
     writeUnlocked(next)
@@ -188,7 +193,7 @@ export default function App() {
     let created = await store.create(createPlayer(profile.name, profile.avatar, profile.color))
     if (pin) {
       created = await store.setPin(created.id, null, pin)
-      unlock(created.id)
+      unlock(created.id, pin)
     }
     replacePlayer(created)
     selectPlayer(created)
@@ -196,7 +201,7 @@ export default function App() {
 
   const checkPin = async (candidate: Player, pin: string) => {
     const ok = await store.checkPin(candidate.id, pin)
-    if (ok) unlock(candidate.id)
+    if (ok) unlock(candidate.id, pin)
     return ok
   }
 
@@ -205,7 +210,7 @@ export default function App() {
     if (newPin !== undefined) updated = await store.setPin(candidate.id, pin, newPin)
     replacePlayer(updated)
     // After setting a new PIN the child stays signed in on this device.
-    if (newPin) unlock(candidate.id)
+    if (newPin) unlock(candidate.id, newPin)
   }
 
   const start = (mission: Mission, duel?: DuelPlay) => {
@@ -339,7 +344,6 @@ export default function App() {
         onSelect={selectPlayer}
         onCreate={create}
         onCheckPin={checkPin}
-        onEdit={editPlayer}
         onOpenFamily={backendConfigured ? () => setScreen({ name: 'family' }) : undefined}
       />
     )
@@ -373,6 +377,7 @@ export default function App() {
           tournamentId={tournamentId}
           onSelectTournament={setTournamentId}
           onStart={start}
+          onEditProfile={() => setScreen({ name: 'profile' })}
           onSwitchPlayer={() => {
             writeActivePlayerId(null)
             setScreen({ name: 'players' })
@@ -391,6 +396,16 @@ export default function App() {
           }}
           onEquip={(slot, itemId) => updateExtras((current) => equipItem(current, slot, itemId))}
         />,
+      )
+    case 'profile':
+      return (
+        <ProfileEdit
+          player={player}
+          knownPin={knownPins[player.id] ?? null}
+          onCheckPin={(pin) => checkPin(player, pin)}
+          onSave={(pin, profile, newPin) => editPlayer(player, pin, profile, newPin)}
+          onBack={() => setScreen({ name: 'map' })}
+        />
       )
     case 'badges':
       return withNav('badges', <Badges player={player} />)

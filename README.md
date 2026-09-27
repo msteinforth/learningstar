@@ -57,8 +57,8 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   - **PIN eines Kindes zurücksetzen**, falls es sie vergessen hat.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
-- **Mein Pferd**: Über den Stift im Stall lassen sich Name, Pferd und Farbe
-  jederzeit ändern. Jedes Kind kann sein Pferd mit einer eigenen PIN (4–6 Ziffern)
+- **Mein Pferd**: Nach der Auswahl im Stall lassen sich über den Stift neben dem
+  eigenen Avatar Name, Pferd und Farbe jederzeit ändern. Jedes Kind kann sein Pferd mit einer eigenen PIN (4–6 Ziffern)
   schützen: Dann fragt die App beim Auswählen und Bearbeiten danach. In einem
   geöffneten Browser-Tab bleibt das Pferd bis zum Schließen entsperrt. Die PIN wird
   nur als Hash gespeichert (mit Familie auf dem Server) und bleibt beim Umzug in

@@ -18,8 +18,6 @@ interface Props {
   /** Creates a player; with `pin` the horse is protected right away. */
   onCreate: (profile: PlayerProfile, pin: string | null) => Promise<void>
   onCheckPin: (player: Player, pin: string) => Promise<boolean>
-  /** `pin` is the current PIN (null without one); `newPin` undefined keeps it, null removes it. */
-  onEdit: (player: Player, pin: string | null, profile: PlayerProfile, newPin: string | null | undefined) => Promise<void>
   /** Opens the family settings; missing when no family server is set up. */
   onOpenFamily?: () => void
   onOpenParents: () => void
@@ -28,12 +26,11 @@ interface Props {
 type Mode =
   | { kind: 'list' }
   | { kind: 'create' }
-  | { kind: 'pin'; player: Player; next: 'play' | 'edit' }
-  | { kind: 'edit'; player: Player; pin: string | null }
+  | { kind: 'pin'; player: Player }
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect, onCreate, onCheckPin, onEdit, onOpenFamily, onOpenParents }: Props) {
+export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect, onCreate, onCheckPin, onOpenFamily, onOpenParents }: Props) {
   const [mode, setMode] = useState<Mode>({ kind: 'list' })
 
   if (loadError) {
@@ -65,11 +62,7 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
   }
 
   const toList = () => setMode({ kind: 'list' })
-  const open = (player: Player, next: 'play' | 'edit') => {
-    if (player.hasPin) setMode({ kind: 'pin', player, next })
-    else if (next === 'play') onSelect(player)
-    else setMode({ kind: 'edit', player, pin: null })
-  }
+  const open = (player: Player) => (player.hasPin ? setMode({ kind: 'pin', player }) : onSelect(player))
 
   const creating = mode.kind === 'create' || players.length === 0
 
@@ -91,39 +84,24 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
       {mode.kind === 'pin' ? (
         <PinPrompt
           player={mode.player}
-          purpose={mode.next}
+          purpose="play"
           onCheck={(pin) => onCheckPin(mode.player, pin)}
-          onUnlocked={(pin) => (mode.next === 'play' ? onSelect(mode.player) : setMode({ kind: 'edit', player: mode.player, pin }))}
+          onUnlocked={() => onSelect(mode.player)}
           onCancel={toList}
-        />
-      ) : mode.kind === 'edit' ? (
-        <ProfileForm
-          title="Pferd bearbeiten"
-          submitLabel="Speichern"
-          initial={mode.player}
-          hasPin={Boolean(mode.player.hasPin)}
-          onCancel={toList}
-          onSubmit={async (profile, newPin) => {
-            await onEdit(mode.player, mode.pin, profile, newPin)
-            toList()
-          }}
         />
       ) : (
         <>
           {players.length > 0 && (
             <ul className="player-list">
               {players.map((player) => (
-                <li key={player.id} className="player-row">
-                  <button className="player-card" style={{ '--player': player.color } as CSSProperties} onClick={() => open(player, 'play')}>
+                <li key={player.id}>
+                  <button className="player-card" style={{ '--player': player.color } as CSSProperties} onClick={() => open(player)}>
                     <Avatar player={player} size={64} />
                     <span className="player-name">
                       {player.name}
                       <Points value={player.totalPoints} />
                     </span>
                     {player.hasPin && <GameIcon name="lock" className="pin-badge" size={26} title="Mit PIN geschützt" />}
-                  </button>
-                  <button className="edit-player" onClick={() => open(player, 'edit')} aria-label={`${player.name} bearbeiten`} title="Pferd bearbeiten">
-                    <GameIcon name="pencil" size={26} />
                   </button>
                 </li>
               ))}
@@ -163,7 +141,7 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
   )
 }
 
-function PinPrompt({
+export function PinPrompt({
   player,
   purpose,
   onCheck,
@@ -231,7 +209,7 @@ function PinPrompt({
 
 type PinChoice = 'keep' | 'set' | 'remove'
 
-function ProfileForm({
+export function ProfileForm({
   title,
   submitLabel,
   initial,

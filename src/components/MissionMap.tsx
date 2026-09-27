@@ -15,6 +15,8 @@ interface Props {
   tournamentId: string | null
   onSelectTournament: (id: string | null) => void
   onStart: (mission: Mission) => void
+  /** Opens "Mein Pferd" (name, horse, colour, PIN). */
+  onEditProfile: () => void
   onSwitchPlayer: () => void
 }
 
@@ -34,17 +36,22 @@ function trailPath(points: { x: number; y: number }[]): string {
     .join(' ')
 }
 
-export function MissionMap({ player, customMissions, tournamentId, onSelectTournament, onStart, onSwitchPlayer }: Props) {
+export function MissionMap({ player, customMissions, tournamentId, onSelectTournament, onStart, onEditProfile, onSwitchPlayer }: Props) {
   const selected = tracks.find((track) => track.id === tournamentId)
   const allMissions = [...missions, ...customMissions]
 
   return (
     <main className="screen">
       <header className="topbar">
-        <button className="player-chip" onClick={onSwitchPlayer} title="Spieler wechseln">
-          <Avatar player={player} size={44} />
-          <span>{player.name}</span>
-        </button>
+        <span className="player-chip-group">
+          <button className="player-chip" onClick={onSwitchPlayer} title="Spieler wechseln">
+            <Avatar player={player} size={44} />
+            <span>{player.name}</span>
+          </button>
+          <button className="edit-profile" onClick={onEditProfile} aria-label="Mein Pferd bearbeiten" title="Mein Pferd bearbeiten">
+            <GameIcon name="pencil" size={24} />
+          </button>
+        </span>
         <span className="topbar-end">
           <SoundToggle />
           <span className="points-badge" title="Hufeisen im Beutel">

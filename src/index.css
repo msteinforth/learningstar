@@ -3023,42 +3023,45 @@ legend {
 }
 
 /* ---------- Edit horse, child PIN ---------- */
-.player-row {
-  position: relative;
+.player-chip-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.player-row .player-card {
-  padding-right: 62px;
-}
-
-.pin-badge {
+.edit-profile {
   flex: none;
-  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.2));
-}
-
-.edit-player {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
   border: none;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.92);
-  box-shadow: 0 3px 0 rgb(0 0 0 / 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 0 var(--shadow-color);
   cursor: pointer;
   transition: transform 0.15s;
 }
 
-.edit-player:hover {
-  transform: translateY(-50%) scale(1.08) rotate(-8deg);
+.edit-profile:hover {
+  transform: scale(1.08) rotate(-8deg);
 }
 
-.edit-player:active {
-  transform: translateY(-45%);
+.edit-profile:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--shadow-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-profile {
+    background: var(--bg-card);
+  }
+}
+
+.pin-badge {
+  flex: none;
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.2));
 }
 
 .pin-prompt {
