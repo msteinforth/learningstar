@@ -139,6 +139,13 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'hat-party', slot: 'hat', name: 'Partyhut', look: 'party-hat', price: 80 },
   { id: 'hat-grad', slot: 'hat', name: 'Doktorhut', look: 'grad-cap', price: 100, requiresBadge: 'einmaleins-profi' },
   { id: 'hat-crown', slot: 'hat', name: 'Krone', look: 'crown', price: 200, requiresBadge: 'gold-sammler' },
+  // Premium: for children who save up for a long time.
+  { id: 'hat-helmet', slot: 'hat', name: 'Reithelm', look: 'riding-helmet', price: 300 },
+  { id: 'hat-cowboy', slot: 'hat', name: 'Cowboyhut', look: 'cowboy-hat', price: 400 },
+  { id: 'hat-tiara', slot: 'hat', name: 'Diadem', look: 'tiara', price: 600 },
+  { id: 'hat-wizard', slot: 'hat', name: 'Zauberhut', look: 'wizard-hat', price: 750 },
+  { id: 'hat-viking', slot: 'hat', name: 'Wikingerhelm', look: 'viking-helmet', price: 900 },
+  { id: 'hat-unicorn', slot: 'hat', name: 'Einhorn-Horn', look: 'unicorn-horn', price: 1500, requiresBadge: 'hufeisen-500' },
 
   { id: 'buddy-carrot', slot: 'buddy', name: 'Karotte', look: 'carrot', price: 15 },
   { id: 'buddy-apple', slot: 'buddy', name: 'Apfel', look: 'apple', price: 15 },
@@ -147,6 +154,12 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'buddy-cat', slot: 'buddy', name: 'Stallkatze', look: 'cat', price: 80 },
   { id: 'buddy-dog', slot: 'buddy', name: 'Hofhund', look: 'dog', price: 90 },
   { id: 'buddy-star', slot: 'buddy', name: 'Glücksstern', look: 'star', price: 120, requiresBadge: 'serie-7' },
+  { id: 'buddy-bunny', slot: 'buddy', name: 'Häschen', look: 'bunny', price: 300 },
+  { id: 'buddy-hedgehog', slot: 'buddy', name: 'Igel', look: 'hedgehog', price: 400 },
+  { id: 'buddy-owl', slot: 'buddy', name: 'Schlaue Eule', look: 'owl', price: 550 },
+  { id: 'buddy-fox', slot: 'buddy', name: 'Füchslein', look: 'fox', price: 650 },
+  { id: 'buddy-penguin', slot: 'buddy', name: 'Pinguin', look: 'penguin', price: 800 },
+  { id: 'buddy-dragon', slot: 'buddy', name: 'Mini-Drache', look: 'dragon', price: 1500, requiresBadge: 'duell-champion' },
 
   { id: 'bg-meadow', slot: 'background', name: 'Frühlingswiese', look: 'linear-gradient(160deg, #b8f28b, #4fae3b)', price: 25 },
   { id: 'bg-sky', slot: 'background', name: 'Himmelblau', look: 'linear-gradient(160deg, #a8e6ff, #1cb0f6)', price: 25 },
@@ -155,6 +168,42 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'bg-night', slot: 'background', name: 'Sternennacht', look: 'radial-gradient(circle at 30% 30%, #fff 0 2px, transparent 3px), radial-gradient(circle at 70% 60%, #fff 0 1.5px, transparent 2.5px), linear-gradient(160deg, #3b3f8f, #141a4a)', price: 90 },
   { id: 'bg-rainbow', slot: 'background', name: 'Regenbogen', look: 'conic-gradient(from 200deg, #ff5a5f, #ff9f1c, #ffd23f, #58cc02, #1cb0f6, #a560f0, #ff5a5f)', price: 150 },
   { id: 'bg-gold', slot: 'background', name: 'Goldglanz', look: 'linear-gradient(135deg, #fff3b0, #ffc629 45%, #e0a000)', price: 150, requiresBadge: 'fehlerfrei' },
+  {
+    id: 'bg-flowers',
+    slot: 'background',
+    name: 'Blumenmeer',
+    look: 'radial-gradient(circle at 25% 70%, #ff7eb6 0 4px, transparent 5px), radial-gradient(circle at 70% 78%, #ffe066 0 4px, transparent 5px), radial-gradient(circle at 50% 88%, #ffffff 0 3px, transparent 4px), linear-gradient(180deg, #bdf0ff 0 50%, #7fd65a 50%)',
+    price: 350,
+  },
+  {
+    id: 'bg-ocean',
+    slot: 'background',
+    name: 'Unterwasserwelt',
+    look: 'radial-gradient(circle at 25% 35%, rgba(255,255,255,0.8) 0 3px, transparent 4px), radial-gradient(circle at 75% 20%, rgba(255,255,255,0.7) 0 2px, transparent 3px), linear-gradient(180deg, #5ee0f0, #1c7fd6 60%, #0b3f8a)',
+    price: 500,
+  },
+  {
+    id: 'bg-aurora',
+    slot: 'background',
+    name: 'Polarlicht',
+    look: 'linear-gradient(200deg, transparent 20%, rgba(88,204,2,0.75) 40%, transparent 60%), linear-gradient(160deg, transparent 30%, rgba(165,96,240,0.8) 55%, transparent 75%), linear-gradient(180deg, #0b1440, #1a2a6c)',
+    price: 700,
+  },
+  {
+    id: 'bg-galaxy',
+    slot: 'background',
+    name: 'Galaxie',
+    look: 'radial-gradient(circle at 20% 25%, #fff 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 40%, #fff 0 2px, transparent 3px), radial-gradient(circle at 45% 80%, #fff 0 1.5px, transparent 2.5px), radial-gradient(ellipse at 60% 55%, #ff7eb6 0, #a560f0 30%, transparent 60%), linear-gradient(160deg, #1a0b3d, #3b1a7a)',
+    price: 1000,
+  },
+  {
+    id: 'bg-diamond',
+    slot: 'background',
+    name: 'Diamantglanz',
+    look: 'conic-gradient(from 45deg, #e8f7ff, #a8e6ff, #ffffff, #d8c8ff, #ffffff, #a8e6ff, #e8f7ff)',
+    price: 2000,
+    requiresBadge: 'allrounder',
+  },
 ]
 
 export function findItem(id: string | undefined): ShopItem | undefined {
