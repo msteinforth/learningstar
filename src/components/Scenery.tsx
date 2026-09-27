@@ -1,7 +1,6 @@
-import { HORSES } from '../game/horses'
-import { HorseSide } from './Horse'
+import { Meadow } from './Meadow'
 
-/** Paddock backdrop behind every screen: sky, sun, drifting clouds, hills and a fence. */
+/** Paddock backdrop behind every screen: sky, sun, drifting clouds, hills, a fence and horses on the meadow. */
 export function Scenery() {
   return (
     <div className="scenery" aria-hidden="true">
@@ -16,7 +15,7 @@ export function Scenery() {
       <svg className="cloud cloud-3" viewBox="0 0 120 50">
         <path d="M20 45 a18 18 0 0 1 4-35 a22 22 0 0 1 40-5 a18 18 0 0 1 32 8 a16 16 0 0 1 4 32 z" />
       </svg>
-      <HorseSide horse={HORSES[1]} width={96} className="grazing-horse" />
+      <Meadow behind />
       <svg className="hills" viewBox="0 0 1200 260" preserveAspectRatio="none">
         <path className="hill-back" d="M0 120 C 180 40, 360 60, 520 110 S 860 30, 1200 90 L1200 260 L0 260 Z" />
         <path className="hill-mid" d="M0 170 C 220 110, 420 130, 640 170 S 1000 110, 1200 150 L1200 260 L0 260 Z" />
@@ -34,6 +33,7 @@ export function Scenery() {
           ))}
         </g>
       </svg>
+      <Meadow behind={false} />
     </div>
   )
 }

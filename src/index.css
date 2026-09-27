@@ -2448,12 +2448,50 @@ legend {
   transform: scaleX(-1);
 }
 
-.grazing-horse {
+/* Horses on the meadow: they gallop across, stop for a while and trot on (see Meadow.tsx). */
+.meadow-horse {
   position: absolute;
-  z-index: 1;
-  left: 7%;
-  bottom: calc(max(30vh, 170px) * 0.3);
+  left: 0;
+  bottom: calc(max(30vh, 170px) * var(--level, 0.3));
+  will-change: transform;
   filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.12));
+}
+
+/* In front of the hills; the one further back walks behind the fence. */
+.meadow-horse:not(.behind) {
+  z-index: 1;
+}
+
+.meadow-horse.behind {
+  opacity: 0.95;
+}
+
+.horse-side.facing-left {
+  transform: scaleX(-1);
+}
+
+/* Standing still: legs straight down, tail swishing. */
+.horse-side.standing .leg-back-far,
+.horse-side.standing .leg-front-far {
+  --leg: 4deg;
+}
+.horse-side.standing .leg-back-near,
+.horse-side.standing .leg-front-near {
+  --leg: -4deg;
+}
+.horse-side.standing .horse-tail {
+  animation: tail-swish 1.8s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: right top;
+}
+.horse-side.standing .horse-leg {
+  transition: transform 0.25s;
+}
+
+@keyframes tail-swish {
+  to {
+    transform: rotate(8deg);
+  }
 }
 
 /* --- Eltern-Bereich ----------------------------------------------------------------- */
