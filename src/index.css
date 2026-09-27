@@ -524,8 +524,30 @@ h2 {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+/* Stall: two tiles per row, avatar above the name. */
+.player-list .player-card {
+  position: relative;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 10px 14px;
+  text-align: center;
+}
+
+.player-list .player-card .player-name {
+  flex: none;
+  align-items: center;
+}
+
+.player-list .pin-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 .player-card {
