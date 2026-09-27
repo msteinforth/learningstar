@@ -16,6 +16,8 @@ create table if not exists public.families (
 -- Eltern-Bereich: PIN (nur als SHA-256-Hash) und eigene Missionen der Familie.
 alter table public.families add column if not exists parent_pin_hash text;
 alter table public.families add column if not exists custom_missions jsonb not null default '[]'::jsonb;
+-- Einstellungen der Eltern, z. B. die tägliche Spielzeit: {"defaultLimit": 30, "limits": {"<Kind>": 45}}.
+alter table public.families add column if not exists settings jsonb not null default '{}'::jsonb;
 
 create table if not exists public.players (
   id uuid primary key,
@@ -35,6 +37,9 @@ alter table public.players add column if not exists extras jsonb not null defaul
 
 -- Optionale PIN des Kindes (nur als SHA-256-Hash), damit Geschwister nicht mit fremdem Pferd spielen.
 alter table public.players add column if not exists pin_hash text check (pin_hash ~ '^[0-9a-f]{64}$');
+
+-- Spielzeit des zuletzt gespielten Tages: {"day": "2026-09-27", "seconds": 840}.
+alter table public.players add column if not exists usage jsonb not null default '{}'::jsonb;
 
 create index if not exists players_family_idx on public.players (family_id);
 
@@ -118,7 +123,8 @@ as $$
     'missions', p.missions,
     'mistakes', p.mistakes,
     'extras', p.extras,
-    'hasPin', p.pin_hash is not null
+    'hasPin', p.pin_hash is not null,
+    'usage', p.usage
   )
 $$;
 
@@ -429,6 +435,85 @@ begin
 end;
 $$;
 
+-- --- Spielzeit ---------------------------------------------------------------
+
+-- Zählt Spielzeit dazu (die App meldet sich alle 30 Sekunden); an einem neuen Tag beginnt die Zählung neu.
+create or replace function public.add_usage(p_code text, p_player_id uuid, p_day text, p_seconds integer)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_usage jsonb;
+begin
+  if p_day !~ '^\d{4}-\d{2}-\d{2}$' or p_seconds is null or p_seconds < 0 or p_seconds > 300 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  update public.players
+  set usage = jsonb_build_object(
+        'day', p_day,
+        'seconds', case when usage ->> 'day' = p_day then coalesce((usage ->> 'seconds')::integer, 0) else 0 end + p_seconds
+      )
+  where id = p_player_id and family_id = v_family;
+  if not found then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  v_usage := (select p.usage from public.players p where p.id = p_player_id);
+  return v_usage;
+end;
+$$;
+
+-- Tägliche Spielzeit einstellen (nur mit Eltern-PIN).
+create or replace function public.save_family_settings(p_code text, p_pin_hash text, p_settings jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+begin
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family);
+  if v_current is null or v_current is distinct from p_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  if jsonb_typeof(p_settings) <> 'object' or pg_column_size(p_settings) > 20000 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  update public.families set settings = p_settings where id = v_family;
+  return p_settings;
+end;
+$$;
+
+-- Schenkt einem Kind für heute wieder die volle Spielzeit (nur mit Eltern-PIN).
+create or replace function public.reset_usage(p_code text, p_pin_hash text, p_player_id uuid)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+begin
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family);
+  if v_current is null or v_current is distinct from p_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  update public.players set usage = '{}'::jsonb where id = p_player_id and family_id = v_family;
+  if not found then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  return '{}'::jsonb;
+end;
+$$;
+
 -- --- Eltern-Bereich ---------------------------------------------------------
 
 -- Eigene Missionen (für alle Geräte der Familie) und ob schon eine PIN gesetzt ist.
@@ -439,7 +524,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select jsonb_build_object('hasPin', f.parent_pin_hash is not null, 'missions', f.custom_missions)
+  select jsonb_build_object('hasPin', f.parent_pin_hash is not null, 'missions', f.custom_missions, 'settings', f.settings)
   from public.families f
   where f.id = public.ls_family_id(p_code)
 $$;
@@ -696,7 +781,10 @@ revoke execute on function
   public.check_player_pin(text, uuid, text),
   public.update_player(text, uuid, text, text, text, text),
   public.set_player_pin(text, uuid, text, text),
-  public.reset_player_pin(text, text, uuid)
+  public.reset_player_pin(text, text, uuid),
+  public.add_usage(text, uuid, text, integer),
+  public.save_family_settings(text, text, jsonb),
+  public.reset_usage(text, text, uuid)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -730,5 +818,8 @@ grant execute on function
   public.check_player_pin(text, uuid, text),
   public.update_player(text, uuid, text, text, text, text),
   public.set_player_pin(text, uuid, text, text),
-  public.reset_player_pin(text, text, uuid)
+  public.reset_player_pin(text, text, uuid),
+  public.add_usage(text, uuid, text, integer),
+  public.save_family_settings(text, text, jsonb),
+  public.reset_usage(text, text, uuid)
 to anon, authenticated;

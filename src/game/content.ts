@@ -1,6 +1,7 @@
 import { call, type Rpc } from './backend'
 import { sanitizeMissions } from './custom'
 import { LocalDuelStore } from './duels'
+import { type FamilySettings, sanitizeSettings } from './limits'
 import { hashPin, WrongPinError } from './pin'
 import { LocalPlayerStore } from './storage'
 import type { Mission } from './types'
@@ -9,6 +10,7 @@ import type { Mission } from './types'
 export interface ParentContent {
   hasPin: boolean
   missions: Mission[]
+  settings: FamilySettings
 }
 
 export interface ContentStore {
@@ -21,6 +23,9 @@ export interface ContentStore {
   deletePlayer(pin: string, playerId: string): Promise<void>
   /** Removes a child's forgotten PIN. */
   resetPlayerPin(pin: string, playerId: string): Promise<void>
+  saveSettings(pin: string, settings: FamilySettings): Promise<FamilySettings>
+  /** Gives a child today's full play time back. */
+  resetUsage(pin: string, playerId: string): Promise<void>
 }
 
 // The parents' PIN is salted with the family code ("local" without a family).
@@ -31,6 +36,7 @@ const CONTENT_KEY = 'learningstar.parents.v1'
 interface LocalContent {
   pinHash: string | null
   missions: Mission[]
+  settings: FamilySettings
 }
 
 export class LocalContentStore implements ContentStore {
@@ -42,7 +48,7 @@ export class LocalContentStore implements ContentStore {
 
   async load(): Promise<ParentContent> {
     const content = this.read()
-    return { hasPin: content.pinHash !== null, missions: content.missions }
+    return { hasPin: content.pinHash !== null, missions: content.missions, settings: content.settings }
   }
 
   async checkPin(pin: string): Promise<boolean> {
@@ -73,12 +79,27 @@ export class LocalContentStore implements ContentStore {
     new LocalPlayerStore(this.storage).removePin(playerId)
   }
 
+  async saveSettings(pin: string, settings: FamilySettings): Promise<FamilySettings> {
+    if (!(await this.checkPin(pin))) throw new WrongPinError()
+    this.write({ ...this.read(), settings })
+    return settings
+  }
+
+  async resetUsage(pin: string, playerId: string): Promise<void> {
+    if (!(await this.checkPin(pin))) throw new WrongPinError()
+    new LocalPlayerStore(this.storage).resetUsage(playerId)
+  }
+
   private read(): LocalContent {
     try {
       const parsed = JSON.parse(this.storage.getItem(CONTENT_KEY) ?? 'null') as Partial<LocalContent> | null
-      return { pinHash: typeof parsed?.pinHash === 'string' ? parsed.pinHash : null, missions: sanitizeMissions(parsed?.missions) }
+      return {
+        pinHash: typeof parsed?.pinHash === 'string' ? parsed.pinHash : null,
+        missions: sanitizeMissions(parsed?.missions),
+        settings: sanitizeSettings(parsed?.settings),
+      }
     } catch {
-      return { pinHash: null, missions: [] }
+      return { pinHash: null, missions: [], settings: sanitizeSettings(null) }
     }
   }
 
@@ -97,8 +118,8 @@ export class FamilyContentStore implements ContentStore {
   }
 
   async load(): Promise<ParentContent> {
-    const content = await call<{ hasPin: boolean; missions: unknown }>(this.rpc, 'get_family_content', { p_code: this.code })
-    return { hasPin: content.hasPin, missions: sanitizeMissions(content.missions) }
+    const content = await call<{ hasPin: boolean; missions: unknown; settings?: unknown }>(this.rpc, 'get_family_content', { p_code: this.code })
+    return { hasPin: content.hasPin, missions: sanitizeMissions(content.missions), settings: sanitizeSettings(content.settings) }
   }
 
   async checkPin(pin: string): Promise<boolean> {
@@ -131,6 +152,19 @@ export class FamilyContentStore implements ContentStore {
   async resetPlayerPin(pin: string, playerId: string): Promise<void> {
     await this.wrongPinAware(async () =>
       call(this.rpc, 'reset_player_pin', { p_code: this.code, p_pin_hash: await this.hash(pin), p_player_id: playerId }),
+    )
+  }
+
+  async saveSettings(pin: string, settings: FamilySettings): Promise<FamilySettings> {
+    const saved = await this.wrongPinAware(async () =>
+      call<unknown>(this.rpc, 'save_family_settings', { p_code: this.code, p_pin_hash: await this.hash(pin), p_settings: settings }),
+    )
+    return sanitizeSettings(saved)
+  }
+
+  async resetUsage(pin: string, playerId: string): Promise<void> {
+    await this.wrongPinAware(async () =>
+      call(this.rpc, 'reset_usage', { p_code: this.code, p_pin_hash: await this.hash(pin), p_player_id: playerId }),
     )
   }
 

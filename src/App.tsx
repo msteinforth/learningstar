@@ -10,11 +10,13 @@ import { type DuelPlay, type DuelSaveState, MissionResultView, type SaveState } 
 import { ParentArea } from './components/ParentArea'
 import { PlayerSelect } from './components/PlayerSelect'
 import { ProfileEdit } from './components/ProfileEdit'
+import { TimeUp } from './components/TimeUp'
 import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
 import { type ContentStore, FamilyContentStore, LocalContentStore, type ParentContent } from './game/content'
 import { isVisibleTo } from './game/custom'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
+import { addUsage, DEFAULT_SETTINGS, HEARTBEAT_SECONDS, limitFor, type PlayerUsage, secondsLeft, today } from './game/limits'
 import { missions } from './game/missions'
 import { createPlayer } from './game/progress'
 import { type DuelStore, duelWins, FamilyDuelStore, LocalDuelStore, newSeed, openChallenges, toDuelResult } from './game/duels'
@@ -95,7 +97,9 @@ export default function App() {
   const [tournamentId, setTournamentId] = useState<string | null>(null)
 
   const contentStore: ContentStore = useMemo(() => (family ? new FamilyContentStore(lazyRpc, family.code) : new LocalContentStore()), [family])
-  const [content, setContent] = useState<ParentContent>({ hasPin: false, missions: [] })
+  const [content, setContent] = useState<ParentContent>({ hasPin: false, missions: [], settings: DEFAULT_SETTINGS })
+  // The play-time limit only applies once the parents' settings were loaded (or failed to load).
+  const [contentLoaded, setContentLoaded] = useState(false)
 
   const duelStore: DuelStore = useMemo(() => (family ? new FamilyDuelStore(lazyRpc, family.code) : new LocalDuelStore()), [family])
   const [duels, setDuels] = useState<Duel[]>([])
@@ -118,8 +122,12 @@ export default function App() {
     })
     // The parents' missions are a bonus: without them the built-in tournaments still work.
     contentStore.load().then(
-      (loaded) => active && setContent(loaded),
-      () => undefined,
+      (loaded) => {
+        if (!active) return
+        setContent(loaded)
+        setContentLoaded(true)
+      },
+      () => active && setContentLoaded(true),
     )
     duelStore.list().then(
       (loaded) => {
@@ -159,6 +167,29 @@ export default function App() {
 
   // A horse with a PIN is only opened after the PIN was entered in this tab.
   const player = players?.find((candidate) => candidate.id === activeId && (!candidate.hasPin || unlocked.includes(candidate.id)))
+
+  // Play time: counted while a child's horse is open and the app is visible.
+  const left = player && contentLoaded ? secondsLeft(content.settings, player) : null
+  const timeUp = left === 0
+  const counting = Boolean(player) && !timeUp && !['players', 'family', 'parents'].includes(screen.name)
+  const countingId = counting ? player!.id : null
+
+  const setUsage = (playerId: string, update: (usage: PlayerUsage | undefined) => PlayerUsage) =>
+    setPlayers((current) => (current ?? []).map((existing) => (existing.id === playerId ? { ...existing, usage: update(existing.usage) } : existing)))
+
+  useEffect(() => {
+    if (!countingId) return
+    const timer = setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      const day = today()
+      store.addUsage(countingId, day, HEARTBEAT_SECONDS).then(
+        (usage) => setUsage(countingId, () => usage),
+        // Offline: keep counting on this device.
+        () => setUsage(countingId, (usage) => addUsage(usage, day, HEARTBEAT_SECONDS)),
+      )
+    }, HEARTBEAT_SECONDS * 1000)
+    return () => clearInterval(timer)
+  }, [countingId, store])
 
   const unlock = (playerId: string, pin?: string) => {
     if (pin) setKnownPins((current) => ({ ...current, [playerId]: pin }))
@@ -214,6 +245,8 @@ export default function App() {
   }
 
   const start = (mission: Mission, duel?: DuelPlay) => {
+    // A mission already running may be finished, but no new one starts once the time is up.
+    if (timeUp) return setScreen({ name: 'map' })
     if (!duel) setTournamentId(mission.track)
     setScreen({ name: 'play', mission, run: Date.now(), duel })
   }
@@ -314,8 +347,11 @@ export default function App() {
         store={contentStore}
         hasPin={content.hasPin}
         customMissions={content.missions}
+        settings={content.settings}
         players={players ?? []}
         onMissionsChanged={(missions) => setContent((current) => ({ ...current, missions }))}
+        onSettingsChanged={(settings) => setContent((current) => ({ ...current, settings }))}
+        onUsageReset={(playerId) => setUsage(playerId, () => ({ day: today(), seconds: 0 }))}
         onPlayerDeleted={(playerId) => {
           setPlayers((current) => (current ?? []).filter((existing) => existing.id !== playerId))
           if (activeId === playerId) {
@@ -349,6 +385,20 @@ export default function App() {
     )
   }
 
+  if (timeUp && screen.name !== 'play' && screen.name !== 'result') {
+    return (
+      <TimeUp
+        player={player}
+        minutes={limitFor(content.settings, player.id) ?? 0}
+        onSwitchPlayer={() => {
+          writeActivePlayerId(null)
+          setScreen({ name: 'players' })
+          load()
+        }}
+      />
+    )
+  }
+
   const playerIds = (players ?? []).map((candidate) => candidate.id)
   const myMissions = content.missions.filter((mission) => isVisibleTo(mission, player.id, playerIds))
 
@@ -377,6 +427,7 @@ export default function App() {
           tournamentId={tournamentId}
           onSelectTournament={setTournamentId}
           onStart={start}
+          secondsLeft={left}
           onEditProfile={() => setScreen({ name: 'profile' })}
           onSwitchPlayer={() => {
             writeActivePlayerId(null)

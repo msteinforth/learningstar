@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import type { ContentStore } from '../game/content'
 import { buildMission, describeMistake, isVisibleTo, draftFromMission, draftProblems, emptyDraft, kindsFor, type MissionDraft, parseQuestions, parseVocabulary } from '../game/custom'
 import { findTrack, missions as builtInMissions, tracks } from '../game/missions'
+import { type FamilySettings, formatMinutes, type Limit, LIMIT_OPTIONS, limitFor, secondsToday } from '../game/limits'
 import { PIN_PATTERN } from '../game/pin'
 import { BADGES, extrasOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
@@ -13,8 +14,11 @@ interface Props {
   store: ContentStore
   hasPin: boolean
   customMissions: Mission[]
+  settings: FamilySettings
   players: Player[]
   onMissionsChanged: (missions: Mission[]) => void
+  onSettingsChanged: (settings: FamilySettings) => void
+  onUsageReset: (playerId: string) => void
   onPlayerDeleted: (playerId: string) => void
   onPlayerPinReset: (playerId: string) => void
   onPinSet: () => void
@@ -27,7 +31,21 @@ type Tab = 'missions' | 'progress' | 'settings'
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-export function ParentArea({ store, hasPin, customMissions, players, onMissionsChanged, onPlayerDeleted, onPlayerPinReset, onPinSet, onOpenFamily, onBack }: Props) {
+export function ParentArea({
+  store,
+  hasPin,
+  customMissions,
+  settings,
+  players,
+  onMissionsChanged,
+  onSettingsChanged,
+  onUsageReset,
+  onPlayerDeleted,
+  onPlayerPinReset,
+  onPinSet,
+  onOpenFamily,
+  onBack,
+}: Props) {
   const [pin, setPin] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('missions')
 
@@ -68,8 +86,24 @@ export function ParentArea({ store, hasPin, customMissions, players, onMissionsC
             ))}
           </div>
           {tab === 'missions' && <MissionManager store={store} pin={pin} missions={customMissions} players={players} onChanged={onMissionsChanged} />}
-          {tab === 'progress' && <Progress store={store} pin={pin} players={players} customMissions={customMissions} onDeleted={onPlayerDeleted} onPinReset={onPlayerPinReset} />}
-          {tab === 'settings' && <Settings store={store} pin={pin} onPinChanged={setPin} onOpenFamily={onOpenFamily} />}
+          {tab === 'progress' && (
+            <Progress
+              store={store}
+              pin={pin}
+              players={players}
+              customMissions={customMissions}
+              settings={settings}
+              onDeleted={onPlayerDeleted}
+              onPinReset={onPlayerPinReset}
+              onUsageReset={onUsageReset}
+            />
+          )}
+          {tab === 'settings' && (
+            <>
+              <PlayTime store={store} pin={pin} settings={settings} players={players} onChanged={onSettingsChanged} />
+              <Settings store={store} pin={pin} onPinChanged={setPin} onOpenFamily={onOpenFamily} />
+            </>
+          )}
         </>
       )}
     </main>
@@ -465,15 +499,19 @@ function Progress({
   pin,
   players,
   customMissions,
+  settings,
   onDeleted,
   onPinReset,
+  onUsageReset,
 }: {
   store: ContentStore
   pin: string
   players: Player[]
   customMissions: Mission[]
+  settings: FamilySettings
   onDeleted: (playerId: string) => void
   onPinReset: (playerId: string) => void
+  onUsageReset: (playerId: string) => void
 }) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [pinMessage, setPinMessage] = useState<{ playerId: string; ok: boolean; text: string } | null>(null)
@@ -501,6 +539,20 @@ function Progress({
       await store.resetPlayerPin(pin, player.id)
       onPinReset(player.id)
       setPinMessage({ playerId: player.id, ok: true, text: `Die PIN von ${player.name} ist entfernt. ${player.name} kann eine neue festlegen.` })
+    } catch (caught) {
+      setPinMessage({ playerId: player.id, ok: false, text: errorText(caught) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const resetUsage = async (player: Player) => {
+    setBusy(true)
+    setPinMessage(null)
+    try {
+      await store.resetUsage(pin, player.id)
+      onUsageReset(player.id)
+      setPinMessage({ playerId: player.id, ok: true, text: `${player.name} hat heute wieder die volle Spielzeit.` })
     } catch (caught) {
       setPinMessage({ playerId: player.id, ok: false, text: errorText(caught) })
     } finally {
@@ -543,6 +595,13 @@ function Progress({
                 <dt>Abzeichen</dt>
                 <dd>
                   <GameIcon name="medal" className="inline-icon" /> {badgeCount}/{BADGES.length}
+                </dd>
+              </div>
+              <div>
+                <dt>Heute</dt>
+                <dd>
+                  <GameIcon name="clock" className="inline-icon" /> {Math.floor(secondsToday(player) / 60)}
+                  {limitFor(settings, player.id) !== null && <small>/{limitFor(settings, player.id)}</small>} Min
                 </dd>
               </div>
               <div>
@@ -590,6 +649,11 @@ function Progress({
               </div>
             ) : (
               <div className="child-actions">
+                {secondsToday(player) > 0 && (
+                  <button className="button small secondary" disabled={busy} onClick={() => resetUsage(player)}>
+                    <GameIcon name="clock" className="inline-icon" /> Spielzeit heute zurücksetzen
+                  </button>
+                )}
                 {player.hasPin && (
                   <button className="button small secondary" disabled={busy} onClick={() => resetPin(player)}>
                     <GameIcon name="lock-open" className="inline-icon" /> PIN zurücksetzen
@@ -622,6 +686,103 @@ function Progress({
         )
       })}
     </ul>
+  )
+}
+
+// --- Play time ------------------------------------------------------------------------------
+
+const limitLabel = (limit: Limit) => (limit === null ? 'Kein Limit' : `${limit} Minuten`)
+
+function LimitSelect({ value, onChange, label, withDefault }: { value: Limit | 'default'; onChange: (value: Limit | 'default') => void; label: string; withDefault?: string }) {
+  return (
+    <select aria-label={label} value={value === null ? 'none' : String(value)} onChange={(event) => {
+      const raw = event.target.value
+      onChange(raw === 'default' ? 'default' : raw === 'none' ? null : Number(raw))
+    }}>
+      {withDefault && <option value="default">Standard ({withDefault})</option>}
+      {LIMIT_OPTIONS.map((minutes) => (
+        <option key={minutes} value={minutes}>
+          {minutes} Minuten
+        </option>
+      ))}
+      <option value="none">Kein Limit</option>
+    </select>
+  )
+}
+
+function PlayTime({
+  store,
+  pin,
+  settings,
+  players,
+  onChanged,
+}: {
+  store: ContentStore
+  pin: string
+  settings: FamilySettings
+  players: Player[]
+  onChanged: (settings: FamilySettings) => void
+}) {
+  const [draft, setDraft] = useState(settings)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const save = async () => {
+    setBusy(true)
+    setMessage(null)
+    try {
+      // Only keep own values of children that still exist.
+      const limits = Object.fromEntries(Object.entries(draft.limits).filter(([id]) => players.some((player) => player.id === id)))
+      onChanged(await store.saveSettings(pin, { ...draft, limits }))
+      setMessage({ ok: true, text: 'Die Spielzeiten sind gespeichert.' })
+    } catch (caught) {
+      setMessage({ ok: false, text: errorText(caught) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="card panel play-time">
+      <h2>
+        <GameIcon name="clock" className="inline-icon" /> Spielzeit pro Tag
+      </h2>
+      <p>Ist die Zeit um, kann das Kind die laufende Mission noch beenden, dann ist Pause bis morgen. Gezählt wird nur, solange die App offen ist – auf allen Geräten zusammen.</p>
+      <label>
+        Standard für alle Kinder
+        <LimitSelect label="Standard für alle Kinder" value={draft.defaultLimit} onChange={(value) => value !== 'default' && setDraft({ ...draft, defaultLimit: value })} />
+      </label>
+      {players.length > 0 && (
+        <div className="limit-list">
+          {players.map((player) => {
+            const own = player.id in draft.limits
+            return (
+              <label key={player.id} className="limit-row">
+                <span className="limit-child">
+                  <Avatar player={player} size={36} /> {player.name}
+                  <small>heute {formatMinutes(secondsToday(player))}</small>
+                </span>
+                <LimitSelect
+                  label={`Spielzeit für ${player.name}`}
+                  value={own ? draft.limits[player.id] : 'default'}
+                  withDefault={limitLabel(draft.defaultLimit)}
+                  onChange={(value) => {
+                    const limits = { ...draft.limits }
+                    if (value === 'default') delete limits[player.id]
+                    else limits[player.id] = value
+                    setDraft({ ...draft, limits })
+                  }}
+                />
+              </label>
+            )
+          })}
+        </div>
+      )}
+      {message && <p className={`notice ${message.ok ? 'success' : 'error'}`}>{message.text}</p>}
+      <button className="button primary" disabled={busy} onClick={save}>
+        Spielzeiten speichern
+      </button>
+    </section>
   )
 }
 

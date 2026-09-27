@@ -91,7 +91,7 @@ describe('custom missions', () => {
 describe('LocalContentStore', () => {
   it('needs the PIN to change missions or the PIN', async () => {
     const store = new LocalContentStore(new MemoryStorage() as unknown as Storage)
-    expect(await store.load()).toEqual({ hasPin: false, missions: [] })
+    expect(await store.load()).toEqual({ hasPin: false, missions: [], settings: { defaultLimit: 30, limits: {} } })
     await store.setPin(null, '2468')
     expect(await store.checkPin('2468')).toBe(true)
     await expect(store.saveMissions('1111', [])).rejects.toBeInstanceOf(WrongPinError)

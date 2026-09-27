@@ -1,3 +1,5 @@
+import type { PlayerUsage } from './limits'
+
 export type MissionType = 'multiplication' | 'vocabulary' | 'quiz'
 export type AnswerMode = 'choice' | 'input'
 /** Translate the foreign word into German, or the German word into the foreign language. */
@@ -126,6 +128,8 @@ export interface Player {
   extras?: PlayerExtras
   /** The child protected the horse with a PIN (the PIN itself never leaves the store). */
   hasPin?: boolean
+  /** Play time of the last day played, for the parents' daily limit. */
+  usage?: PlayerUsage
 }
 
 /** What a child can change about the horse later on. */

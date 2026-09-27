@@ -1,4 +1,5 @@
 import { call, type Rpc } from './backend'
+import { addUsage, type PlayerUsage } from './limits'
 import { hashPlayerPin, WrongPinError } from './pin'
 import { applyResult } from './progress'
 import type { MissionResult, Player, PlayerExtras, PlayerProfile } from './types'
@@ -33,6 +34,8 @@ export interface PlayerStore {
   checkPin(playerId: string, pin: string): Promise<boolean>
   /** Sets, changes (old PIN needed) or removes (`newPin` null) the child's PIN. */
   setPin(playerId: string, oldPin: string | null, newPin: string | null): Promise<Player>
+  /** Adds play time for `day` (YYYY-MM-DD) and returns the child's usage of that day. */
+  addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage>
   leaderboard(): Promise<LeaderboardEntry[]>
 }
 
@@ -110,6 +113,19 @@ export class LocalPlayerStore implements PlayerStore {
     else pins[playerId] = await hashPlayerPin(newPin, playerId)
     this.storage.setItem(PINS_KEY, JSON.stringify(pins))
     return this.withPin(player)
+  }
+
+  async addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage> {
+    const player = this.find(playerId)
+    const usage = addUsage(player.usage, day, seconds)
+    this.writePlayer({ ...player, usage })
+    return usage
+  }
+
+  /** The parents give today's play time back (after checking the parents' PIN). */
+  resetUsage(playerId: string): void {
+    const { usage: _cleared, ...player } = this.find(playerId)
+    this.writePlayer(player)
   }
 
   /** Forgotten PIN: the parents' area removes it (after checking the parents' PIN). */
@@ -269,6 +285,10 @@ export class FamilyPlayerStore implements PlayerStore {
       p_old_pin_hash: oldPin === null ? null : await hashPlayerPin(oldPin, playerId),
       p_new_pin_hash: newPin === null ? null : await hashPlayerPin(newPin, playerId),
     })
+  }
+
+  addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage> {
+    return call(this.rpc, 'add_usage', { p_code: this.code, p_player_id: playerId, p_day: day, p_seconds: seconds })
   }
 
   leaderboard(): Promise<LeaderboardEntry[]> {

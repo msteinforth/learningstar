@@ -306,4 +306,15 @@ export const uiIcons: Record<string, ReactNode> = {
       </g>
     </>
   ),
+  moon: (
+    <>
+      <path d="M30 6 A 18 18 0 1 0 42 34 A 14 14 0 1 1 30 6 Z" fill="#ffe066" stroke={GOLD_DARK} strokeWidth={1.5} strokeLinejoin="round" />
+      <path d="M20 26 Q 22 28, 24 26" fill="none" stroke={INK} strokeWidth={1.6} strokeLinecap="round" />
+      <path d="M13 26 Q 15 28, 17 26" fill="none" stroke={INK} strokeWidth={1.6} strokeLinecap="round" />
+      <ellipse cx={14} cy={31} rx={2} ry={1.2} fill="#ff9fb3" />
+      <path d="M36 8 L37 10.5 L39.5 11.5 L37 12.5 L36 15 L35 12.5 L32.5 11.5 L35 10.5 Z" fill="#ffffff" stroke="#e6e0ff" strokeWidth={0.6} />
+      <text x={33} y={26} fontSize={8} fontWeight={800} fill={INK} fontFamily="sans-serif">z</text>
+      <text x={38} y={21} fontSize={6} fontWeight={800} fill={INK} fontFamily="sans-serif">z</text>
+    </>
+  ),
 }

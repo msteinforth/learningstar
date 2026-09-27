@@ -1,4 +1,5 @@
 import { missions, tracks } from '../game/missions'
+import { formatMinutes } from '../game/limits'
 import { isUnlocked } from '../game/progress'
 import { walletOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
@@ -15,6 +16,8 @@ interface Props {
   tournamentId: string | null
   onSelectTournament: (id: string | null) => void
   onStart: (mission: Mission) => void
+  /** Play time left today; null without a limit. */
+  secondsLeft: number | null
   /** Opens "Mein Pferd" (name, horse, colour, PIN). */
   onEditProfile: () => void
   onSwitchPlayer: () => void
@@ -36,7 +39,7 @@ function trailPath(points: { x: number; y: number }[]): string {
     .join(' ')
 }
 
-export function MissionMap({ player, customMissions, tournamentId, onSelectTournament, onStart, onEditProfile, onSwitchPlayer }: Props) {
+export function MissionMap({ player, customMissions, tournamentId, onSelectTournament, onStart, secondsLeft, onEditProfile, onSwitchPlayer }: Props) {
   const selected = tracks.find((track) => track.id === tournamentId)
   const allMissions = [...missions, ...customMissions]
 
@@ -53,6 +56,12 @@ export function MissionMap({ player, customMissions, tournamentId, onSelectTourn
           </button>
         </span>
         <span className="topbar-end">
+          {secondsLeft !== null && (
+            <span className={`time-badge ${secondsLeft <= 5 * 60 ? 'low' : ''}`} title="Spielzeit für heute" aria-label={`Noch ${formatMinutes(secondsLeft)} Spielzeit heute`}>
+              <GameIcon name="clock" size={22} /> {Math.ceil(secondsLeft / 60)}
+              <span className="time-unit"> Min</span>
+            </span>
+          )}
           <SoundToggle />
           <span className="points-badge" title="Hufeisen im Beutel">
             <Points value={walletOf(player)} />

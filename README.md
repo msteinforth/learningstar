@@ -55,6 +55,13 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
     Hufeisen, Abzeichen, Einkäufen und Duellen – mit Familie auf allen Geräten.
     Der Server prüft dafür die Eltern-PIN.
   - **PIN eines Kindes zurücksetzen**, falls es sie vergessen hat.
+  - **Spielzeit pro Tag** (Einstellungen): ein Standard für alle Kinder
+    (voreingestellt 30 Minuten, auch „Kein Limit“) und bei Bedarf ein eigener Wert
+    pro Kind. Gezählt wird nur, solange das Pferd eines Kindes geöffnet und die App
+    sichtbar ist – mit Familie über alle Geräte zusammen. Ist die Zeit um, darf die
+    laufende Mission noch fertig gespielt werden, danach ist Pause bis morgen. Oben
+    im Hof sehen die Kinder ihre Restzeit; unter „Fortschritt“ lässt sich die
+    Spielzeit für heute zurücksetzen.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
 - **Mein Pferd**: Nach der Auswahl im Stall lassen sich über den Stift neben dem

@@ -707,15 +707,17 @@ legend {
 
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px 12px;
 }
 
 .topbar-end {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
 .player-chip {
@@ -2656,7 +2658,7 @@ legend {
 
 .child-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   margin: 0;
 }
@@ -3131,4 +3133,117 @@ legend {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ---------- Play time ---------- */
+.time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--shadow-color);
+  white-space: nowrap;
+}
+
+.time-badge.low {
+  background: #ffe0e1;
+  color: #c62828;
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.time-up-card {
+  position: relative;
+  align-items: center;
+  text-align: center;
+  max-width: 460px;
+  width: 100%;
+  margin: 40px auto 0;
+  padding-top: 34px;
+}
+
+.time-up-card h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  color: var(--text);
+}
+
+.time-up-card p {
+  margin: 0;
+}
+
+.time-up-moon {
+  position: absolute;
+  top: -36px;
+  right: 18px;
+  filter: drop-shadow(0 4px 0 rgb(0 0 0 / 0.15));
+}
+
+.time-up-horse {
+  opacity: 0.9;
+}
+
+.limit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.limit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+}
+
+.limit-row select {
+  flex: 1 1 170px;
+  max-width: 220px;
+}
+
+.limit-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.limit-child small {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* Narrow phones: keep avatar, edit button, time, sound and horseshoes in one row. */
+@media (max-width: 480px) {
+  .topbar-end {
+    gap: 6px;
+  }
+
+  .player-chip > span:last-child {
+    max-width: 5.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .time-badge .time-unit {
+    display: none;
+  }
+
+  .sound-toggle {
+    padding: 6px 9px;
+  }
 }

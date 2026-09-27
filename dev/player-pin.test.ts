@@ -106,3 +106,45 @@ describe('profile and PIN of a child on the family server', () => {
     expect(await store.checkPin(ben.id, '0000')).toBe(false)
   })
 })
+
+describe('daily play time on the family server', () => {
+  let rpc: Rpc
+
+  beforeAll(async () => {
+    rpc = (await createPgliteBackend()).rpc
+  })
+
+  it('adds up play time from several devices and starts over on a new day', async () => {
+    const family = await createFamily(rpc, 'Zeit')
+    const tablet = new FamilyPlayerStore(rpc, family.code)
+    const laptop = new FamilyPlayerStore(rpc, family.code)
+    const lena = await tablet.create(createPlayer('Lena', 'horse:bay', '#ff5a5f'))
+
+    await tablet.addUsage(lena.id, '2026-09-27', 30)
+    expect(await laptop.addUsage(lena.id, '2026-09-27', 30)).toEqual({ day: '2026-09-27', seconds: 60 })
+    expect((await laptop.list())[0].usage).toEqual({ day: '2026-09-27', seconds: 60 })
+    expect(await tablet.addUsage(lena.id, '2026-09-28', 30)).toEqual({ day: '2026-09-28', seconds: 30 })
+
+    await expect(tablet.addUsage(lena.id, '2026-09-28', 5000)).rejects.toThrow()
+    await expect(tablet.addUsage(lena.id, 'morgen', 30)).rejects.toThrow()
+    await expect(new FamilyPlayerStore(rpc, (await createFamily(rpc, 'Fremd')).code).addUsage(lena.id, '2026-09-28', 30)).rejects.toThrow()
+  })
+
+  it('lets only the parents change the limits and give time back', async () => {
+    const family = await createFamily(rpc, 'Eltern-Zeit')
+    const content = new FamilyContentStore(rpc, family.code)
+    const store = new FamilyPlayerStore(rpc, family.code)
+    await content.setPin(null, '2468')
+    const tom = await store.create(createPlayer('Tom', 'horse:bay', '#ff5a5f'))
+
+    expect((await content.load()).settings).toEqual({ defaultLimit: 30, limits: {} })
+    await expect(content.saveSettings('0000', { defaultLimit: 60, limits: {} })).rejects.toThrow('Die PIN stimmt nicht.')
+    await content.saveSettings('2468', { defaultLimit: 45, limits: { [tom.id]: null } })
+    expect((await content.load()).settings).toEqual({ defaultLimit: 45, limits: { [tom.id]: null } })
+
+    await store.addUsage(tom.id, '2026-09-27', 120)
+    await expect(content.resetUsage('0000', tom.id)).rejects.toThrow('Die PIN stimmt nicht.')
+    await content.resetUsage('2468', tom.id)
+    expect((await store.list())[0].usage).toEqual({})
+  })
+})

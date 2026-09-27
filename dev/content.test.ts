@@ -22,7 +22,7 @@ describe('FamilyContentStore against the Supabase schema', () => {
     const tablet = new FamilyContentStore(rpc, family.code)
     const laptop = new FamilyContentStore(rpc, family.code)
 
-    expect(await tablet.load()).toEqual({ hasPin: false, missions: [] })
+    expect(await tablet.load()).toEqual({ hasPin: false, missions: [], settings: { defaultLimit: 30, limits: {} } })
     await expect(tablet.saveMissions('1234', [mission()])).rejects.toBeInstanceOf(WrongPinError)
 
     await tablet.setPin(null, '1234')
