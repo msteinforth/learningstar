@@ -1,7 +1,8 @@
 import { type FormEvent, useState } from 'react'
 import type { ContentStore } from '../game/content'
-import { buildMission, describeMistake, draftFromMission, draftProblems, emptyDraft, kindsFor, type MissionDraft, parseQuestions, parseVocabulary } from '../game/custom'
+import { buildMission, describeMistake, isVisibleTo, draftFromMission, draftProblems, emptyDraft, kindsFor, type MissionDraft, parseQuestions, parseVocabulary } from '../game/custom'
 import { findTrack, missions as builtInMissions, tracks } from '../game/missions'
+import { PIN_PATTERN } from '../game/pin'
 import { BADGES, extrasOf } from '../game/rewards'
 import type { Mission, Player } from '../game/types'
 import { Avatar } from './Avatar'
@@ -15,6 +16,7 @@ interface Props {
   players: Player[]
   onMissionsChanged: (missions: Mission[]) => void
   onPlayerDeleted: (playerId: string) => void
+  onPlayerPinReset: (playerId: string) => void
   onPinSet: () => void
   onOpenFamily?: () => void
   onBack: () => void
@@ -22,11 +24,10 @@ interface Props {
 
 type Tab = 'missions' | 'progress' | 'settings'
 
-const PIN_PATTERN = /^\d{4,6}$/
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-export function ParentArea({ store, hasPin, customMissions, players, onMissionsChanged, onPlayerDeleted, onPinSet, onOpenFamily, onBack }: Props) {
+export function ParentArea({ store, hasPin, customMissions, players, onMissionsChanged, onPlayerDeleted, onPlayerPinReset, onPinSet, onOpenFamily, onBack }: Props) {
   const [pin, setPin] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('missions')
 
@@ -66,8 +67,8 @@ export function ParentArea({ store, hasPin, customMissions, players, onMissionsC
               </button>
             ))}
           </div>
-          {tab === 'missions' && <MissionManager store={store} pin={pin} missions={customMissions} onChanged={onMissionsChanged} />}
-          {tab === 'progress' && <Progress store={store} pin={pin} players={players} customMissions={customMissions} onDeleted={onPlayerDeleted} />}
+          {tab === 'missions' && <MissionManager store={store} pin={pin} missions={customMissions} players={players} onChanged={onMissionsChanged} />}
+          {tab === 'progress' && <Progress store={store} pin={pin} players={players} customMissions={customMissions} onDeleted={onPlayerDeleted} onPinReset={onPlayerPinReset} />}
           {tab === 'settings' && <Settings store={store} pin={pin} onPinChanged={setPin} onOpenFamily={onOpenFamily} />}
         </>
       )}
@@ -149,7 +150,19 @@ function PinGate({ store, hasPin, onUnlocked, onPinSet }: { store: ContentStore;
 
 // --- Missions ---------------------------------------------------------------------------
 
-function MissionManager({ store, pin, missions, onChanged }: { store: ContentStore; pin: string; missions: Mission[]; onChanged: (missions: Mission[]) => void }) {
+function MissionManager({
+  store,
+  pin,
+  missions,
+  players,
+  onChanged,
+}: {
+  store: ContentStore
+  pin: string
+  missions: Mission[]
+  players: Player[]
+  onChanged: (missions: Mission[]) => void
+}) {
   const [draft, setDraft] = useState<MissionDraft | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -173,6 +186,7 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
     return (
       <MissionEditor
         draft={draft}
+        players={players}
         busy={busy}
         error={error}
         onChange={setDraft}
@@ -181,7 +195,8 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
           setError(null)
         }}
         onSave={async () => {
-          const mission = buildMission(draft)
+          // Children deleted in the meantime are dropped from the selection.
+          const mission = buildMission({ ...draft, players: draft.players.filter((id) => players.some((player) => player.id === id)) })
           const exists = missions.some((existing) => existing.id === mission.id)
           const next = exists ? missions.map((existing) => (existing.id === mission.id ? mission : existing)) : [...missions, mission]
           if (await save(next)) setDraft(null)
@@ -214,6 +229,7 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
                   <small>
                     {track?.title} · {mission.subtitle}
                   </small>
+                  <small className="assigned">{assignedLabel(mission, players)}</small>
                 </span>
                 {confirmDelete === mission.id ? (
                   <span className="custom-actions">
@@ -249,6 +265,12 @@ function MissionManager({ store, pin, missions, onChanged }: { store: ContentSto
   )
 }
 
+/** "Für alle Kinder" or "Nur für Lena, Tom". */
+function assignedLabel(mission: Mission, players: Player[]): string {
+  const names = players.filter((player) => mission.players?.includes(player.id)).map((player) => player.name)
+  return names.length === 0 ? 'Für alle Kinder' : `Nur für ${names.join(', ')}`
+}
+
 const KIND_LABELS: Record<MissionDraft['kind'], string> = {
   vocabulary: 'Vokabeln',
   quiz: 'Eigene Fragen',
@@ -263,6 +285,7 @@ const PLACEHOLDERS: Record<string, string> = {
 
 function MissionEditor({
   draft,
+  players,
   busy,
   error,
   onChange,
@@ -270,6 +293,7 @@ function MissionEditor({
   onSave,
 }: {
   draft: MissionDraft
+  players: Player[]
   busy: boolean
   error: string | null
   onChange: (draft: MissionDraft) => void
@@ -388,6 +412,32 @@ function MissionEditor({
         </label>
       </div>
 
+      {players.length > 1 && (
+        <fieldset>
+          <legend>Für wen?</legend>
+          <div className="chip-row">
+            <button type="button" className={`chip ${draft.players.length === 0 ? 'selected' : ''}`} aria-pressed={draft.players.length === 0} onClick={() => set({ players: [] })}>
+              Alle Kinder
+            </button>
+            {players.map((player) => {
+              const active = draft.players.includes(player.id)
+              return (
+                <button
+                  type="button"
+                  key={player.id}
+                  className={`chip player-chip-option ${active ? 'selected' : ''}`}
+                  aria-pressed={active}
+                  onClick={() => set({ players: active ? draft.players.filter((id) => id !== player.id) : [...draft.players, player.id] })}
+                >
+                  <Avatar player={player} size={26} /> {player.name}
+                </button>
+              )
+            })}
+          </div>
+          <small className="field-help">Ohne Auswahl sehen alle Kinder die Mission. Sonst nur die ausgewählten.</small>
+        </fieldset>
+      )}
+
       {tried && problems.length > 0 && (
         <ul className="notice error problem-list">
           {problems.map((problem) => (
@@ -416,14 +466,17 @@ function Progress({
   players,
   customMissions,
   onDeleted,
+  onPinReset,
 }: {
   store: ContentStore
   pin: string
   players: Player[]
   customMissions: Mission[]
   onDeleted: (playerId: string) => void
+  onPinReset: (playerId: string) => void
 }) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [pinMessage, setPinMessage] = useState<{ playerId: string; ok: boolean; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -441,8 +494,23 @@ function Progress({
     }
   }
 
+  const resetPin = async (player: Player) => {
+    setBusy(true)
+    setPinMessage(null)
+    try {
+      await store.resetPlayerPin(pin, player.id)
+      onPinReset(player.id)
+      setPinMessage({ playerId: player.id, ok: true, text: `Die PIN von ${player.name} ist entfernt. ${player.name} kann eine neue festlegen.` })
+    } catch (caught) {
+      setPinMessage({ playerId: player.id, ok: false, text: errorText(caught) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   if (players.length === 0) return <p className="card panel hint">Noch keine Spieler angelegt.</p>
   const allMissions = [...builtInMissions, ...customMissions]
+  const playerIds = players.map((player) => player.id)
   return (
     <ul className="progress-list">
       {players.map((player) => {
@@ -486,7 +554,7 @@ function Progress({
             </dl>
             <ul className="track-progress">
               {tracks.map((track) => {
-                const trackMissions = allMissions.filter((mission) => mission.track === track.id)
+                const trackMissions = allMissions.filter((mission) => mission.track === track.id && isVisibleTo(mission, player.id, playerIds))
                 const done = trackMissions.filter((mission) => player.missions[mission.id]?.passed).length
                 return (
                   <li key={track.id} className={`theme-${track.id}`}>
@@ -503,6 +571,7 @@ function Progress({
                 )
               })}
             </ul>
+            {pinMessage?.playerId === player.id && <p className={`notice ${pinMessage.ok ? 'success' : 'error'}`}>{pinMessage.text}</p>}
             {confirmId === player.id ? (
               <div className="notice error delete-confirm">
                 <p>
@@ -520,15 +589,22 @@ function Progress({
                 </div>
               </div>
             ) : (
-              <button
-                className="button small secondary delete-player"
-                onClick={() => {
-                  setError(null)
-                  setConfirmId(player.id)
-                }}
-              >
-                <GameIcon name="trash" className="inline-icon" /> Spieler löschen
-              </button>
+              <div className="child-actions">
+                {player.hasPin && (
+                  <button className="button small secondary" disabled={busy} onClick={() => resetPin(player)}>
+                    <GameIcon name="lock-open" className="inline-icon" /> PIN zurücksetzen
+                  </button>
+                )}
+                <button
+                  className="button small secondary delete-player"
+                  onClick={() => {
+                    setError(null)
+                    setConfirmId(player.id)
+                  }}
+                >
+                  <GameIcon name="trash" className="inline-icon" /> Spieler löschen
+                </button>
+              </div>
             )}
             {tricky.length > 0 && (
               <div className="tricky">

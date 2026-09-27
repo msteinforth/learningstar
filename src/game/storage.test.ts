@@ -70,3 +70,30 @@ describe('LocalPlayerStore', () => {
     expect(await store.list()).toEqual([])
   })
 })
+
+describe('LocalPlayerStore profile and PIN', () => {
+  it('edits the horse and protects it with a PIN', async () => {
+    const storage = new MemoryStorage()
+    const store = new LocalPlayerStore(storage)
+    const lena = await store.create(createPlayer('Lena', 'horse:bay', '#c0703a'))
+    expect(lena.hasPin).toBeUndefined()
+
+    const edited = await store.updateProfile(lena.id, null, { name: ' Lena ', avatar: 'horse:unicorn', color: '#5b7fb5' })
+    expect(edited).toMatchObject({ name: 'Lena', avatar: 'horse:unicorn', color: '#5b7fb5' })
+
+    await store.setPin(lena.id, null, '2468')
+    const [listed] = await store.list()
+    expect(listed.hasPin).toBe(true)
+    // The hash lives apart from the profile and is not part of the player object.
+    expect(JSON.stringify(listed)).not.toContain('pinHash')
+    expect(storage.getItem('learningstar.players.v1')).not.toContain('hasPin')
+
+    expect(await store.checkPin(lena.id, '2468')).toBe(true)
+    expect(await store.checkPin(lena.id, '1111')).toBe(false)
+    await expect(store.updateProfile(lena.id, '1111', { name: 'X', avatar: 'horse:bay', color: '#000000' })).rejects.toThrow('Die PIN stimmt nicht.')
+    await expect(store.setPin(lena.id, null, null)).rejects.toThrow('Die PIN stimmt nicht.')
+
+    store.removePin(lena.id)
+    expect((await store.list())[0].hasPin).toBeUndefined()
+  })
+})

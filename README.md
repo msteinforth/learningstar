@@ -47,14 +47,23 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   - **Eigene Missionen** anlegen, z. B. die Vokabeln für den nächsten Test
     (`the saddle = der Sattel`), eigene Fragen (`Hauptstadt von Frankreich = Paris | Lyon | Nizza`)
     oder bestimmte 1×1-Reihen. Sie erscheinen sofort mit Stern im gewählten Turnier
-    und sind immer freigeschaltet.
+    und sind immer freigeschaltet. Unter „Für wen?“ lässt sich eine Mission einzelnen
+    Kindern zuweisen – ohne Auswahl sehen sie alle Kinder.
   - **Fortschritt** jedes Kindes: Hufeisen, Abzeichen, Tagesserie, Stand je
     Turnier und die Aufgaben, die noch schwerfallen.
   - **Spieler löschen** (mit Sicherheitsabfrage): entfernt ein Kind samt
     Hufeisen, Abzeichen, Einkäufen und Duellen – mit Familie auf allen Geräten.
     Der Server prüft dafür die Eltern-PIN.
+  - **PIN eines Kindes zurücksetzen**, falls es sie vergessen hat.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
+- **Mein Pferd**: Über den Stift im Stall lassen sich Name, Pferd und Farbe
+  jederzeit ändern. Jedes Kind kann sein Pferd mit einer eigenen PIN (4–6 Ziffern)
+  schützen: Dann fragt die App beim Auswählen und Bearbeiten danach. In einem
+  geöffneten Browser-Tab bleibt das Pferd bis zum Schließen entsperrt. Die PIN wird
+  nur als Hash gespeichert (mit Familie auf dem Server) und bleibt beim Umzug in
+  eine Familie erhalten. Sie schützt vor Geschwistern, die im Stall aufs falsche
+  Pferd tippen – nicht vor jemandem, der gezielt die Schnittstelle des Servers aufruft.
 - **Familien-Rangliste**: Wer hat diese Woche die meisten Hufeisen gesammelt?
   Die Wochenwertung beginnt jeden Montag neu, daneben gibt es eine Gesamtwertung.
   Mit einer *Familie* spielen die Kinder auf verschiedenen Geräten und sehen

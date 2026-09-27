@@ -55,6 +55,10 @@ jobs:
           check get_family_content "{$code}"
           check list_duels "{$code}"
           check delete_player "{$code,\"p_pin_hash\":\"x\",\"p_player_id\":$uuid}"
+          check check_player_pin "{$code,\"p_player_id\":$uuid,\"p_pin_hash\":\"x\"}"
+          check update_player "{$code,\"p_player_id\":$uuid,\"p_pin_hash\":\"x\",\"p_name\":\"x\",\"p_avatar\":\"x\",\"p_color\":\"#000000\"}"
+          check set_player_pin "{$code,\"p_player_id\":$uuid,\"p_old_pin_hash\":\"x\",\"p_new_pin_hash\":null}"
+          check reset_player_pin "{$code,\"p_pin_hash\":\"x\",\"p_player_id\":$uuid}"
           if [ -n "$missing" ]; then
             echo "::warning::Familien-Server: es fehlen$missing – bitte supabase/schema.sql erneut ausführen."
             exit 1

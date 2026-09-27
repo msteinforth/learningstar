@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { isVisibleTo } from '../game/custom'
 import { duelOutcome, openChallenges } from '../game/duels'
 import { findTrack, tracks } from '../game/missions'
 import { isUnlocked } from '../game/progress'
@@ -40,7 +41,15 @@ export function Duels({ player, players, duels, missions, loadError, onChallenge
   const waiting = mine.filter((duel) => duel.challengerId === player.id && !duel.opponentResult)
   const finished = mine.filter((duel) => duel.opponentResult).slice(0, 10)
   const opponent = opponentId ? byId(opponentId) : undefined
-  const choices = missions.filter((mission) => mission.track === trackId && isUnlocked(mission, player))
+  const playerIds = players.map((candidate) => candidate.id)
+  // Parents' missions for single children can only be played by both sides of the duel if both see them.
+  const choices = missions.filter(
+    (mission) =>
+      mission.track === trackId &&
+      isUnlocked(mission, player) &&
+      isVisibleTo(mission, player.id, playerIds) &&
+      (!opponent || isVisibleTo(mission, opponent.id, playerIds)),
+  )
 
   return (
     <main className="screen duels">

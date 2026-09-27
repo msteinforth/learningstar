@@ -61,6 +61,8 @@ interface MissionBase {
   passRatio?: number
   /** Created by the parents in the app (always unlocked). */
   custom?: boolean
+  /** Parents' missions only: ids of the children who see it. Missing or empty = everyone. */
+  players?: string[]
 }
 
 export type Mission =
@@ -122,6 +124,15 @@ export interface Player {
   mistakes: Record<string, number>
   /** Missing for profiles created before rewards existed; read it via `extrasOf`. */
   extras?: PlayerExtras
+  /** The child protected the horse with a PIN (the PIN itself never leaves the store). */
+  hasPin?: boolean
+}
+
+/** What a child can change about the horse later on. */
+export interface PlayerProfile {
+  name: string
+  avatar: string
+  color: string
 }
 
 export interface TaskResult {

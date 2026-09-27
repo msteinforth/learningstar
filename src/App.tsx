@@ -12,6 +12,7 @@ import { PlayerSelect } from './components/PlayerSelect'
 import { Shop } from './components/Shop'
 import { backendConfigured, lazyRpc } from './game/backend'
 import { type ContentStore, FamilyContentStore, LocalContentStore, type ParentContent } from './game/content'
+import { isVisibleTo } from './game/custom'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
 import { missions } from './game/missions'
 import { createPlayer } from './game/progress'
@@ -19,7 +20,7 @@ import { type DuelStore, duelWins, FamilyDuelStore, LocalDuelStore, newSeed, ope
 import { awardBadges, buyItem, equipItem, extrasOf, newBadges } from './game/rewards'
 import { playSound } from './game/sound'
 import { FamilyPlayerStore, LocalPlayerStore, type PlayerStore } from './game/storage'
-import type { Duel, Mission, MissionResult, Player } from './game/types'
+import type { Duel, Mission, MissionResult, Player, PlayerProfile } from './game/types'
 
 type Screen =
   | { name: 'players' }
@@ -48,6 +49,26 @@ function writeActivePlayerId(id: string | null) {
   }
 }
 
+// Horses opened with their PIN in this browser tab; after closing the tab the PIN is asked again.
+const UNLOCKED_KEY = 'learningstar.unlocked'
+
+function readUnlocked(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(sessionStorage.getItem(UNLOCKED_KEY) ?? '[]')
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function writeUnlocked(ids: string[]) {
+  try {
+    sessionStorage.setItem(UNLOCKED_KEY, JSON.stringify(ids))
+  } catch {
+    // Without session storage the PIN is simply asked again.
+  }
+}
+
 function safeReadFamily(): Family | null {
   try {
     return backendConfigured ? readFamily() : null
@@ -65,6 +86,7 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [localCount, setLocalCount] = useState(0)
   const [activeId, setActiveId] = useState<string | null>(readActivePlayerId)
+  const [unlocked, setUnlocked] = useState<string[]>(readUnlocked)
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
   const [tournamentId, setTournamentId] = useState<string | null>(null)
 
@@ -131,10 +153,21 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [family, load])
 
-  const player = players?.find((candidate) => candidate.id === activeId)
+  // A horse with a PIN is only opened after the PIN was entered in this tab.
+  const player = players?.find((candidate) => candidate.id === activeId && (!candidate.hasPin || unlocked.includes(candidate.id)))
+
+  const unlock = (playerId: string) => {
+    const next = [...unlocked.filter((id) => id !== playerId), playerId]
+    setUnlocked(next)
+    writeUnlocked(next)
+  }
 
   const replacePlayer = (updated: Player) =>
-    setPlayers((current) => [...(current ?? []).filter((existing) => existing.id !== updated.id), updated])
+    setPlayers((current) =>
+      (current ?? []).some((existing) => existing.id === updated.id)
+        ? (current ?? []).map((existing) => (existing.id === updated.id ? updated : existing))
+        : [...(current ?? []), updated],
+    )
 
   // Duel wins live in the duel list; mirror them into the player so duel badges get awarded.
   const wins = player ? duelWins(duels, player.id) : 0
@@ -151,10 +184,28 @@ export default function App() {
     setScreen({ name: 'map' })
   }
 
-  const create = async (name: string, avatar: string, color: string) => {
-    const created = await store.create(createPlayer(name, avatar, color))
+  const create = async (profile: PlayerProfile, pin: string | null) => {
+    let created = await store.create(createPlayer(profile.name, profile.avatar, profile.color))
+    if (pin) {
+      created = await store.setPin(created.id, null, pin)
+      unlock(created.id)
+    }
     replacePlayer(created)
     selectPlayer(created)
+  }
+
+  const checkPin = async (candidate: Player, pin: string) => {
+    const ok = await store.checkPin(candidate.id, pin)
+    if (ok) unlock(candidate.id)
+    return ok
+  }
+
+  const editPlayer = async (candidate: Player, pin: string | null, profile: PlayerProfile, newPin: string | null | undefined) => {
+    let updated = await store.updateProfile(candidate.id, pin, profile)
+    if (newPin !== undefined) updated = await store.setPin(candidate.id, pin, newPin)
+    replacePlayer(updated)
+    // After setting a new PIN the child stays signed in on this device.
+    if (newPin) unlock(candidate.id)
   }
 
   const start = (mission: Mission, duel?: DuelPlay) => {
@@ -221,7 +272,7 @@ export default function App() {
 
   const enterFamily = async (joined: Family, takeLocalPlayers: boolean) => {
     if (takeLocalPlayers) {
-      await moveIntoFamily(lazyRpc, joined, await localStore.list())
+      await moveIntoFamily(lazyRpc, joined, await localStore.export())
       localStore.clear()
     }
     writeFamily(joined)
@@ -269,6 +320,7 @@ export default function App() {
           // Duels of the deleted child are gone too.
           load()
         }}
+        onPlayerPinReset={(playerId) => setPlayers((current) => (current ?? []).map((existing) => (existing.id === playerId ? { ...existing, hasPin: false } : existing)))}
         onPinSet={() => setContent((current) => ({ ...current, hasPin: true }))}
         onOpenFamily={backendConfigured ? () => setScreen({ name: 'family' }) : undefined}
         onBack={() => setScreen({ name: 'players' })}
@@ -286,10 +338,15 @@ export default function App() {
         onRetry={load}
         onSelect={selectPlayer}
         onCreate={create}
+        onCheckPin={checkPin}
+        onEdit={editPlayer}
         onOpenFamily={backendConfigured ? () => setScreen({ name: 'family' }) : undefined}
       />
     )
   }
+
+  const playerIds = (players ?? []).map((candidate) => candidate.id)
+  const myMissions = content.missions.filter((mission) => isVisibleTo(mission, player.id, playerIds))
 
   const withNav = (active: NavTarget, content: ReactNode) => (
     <>
@@ -312,7 +369,7 @@ export default function App() {
         'map',
         <MissionMap
           player={player}
-          customMissions={content.missions}
+          customMissions={myMissions}
           tournamentId={tournamentId}
           onSelectTournament={setTournamentId}
           onStart={start}

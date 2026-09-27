@@ -14,6 +14,8 @@ export interface MissionDraft {
   direction: Direction
   mode: AnswerMode
   count: number
+  /** Children the mission is meant for; empty = everyone. */
+  players: string[]
 }
 
 export const TRACK_LANGUAGES: Record<string, Language> = { english: 'en', french: 'fr', spanish: 'es' }
@@ -104,11 +106,11 @@ export function formatQuestions(questions: QuizQuestion[]): string {
 }
 
 export function emptyDraft(track = 'english'): MissionDraft {
-  return { title: '', track, kind: kindsFor(track)[0], text: '', factors: [], direction: 'to-de', mode: 'choice', count: 10 }
+  return { title: '', track, kind: kindsFor(track)[0], text: '', factors: [], direction: 'to-de', mode: 'choice', count: 10, players: [] }
 }
 
 export function draftFromMission(mission: Mission): MissionDraft {
-  const base = { ...emptyDraft(mission.track), id: mission.id, title: mission.title }
+  const base = { ...emptyDraft(mission.track), id: mission.id, title: mission.title, players: mission.players ?? [] }
   switch (mission.type) {
     case 'multiplication':
       return { ...base, kind: 'multiplication', factors: mission.config.factors, mode: mission.config.mode ?? 'input', count: mission.config.count }
@@ -150,7 +152,7 @@ export function draftProblems(draft: MissionDraft): string[] {
 /** Turns a checked draft into a mission for the tournament path. */
 export function buildMission(draft: MissionDraft, newId: () => string = () => `custom-${crypto.randomUUID()}`): Mission {
   const id = draft.id ?? newId()
-  const base = { id, title: draft.title.trim(), track: draft.track, custom: true }
+  const base = { id, title: draft.title.trim(), track: draft.track, custom: true, ...(draft.players.length > 0 ? { players: [...draft.players] } : {}) }
   const count = Math.max(1, Math.min(20, Math.round(draft.count)))
   switch (draft.kind) {
     case 'multiplication':
@@ -184,7 +186,7 @@ export function buildMission(draft: MissionDraft, newId: () => string = () => `c
 /** Keeps only well-formed missions (content comes from storage or the server). */
 export function sanitizeMissions(value: unknown): Mission[] {
   if (!Array.isArray(value)) return []
-  return value.filter((mission): mission is Mission => {
+  const valid = value.filter((mission): mission is Mission => {
     if (!mission || typeof mission !== 'object') return false
     const m = mission as Partial<Mission>
     if (typeof m.id !== 'string' || typeof m.title !== 'string' || !findTrack(m.track ?? '') || !m.config) return false
@@ -193,6 +195,22 @@ export function sanitizeMissions(value: unknown): Mission[] {
     if (m.type === 'quiz') return Array.isArray(m.config.questions) && m.config.questions.length > 0
     return false
   })
+  return valid.map((mission) => {
+    if (mission.players === undefined) return mission
+    const players = Array.isArray(mission.players) ? mission.players.filter((id): id is string => typeof id === 'string') : []
+    const { players: _dropped, ...rest } = mission
+    return (players.length > 0 ? { ...rest, players } : rest) as Mission
+  })
+}
+
+/**
+ * Whether a child sees a mission. Parents can assign their missions to single
+ * children; children that no longer exist are ignored, so a mission whose
+ * children were all deleted is open to everyone again.
+ */
+export function isVisibleTo(mission: Mission, playerId: string, existingPlayerIds: string[]): boolean {
+  const assigned = (mission.players ?? []).filter((id) => existingPlayerIds.includes(id))
+  return assigned.length === 0 || assigned.includes(playerId)
 }
 
 /** Readable description of a remembered mistake key, e.g. "1x1:8x7" → "8 × 7". */

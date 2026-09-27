@@ -1,6 +1,7 @@
 import { call, type Rpc } from './backend'
 import { sanitizeMissions } from './custom'
 import { LocalDuelStore } from './duels'
+import { hashPin, WrongPinError } from './pin'
 import { LocalPlayerStore } from './storage'
 import type { Mission } from './types'
 
@@ -18,20 +19,12 @@ export interface ContentStore {
   saveMissions(pin: string, missions: Mission[]): Promise<Mission[]>
   /** Deletes a child with all points, badges, purchases and duels. */
   deletePlayer(pin: string, playerId: string): Promise<void>
+  /** Removes a child's forgotten PIN. */
+  resetPlayerPin(pin: string, playerId: string): Promise<void>
 }
 
-export class WrongPinError extends Error {
-  constructor() {
-    super('Die PIN stimmt nicht.')
-  }
-}
-
-/** SHA-256 of the PIN, salted with the family code, so the PIN itself is never stored. */
-export async function hashPin(pin: string, salt: string): Promise<string> {
-  const data = new TextEncoder().encode(`learningstar:${salt}:${pin}`)
-  const digest = await crypto.subtle.digest('SHA-256', data)
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('')
-}
+// The parents' PIN is salted with the family code ("local" without a family).
+export { hashPin, WrongPinError } from './pin'
 
 const CONTENT_KEY = 'learningstar.parents.v1'
 
@@ -73,6 +66,11 @@ export class LocalContentStore implements ContentStore {
     if (!(await this.checkPin(pin))) throw new WrongPinError()
     new LocalPlayerStore(this.storage).remove(playerId)
     new LocalDuelStore(this.storage).removePlayer(playerId)
+  }
+
+  async resetPlayerPin(pin: string, playerId: string): Promise<void> {
+    if (!(await this.checkPin(pin))) throw new WrongPinError()
+    new LocalPlayerStore(this.storage).removePin(playerId)
   }
 
   private read(): LocalContent {
@@ -127,6 +125,12 @@ export class FamilyContentStore implements ContentStore {
   async deletePlayer(pin: string, playerId: string): Promise<void> {
     await this.wrongPinAware(async () =>
       call(this.rpc, 'delete_player', { p_code: this.code, p_pin_hash: await this.hash(pin), p_player_id: playerId }),
+    )
+  }
+
+  async resetPlayerPin(pin: string, playerId: string): Promise<void> {
+    await this.wrongPinAware(async () =>
+      call(this.rpc, 'reset_player_pin', { p_code: this.code, p_pin_hash: await this.hash(pin), p_player_id: playerId }),
     )
   }
 

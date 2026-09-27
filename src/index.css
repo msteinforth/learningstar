@@ -3021,3 +3021,89 @@ legend {
   height: clamp(96px, 30vw, 140px);
   filter: drop-shadow(0 4px 0 var(--shadow-color));
 }
+
+/* ---------- Edit horse, child PIN ---------- */
+.player-row {
+  position: relative;
+}
+
+.player-row .player-card {
+  padding-right: 62px;
+}
+
+.pin-badge {
+  flex: none;
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.2));
+}
+
+.edit-player {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.18);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.edit-player:hover {
+  transform: translateY(-50%) scale(1.08) rotate(-8deg);
+}
+
+.edit-player:active {
+  transform: translateY(-45%);
+}
+
+.pin-prompt {
+  align-items: center;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.pin-prompt h2,
+.pin-prompt p {
+  margin: 0;
+}
+
+.pin-prompt label {
+  width: 100%;
+}
+
+.create-form input.pin-input {
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+}
+
+.pin-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.child-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.custom-text .assigned {
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.player-chip-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -33,6 +33,9 @@ create table if not exists public.players (
 -- Abzeichen, Tagesserie und Einkäufe im Shop (ausgegebene Hufeisen, Besitz, Angezogenes).
 alter table public.players add column if not exists extras jsonb not null default '{}'::jsonb;
 
+-- Optionale PIN des Kindes (nur als SHA-256-Hash), damit Geschwister nicht mit fremdem Pferd spielen.
+alter table public.players add column if not exists pin_hash text check (pin_hash ~ '^[0-9a-f]{64}$');
+
 create index if not exists players_family_idx on public.players (family_id);
 
 -- Jede gespielte Mission, damit sich z. B. die Punkte der Woche berechnen lassen.
@@ -114,7 +117,8 @@ as $$
     'totalPoints', p.total_points,
     'missions', p.missions,
     'mistakes', p.mistakes,
-    'extras', p.extras
+    'extras', p.extras,
+    'hasPin', p.pin_hash is not null
   )
 $$;
 
@@ -207,7 +211,7 @@ begin
     greatest(coalesce((p_player ->> 'totalPoints')::int, 0), 0)
   );
 
-  insert into public.players (id, family_id, name, avatar, color, created_at, total_points, missions, mistakes, extras)
+  insert into public.players (id, family_id, name, avatar, color, created_at, total_points, missions, mistakes, extras, pin_hash)
   values (
     (p_player ->> 'id')::uuid,
     v_family,
@@ -218,7 +222,9 @@ begin
     greatest(coalesce((p_player ->> 'totalPoints')::int, 0), 0),
     coalesce(p_player -> 'missions', '{}'::jsonb),
     coalesce(p_player -> 'mistakes', '{}'::jsonb),
-    coalesce(p_player -> 'extras', '{}'::jsonb)
+    coalesce(p_player -> 'extras', '{}'::jsonb),
+    -- Beim Umzug in eine Familie bleibt die PIN des Kindes erhalten.
+    nullif(p_player ->> 'pinHash', '')
   )
   on conflict (id) do nothing;
 
@@ -320,6 +326,107 @@ begin
   end if;
   perform public.ls_check_extras(v_player.extras, v_player.total_points);
 
+  return public.ls_player_json(v_player);
+end;
+$$;
+
+-- --- Profil und PIN des Kindes ---------------------------------------------
+
+-- Prüft die PIN eines Kindes; ohne PIN ist das Pferd frei zugänglich.
+create or replace function public.check_player_pin(p_code text, p_player_id uuid, p_pin_hash text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_player public.players;
+begin
+  select * into v_player from public.players
+  where id = p_player_id and family_id = public.ls_family_id(p_code);
+  if v_player.id is null then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  return v_player.pin_hash is null or v_player.pin_hash is not distinct from p_pin_hash;
+end;
+$$;
+
+-- Name, Pferd und Farbe ändern (mit der PIN des Kindes, falls es eine hat).
+create or replace function public.update_player(p_code text, p_player_id uuid, p_pin_hash text, p_name text, p_avatar text, p_color text)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_player public.players;
+begin
+  if not public.check_player_pin(p_code, p_player_id, p_pin_hash) then
+    raise exception 'wrong_player_pin' using errcode = '28000';
+  end if;
+  update public.players
+  set name = btrim(p_name),
+      avatar = p_avatar,
+      color = p_color,
+      updated_at = now()
+  where id = p_player_id and family_id = v_family
+  returning * into v_player;
+  return public.ls_player_json(v_player);
+end;
+$$;
+
+-- Setzt, ändert (alte PIN nötig) oder entfernt (p_new_pin_hash null) die PIN eines Kindes.
+create or replace function public.set_player_pin(p_code text, p_player_id uuid, p_old_pin_hash text, p_new_pin_hash text)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_player public.players;
+begin
+  if not public.check_player_pin(p_code, p_player_id, p_old_pin_hash) then
+    raise exception 'wrong_player_pin' using errcode = '28000';
+  end if;
+  update public.players
+  set pin_hash = p_new_pin_hash,
+      updated_at = now()
+  where id = p_player_id and family_id = v_family
+  returning * into v_player;
+  return public.ls_player_json(v_player);
+end;
+$$;
+
+-- Vergessene PIN eines Kindes entfernen (nur mit Eltern-PIN).
+create or replace function public.reset_player_pin(p_code text, p_pin_hash text, p_player_id uuid)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_current text;
+  v_player public.players;
+begin
+  select parent_pin_hash into v_current from public.families where id = v_family;
+  if v_current is null or v_current is distinct from p_pin_hash then
+    raise exception 'wrong_pin' using errcode = '28000';
+  end if;
+  update public.players
+  set pin_hash = null,
+      updated_at = now()
+  where id = p_player_id and family_id = v_family
+  returning * into v_player;
+  if v_player.id is null then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
   return public.ls_player_json(v_player);
 end;
 $$;
@@ -587,7 +694,11 @@ revoke execute on function
   public.list_duels(text),
   public.create_duel(text, jsonb),
   public.answer_duel(text, uuid, uuid, jsonb),
-  public.delete_player(text, text, uuid)
+  public.delete_player(text, text, uuid),
+  public.check_player_pin(text, uuid, text),
+  public.update_player(text, uuid, text, text, text, text),
+  public.set_player_pin(text, uuid, text, text),
+  public.reset_player_pin(text, text, uuid)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -617,5 +728,9 @@ grant execute on function
   public.list_duels(text),
   public.create_duel(text, jsonb),
   public.answer_duel(text, uuid, uuid, jsonb),
-  public.delete_player(text, text, uuid)
+  public.delete_player(text, text, uuid),
+  public.check_player_pin(text, uuid, text),
+  public.update_player(text, uuid, text, text, text, text),
+  public.set_player_pin(text, uuid, text, text),
+  public.reset_player_pin(text, text, uuid)
 to anon, authenticated;

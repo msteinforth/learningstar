@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { LocalContentStore, WrongPinError } from './content'
-import { buildMission, describeMistake, draftFromMission, draftProblems, emptyDraft, parseQuestions, parseVocabulary, sanitizeMissions } from './custom'
+import { buildMission, describeMistake, draftFromMission, draftProblems, emptyDraft, isVisibleTo, parseQuestions, parseVocabulary, sanitizeMissions } from './custom'
 import { createPlayer } from './progress'
 import { createRng } from './random'
 import { LocalPlayerStore } from './storage'
@@ -111,5 +111,29 @@ describe('LocalContentStore', () => {
     await expect(content.deletePlayer('0000', lena.id)).rejects.toBeInstanceOf(WrongPinError)
     await content.deletePlayer('2468', lena.id)
     expect((await players.list()).map((player) => player.name)).toEqual(['Tom'])
+  })
+})
+
+describe('missions for single children', () => {
+  const base = { ...emptyDraft('english'), title: 'Nur Lena', text: 'the saddle = der Sattel\nthe hay = das Heu' }
+
+  it('keeps the chosen children through editing and storage', () => {
+    const mission = buildMission({ ...base, players: ['lena'] }, () => 'm1')
+    expect(mission.players).toEqual(['lena'])
+    expect(draftFromMission(mission).players).toEqual(['lena'])
+    expect(buildMission(base, () => 'm2').players).toBeUndefined()
+    expect(sanitizeMissions(JSON.parse(JSON.stringify([mission])))[0].players).toEqual(['lena'])
+    expect(sanitizeMissions([{ ...mission, players: [3, 'tom'] }])[0].players).toEqual(['tom'])
+    expect(sanitizeMissions([{ ...mission, players: 'lena' }])[0].players).toBeUndefined()
+  })
+
+  it('shows a mission only to its children, or to everyone', () => {
+    const all = ['lena', 'tom']
+    const forLena = buildMission({ ...base, players: ['lena'] }, () => 'm1')
+    expect(isVisibleTo(forLena, 'lena', all)).toBe(true)
+    expect(isVisibleTo(forLena, 'tom', all)).toBe(false)
+    expect(isVisibleTo(buildMission(base, () => 'm2'), 'tom', all)).toBe(true)
+    // Lena was deleted: the mission is open to everyone again.
+    expect(isVisibleTo(forLena, 'tom', ['tom'])).toBe(true)
   })
 })
