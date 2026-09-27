@@ -94,7 +94,7 @@ as $$
 declare
   v_id uuid;
 begin
-  select id into v_id from public.families where code = public.ls_normalize_code(p_code);
+  v_id := (select f.id from public.families f where f.code = public.ls_normalize_code(p_code));
   if v_id is null then
     raise exception 'family_not_found' using errcode = 'P0002';
   end if;
@@ -228,7 +228,7 @@ begin
   )
   on conflict (id) do nothing;
 
-  select * into v_player from public.players where id = (p_player ->> 'id')::uuid;
+  v_player := (select p from public.players p where p.id = (p_player ->> 'id')::uuid);
   if v_player.family_id <> v_family then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
@@ -246,8 +246,7 @@ as $$
 declare
   v_player public.players;
 begin
-  select * into v_player from public.players
-  where id = p_player_id and family_id = public.ls_family_id(p_code);
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = public.ls_family_id(p_code));
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
@@ -288,8 +287,8 @@ begin
       mistakes = p_mistakes,
       extras = p_extras,
       updated_at = now()
-  where id = p_player_id and family_id = v_family
-  returning * into v_player;
+  where id = p_player_id and family_id = v_family;
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = v_family);
 
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
@@ -318,8 +317,8 @@ begin
   update public.players
   set extras = p_extras,
       updated_at = now()
-  where id = p_player_id and family_id = v_family
-  returning * into v_player;
+  where id = p_player_id and family_id = v_family;
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = v_family);
 
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
@@ -343,8 +342,7 @@ as $$
 declare
   v_player public.players;
 begin
-  select * into v_player from public.players
-  where id = p_player_id and family_id = public.ls_family_id(p_code);
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = public.ls_family_id(p_code));
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
@@ -372,8 +370,8 @@ begin
       avatar = p_avatar,
       color = p_color,
       updated_at = now()
-  where id = p_player_id and family_id = v_family
-  returning * into v_player;
+  where id = p_player_id and family_id = v_family;
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = v_family);
   return public.ls_player_json(v_player);
 end;
 $$;
@@ -396,8 +394,8 @@ begin
   update public.players
   set pin_hash = p_new_pin_hash,
       updated_at = now()
-  where id = p_player_id and family_id = v_family
-  returning * into v_player;
+  where id = p_player_id and family_id = v_family;
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = v_family);
   return public.ls_player_json(v_player);
 end;
 $$;
@@ -415,15 +413,15 @@ declare
   v_current text;
   v_player public.players;
 begin
-  select parent_pin_hash into v_current from public.families where id = v_family;
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family);
   if v_current is null or v_current is distinct from p_pin_hash then
     raise exception 'wrong_pin' using errcode = '28000';
   end if;
   update public.players
   set pin_hash = null,
       updated_at = now()
-  where id = p_player_id and family_id = v_family
-  returning * into v_player;
+  where id = p_player_id and family_id = v_family;
+  v_player := (select p from public.players p where p.id = p_player_id and p.family_id = v_family);
   if v_player.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
@@ -473,7 +471,7 @@ begin
   if p_new_pin_hash is null or p_new_pin_hash !~ '^[0-9a-f]{64}$' then
     raise exception 'invalid_content' using errcode = '22023';
   end if;
-  select parent_pin_hash into v_current from public.families where id = v_family for update;
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family for update);
   if v_current is not null and v_current is distinct from p_old_pin_hash then
     raise exception 'wrong_pin' using errcode = '28000';
   end if;
@@ -492,7 +490,7 @@ declare
   v_family uuid := public.ls_family_id(p_code);
   v_current text;
 begin
-  select parent_pin_hash into v_current from public.families where id = v_family;
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family);
   if v_current is null or v_current is distinct from p_pin_hash then
     raise exception 'wrong_pin' using errcode = '28000';
   end if;
@@ -516,7 +514,7 @@ declare
   v_family uuid := public.ls_family_id(p_code);
   v_current text;
 begin
-  select parent_pin_hash into v_current from public.families where id = v_family;
+  v_current := (select f.parent_pin_hash from public.families f where f.id = v_family);
   if v_current is null or v_current is distinct from p_pin_hash then
     raise exception 'wrong_pin' using errcode = '28000';
   end if;
@@ -610,8 +608,8 @@ begin
     p_duel -> 'mission',
     (p_duel ->> 'seed')::bigint,
     p_duel -> 'challengerResult'
-  )
-  returning * into v_duel;
+  );
+  v_duel := (select d from public.duels d where d.id = (p_duel ->> 'id')::uuid);
   return public.ls_duel_json(v_duel);
 end;
 $$;
@@ -633,11 +631,11 @@ begin
   where id = p_duel_id
     and family_id = public.ls_family_id(p_code)
     and opponent_id = p_player_id
-    and opponent_result is null
-  returning * into v_duel;
-  if v_duel.id is null then
+    and opponent_result is null;
+  if not found then
     raise exception 'duel_closed' using errcode = 'P0002';
   end if;
+  v_duel := (select d from public.duels d where d.id = p_duel_id);
   return public.ls_duel_json(v_duel);
 end;
 $$;
