@@ -160,6 +160,15 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'buddy-fox', slot: 'buddy', name: 'Füchslein', look: 'fox', price: 650 },
   { id: 'buddy-penguin', slot: 'buddy', name: 'Pinguin', look: 'penguin', price: 800 },
   { id: 'buddy-dragon', slot: 'buddy', name: 'Mini-Drache', look: 'dragon', price: 1500, requiresBadge: 'duell-champion' },
+  // Snacks and drinks.
+  { id: 'buddy-cocoa', slot: 'buddy', name: 'Heißer Kakao', look: 'cocoa', price: 150 },
+  { id: 'buddy-cola', slot: 'buddy', name: 'Cola', look: 'cola', price: 150 },
+  { id: 'buddy-lollipop', slot: 'buddy', name: 'Riesenlolli', look: 'lollipop', price: 180 },
+  { id: 'buddy-pretzel', slot: 'buddy', name: 'Brezel', look: 'pretzel', price: 200 },
+  { id: 'buddy-donut', slot: 'buddy', name: 'Donut', look: 'donut', price: 250 },
+  { id: 'buddy-popcorn', slot: 'buddy', name: 'Kino-Popcorn', look: 'popcorn', price: 300 },
+  { id: 'buddy-ice-cream', slot: 'buddy', name: 'Eiswaffel', look: 'ice-cream', price: 350 },
+  { id: 'buddy-pizza', slot: 'buddy', name: 'Pizzastück', look: 'pizza', price: 400 },
 
   { id: 'bg-meadow', slot: 'background', name: 'Frühlingswiese', look: 'linear-gradient(160deg, #b8f28b, #4fae3b)', price: 25 },
   { id: 'bg-sky', slot: 'background', name: 'Himmelblau', look: 'linear-gradient(160deg, #a8e6ff, #1cb0f6)', price: 25 },
