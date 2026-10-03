@@ -37,6 +37,10 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
   Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
   Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
+- **Verschenken**: Gekaufte Artikel lassen sich im Laden über „Verschenken“ an
+  ein Geschwisterkind weitergeben (die Hufeisen gibt es nicht zurück). Das
+  beschenkte Kind sieht beim nächsten Öffnen eine Geschenk-Nachricht und kann den
+  Artikel gleich anziehen. Fürs erste Geschenk gibt es das Abzeichen „Großes Herz“.
 - **Duelle**: Ein Kind fordert ein Geschwisterkind heraus und spielt zuerst.
   Das andere Kind bekommt später – auch auf einem anderen Gerät – genau dieselben
   Aufgaben; wer mehr Hufeisen holt, gewinnt (bei Gleichstand zählen die richtigen

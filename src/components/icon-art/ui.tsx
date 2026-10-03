@@ -317,4 +317,18 @@ export const uiIcons: Record<string, ReactNode> = {
       <text x={38} y={21} fontSize={6} fontWeight={800} fill={INK} fontFamily="sans-serif">z</text>
     </>
   ),
+  gift: (
+    <>
+      <rect x={7} y={20} width={34} height={24} rx={4} fill="#ff5a5f" />
+      <rect x={4} y={14} width={40} height={10} rx={3} fill="#ff7a7e" />
+      <rect x={21} y={14} width={6} height={30} fill={GOLD} />
+      <rect x={4} y={18} width={40} height={3} fill="#e5383b" opacity={0.35} />
+      <path d="M24 14 C 18 4, 8 6, 11 12 C 13 15, 20 14, 24 14 Z" fill={GOLD} stroke={GOLD_DARK} strokeWidth={1.2} strokeLinejoin="round" />
+      <path d="M24 14 C 30 4, 40 6, 37 12 C 35 15, 28 14, 24 14 Z" fill={GOLD} stroke={GOLD_DARK} strokeWidth={1.2} strokeLinejoin="round" />
+      <circle cx={24} cy={14} r={3} fill={GOLD_DARK} />
+      <circle cx={13} cy={31} r={1.6} fill="#ffffff" opacity={0.8} />
+      <circle cx={34} cy={36} r={1.6} fill="#ffffff" opacity={0.8} />
+      <circle cx={15} cy={39} r={1.1} fill="#ffffff" opacity={0.8} />
+    </>
+  ),
 }

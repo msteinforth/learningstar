@@ -435,6 +435,74 @@ begin
 end;
 $$;
 
+-- --- Geschenke --------------------------------------------------------------
+
+-- Ein Kind verschenkt einen gekauften Artikel an ein Geschwisterkind: beim Schenkenden
+-- verschwindet er (und wird abgelegt), das andere Kind bekommt ihn mit einer Nachricht.
+create or replace function public.give_item(p_code text, p_from uuid, p_to uuid, p_item text)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_family uuid := public.ls_family_id(p_code);
+  v_from public.players;
+  v_to public.players;
+begin
+  if p_from = p_to or p_item is null or char_length(p_item) > 64 then
+    raise exception 'invalid_content' using errcode = '22023';
+  end if;
+  v_from := (select p from public.players p where p.id = p_from and p.family_id = v_family for update);
+  v_to := (select p from public.players p where p.id = p_to and p.family_id = v_family for update);
+  if v_from.id is null or v_to.id is null then
+    raise exception 'player_not_found' using errcode = 'P0002';
+  end if;
+  if not coalesce(v_from.extras -> 'owned', '[]'::jsonb) ? p_item then
+    raise exception 'item_not_owned' using errcode = '22023';
+  end if;
+  if coalesce(v_to.extras -> 'owned', '[]'::jsonb) ? p_item then
+    raise exception 'item_already_owned' using errcode = '22023';
+  end if;
+
+  update public.players
+  set extras = v_from.extras
+        || jsonb_build_object(
+          'owned', coalesce(v_from.extras -> 'owned', '[]'::jsonb) - p_item,
+          'equipped', (
+            select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
+            from jsonb_each(coalesce(v_from.extras -> 'equipped', '{}'::jsonb)) e
+            where e.value <> to_jsonb(p_item)
+          ),
+          'giftsGiven', coalesce((v_from.extras ->> 'giftsGiven')::integer, 0) + 1
+        ),
+      updated_at = now()
+  where id = p_from;
+
+  update public.players
+  set extras = v_to.extras
+        || jsonb_build_object(
+          'owned', coalesce(v_to.extras -> 'owned', '[]'::jsonb) || to_jsonb(p_item),
+          'gifts', (
+            select coalesce(jsonb_agg(g.gift order by g.position), '[]'::jsonb)
+            from (
+              select t.gift, t.position
+              from jsonb_array_elements(coalesce(v_to.extras -> 'gifts', '[]'::jsonb)) with ordinality as t(gift, position)
+              order by t.position desc
+              limit 19
+            ) g
+          ) || jsonb_build_array(jsonb_build_object('itemId', p_item, 'fromId', v_from.id, 'fromName', v_from.name, 'at', now()))
+        ),
+      updated_at = now()
+  where id = p_to;
+
+  v_from := (select p from public.players p where p.id = p_from);
+  v_to := (select p from public.players p where p.id = p_to);
+  return jsonb_build_object('from', public.ls_player_json(v_from), 'to', public.ls_player_json(v_to));
+end;
+$$;
+
 -- --- Spielzeit ---------------------------------------------------------------
 
 -- Zählt Spielzeit dazu (die App meldet sich alle 30 Sekunden); an einem neuen Tag beginnt die Zählung neu.
@@ -784,7 +852,8 @@ revoke execute on function
   public.reset_player_pin(text, text, uuid),
   public.add_usage(text, uuid, text, integer),
   public.save_family_settings(text, text, jsonb),
-  public.reset_usage(text, text, uuid)
+  public.reset_usage(text, text, uuid),
+  public.give_item(text, uuid, uuid, text)
 from public;
 
 -- Supabase gibt neuen Funktionen standardmäßig Rechte für anon/authenticated,
@@ -821,5 +890,6 @@ grant execute on function
   public.reset_player_pin(text, text, uuid),
   public.add_usage(text, uuid, text, integer),
   public.save_family_settings(text, text, jsonb),
-  public.reset_usage(text, text, uuid)
+  public.reset_usage(text, text, uuid),
+  public.give_item(text, uuid, uuid, text)
 to anon, authenticated;

@@ -21,6 +21,8 @@ const MESSAGES: Record<string, string> = {
   wrong_pin: 'Die PIN stimmt nicht.',
   wrong_player_pin: 'Die PIN stimmt nicht.',
   duel_closed: 'Dieses Duell ist schon beendet.',
+  item_not_owned: 'Diesen Artikel hast du nicht (mehr).',
+  item_already_owned: 'Das hat dein Geschwisterkind schon.',
   not_enough_points: 'Dafür reichen die Hufeisen nicht.',
   invalid_content: 'Die Missionen konnten nicht gespeichert werden (zu groß oder fehlerhaft).',
 }

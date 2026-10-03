@@ -2,6 +2,7 @@ import { call, type Rpc } from './backend'
 import { addUsage, type PlayerUsage } from './limits'
 import { hashPlayerPin, WrongPinError } from './pin'
 import { applyResult } from './progress'
+import { giveItem } from './rewards'
 import type { MissionResult, Player, PlayerExtras, PlayerProfile } from './types'
 
 export interface LeaderboardEntry {
@@ -34,6 +35,8 @@ export interface PlayerStore {
   checkPin(playerId: string, pin: string): Promise<boolean>
   /** Sets, changes (old PIN needed) or removes (`newPin` null) the child's PIN. */
   setPin(playerId: string, oldPin: string | null, newPin: string | null): Promise<Player>
+  /** Gives an owned shop item to a sibling; returns both updated players. */
+  giveItem(fromId: string, toId: string, itemId: string): Promise<{ from: Player; to: Player }>
   /** Adds play time for `day` (YYYY-MM-DD) and returns the child's usage of that day. */
   addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage>
   leaderboard(): Promise<LeaderboardEntry[]>
@@ -113,6 +116,13 @@ export class LocalPlayerStore implements PlayerStore {
     else pins[playerId] = await hashPlayerPin(newPin, playerId)
     this.storage.setItem(PINS_KEY, JSON.stringify(pins))
     return this.withPin(player)
+  }
+
+  async giveItem(fromId: string, toId: string, itemId: string): Promise<{ from: Player; to: Player }> {
+    const { from, to } = giveItem(this.find(fromId), this.find(toId), itemId, this.now())
+    this.writePlayer(from)
+    this.writePlayer(to)
+    return { from: this.withPin(from), to: this.withPin(to) }
   }
 
   async addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage> {
@@ -285,6 +295,10 @@ export class FamilyPlayerStore implements PlayerStore {
       p_old_pin_hash: oldPin === null ? null : await hashPlayerPin(oldPin, playerId),
       p_new_pin_hash: newPin === null ? null : await hashPlayerPin(newPin, playerId),
     })
+  }
+
+  giveItem(fromId: string, toId: string, itemId: string): Promise<{ from: Player; to: Player }> {
+    return call(this.rpc, 'give_item', { p_code: this.code, p_from: fromId, p_to: toId, p_item: itemId })
   }
 
   addUsage(playerId: string, day: string, seconds: number): Promise<PlayerUsage> {

@@ -1,5 +1,5 @@
 import { findTrack, missions, tracks } from './missions'
-import type { ItemSlot, Player, PlayerExtras } from './types'
+import type { Gift, ItemSlot, Player, PlayerExtras } from './types'
 
 // --- Extras & wallet ----------------------------------------------------------
 
@@ -12,6 +12,8 @@ export function extrasOf(player: { extras?: Partial<PlayerExtras> }): PlayerExtr
     badges: extras?.badges ?? {},
     streak: extras?.streak ?? { days: 0, lastDay: null },
     duelWins: extras?.duelWins ?? 0,
+    giftsGiven: extras?.giftsGiven ?? 0,
+    gifts: extras?.gifts ?? [],
   }
 }
 
@@ -81,6 +83,13 @@ export const BADGES: Badge[] = [
   })),
   { id: 'duell-sieg', title: 'Duell-Gewinner', description: 'Gewinne ein Duell.', icon: 'swords', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 1 }) },
   { id: 'duell-champion', title: 'Duell-Champion', description: 'Gewinne 5 Duelle.', icon: 'shield', progress: (p) => ({ current: extrasOf(p).duelWins ?? 0, target: 5 }) },
+  {
+    id: 'grosses-herz',
+    title: 'Großes Herz',
+    description: 'Verschenke etwas aus dem Laden an ein Geschwisterkind.',
+    icon: 'gift',
+    progress: (p) => ({ current: extrasOf(p).giftsGiven ?? 0, target: 1 }),
+  },
   {
     id: 'allrounder',
     title: 'Allround-Reiter',
@@ -259,4 +268,47 @@ export function equipItem(player: Player, slot: ItemSlot, itemId: string | null)
     equipped[slot] = itemId
   }
   return { ...player, extras: { ...extras, equipped } }
+}
+
+// --- Gifts -------------------------------------------------------------------------
+
+/** Presents are kept for the message; older ones are dropped. */
+const MAX_GIFTS = 20
+
+export type GiftCheck = { ok: true } | { ok: false; reason: 'not-owned' | 'already-owned' | 'same-player' }
+
+export function canGive(from: Player, to: Player, itemId: string): GiftCheck {
+  if (from.id === to.id) return { ok: false, reason: 'same-player' }
+  if (!extrasOf(from).owned.includes(itemId)) return { ok: false, reason: 'not-owned' }
+  if (extrasOf(to).owned.includes(itemId)) return { ok: false, reason: 'already-owned' }
+  return { ok: true }
+}
+
+/**
+ * Moves an item from one child to another: the giver loses it (and takes it off),
+ * the receiver gets it with a message. Horseshoes are not refunded.
+ */
+export function giveItem(from: Player, to: Player, itemId: string, now: Date): { from: Player; to: Player } {
+  const check = canGive(from, to, itemId)
+  if (!check.ok) throw new Error(`Verschenken nicht möglich: ${check.reason}`)
+  const giver = extrasOf(from)
+  const equipped = Object.fromEntries(Object.entries(giver.equipped).filter(([, id]) => id !== itemId))
+  const updatedFrom = awardBadges(
+    { ...from, extras: { ...giver, owned: giver.owned.filter((id) => id !== itemId), equipped, giftsGiven: (giver.giftsGiven ?? 0) + 1 } },
+    now,
+  )
+  const receiver = extrasOf(to)
+  const gift: Gift = { itemId, fromId: from.id, fromName: from.name, at: now.toISOString() }
+  const updatedTo = { ...to, extras: { ...receiver, owned: [...receiver.owned, itemId], gifts: [...(receiver.gifts ?? []), gift].slice(-MAX_GIFTS) } }
+  return { from: updatedFrom, to: updatedTo }
+}
+
+export function unseenGifts(player: Player): Gift[] {
+  return (extrasOf(player).gifts ?? []).filter((gift) => !gift.seen)
+}
+
+/** Marks all presents as read (optionally putting one of them on). */
+export function markGiftsSeen(player: Player): Player {
+  const extras = extrasOf(player)
+  return { ...player, extras: { ...extras, gifts: (extras.gifts ?? []).map((gift) => ({ ...gift, seen: true })) } }
 }

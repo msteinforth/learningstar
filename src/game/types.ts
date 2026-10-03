@@ -112,6 +112,18 @@ export interface PlayerExtras {
   streak: { days: number; lastDay: string | null }
   /** Number of duels won (kept up to date from the duel list). */
   duelWins?: number
+  /** Items given to siblings. */
+  giftsGiven?: number
+  /** Presents from siblings; `seen` once the child read the message. */
+  gifts?: Gift[]
+}
+
+export interface Gift {
+  itemId: string
+  fromId: string
+  fromName: string
+  at: string
+  seen?: boolean
 }
 
 export interface Player {

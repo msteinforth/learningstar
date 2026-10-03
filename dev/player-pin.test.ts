@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { FamilyContentStore } from '../src/game/content.ts'
 import { createFamily, moveIntoFamily } from '../src/game/family.ts'
 import { createPlayer } from '../src/game/progress.ts'
+import { buyItem, extrasOf } from '../src/game/rewards.ts'
 import { FamilyPlayerStore, LocalPlayerStore } from '../src/game/storage.ts'
 import { createPgliteBackend, type Rpc } from './pglite-rpc.ts'
 
@@ -146,5 +147,47 @@ describe('daily play time on the family server', () => {
     await expect(content.resetUsage('0000', tom.id)).rejects.toThrow('Die PIN stimmt nicht.')
     await content.resetUsage('2468', tom.id)
     expect((await store.list())[0].usage).toEqual({})
+  })
+})
+
+describe('presents on the family server', () => {
+  let rpc: Rpc
+
+  beforeAll(async () => {
+    rpc = (await createPgliteBackend()).rpc
+  })
+
+  it('moves an item between siblings in one step', async () => {
+    const family = await createFamily(rpc, 'Geschenke')
+    const store = new FamilyPlayerStore(rpc, family.code)
+    const lena = await store.create({ ...createPlayer('Lena', 'horse:bay', '#ff5a5f'), totalPoints: 100 })
+    const tom = await store.create(createPlayer('Tom', 'horse:grey', '#1cb0f6'))
+    await store.updateExtras(lena.id, (current) => buyItem(current, 'hat-bow'))
+
+    const { from, to } = await store.giveItem(lena.id, tom.id, 'hat-bow')
+    expect(extrasOf(from).owned).toEqual([])
+    expect(extrasOf(from).equipped).toEqual({})
+    expect(extrasOf(from).spent).toBe(20)
+    expect(extrasOf(from).giftsGiven).toBe(1)
+    expect(extrasOf(to).owned).toEqual(['hat-bow'])
+    expect(extrasOf(to).gifts).toEqual([expect.objectContaining({ itemId: 'hat-bow', fromId: lena.id, fromName: 'Lena' })])
+
+    // Not twice, not without owning it, not across families.
+    await expect(store.giveItem(lena.id, tom.id, 'hat-bow')).rejects.toThrow('Diesen Artikel hast du nicht (mehr).')
+    await expect(store.giveItem(tom.id, lena.id, 'hat-cap')).rejects.toThrow('Diesen Artikel hast du nicht (mehr).')
+    const other = new FamilyPlayerStore(rpc, (await createFamily(rpc, 'Fremd')).code)
+    await expect(other.giveItem(tom.id, lena.id, 'hat-bow')).rejects.toThrow()
+    const stranger = await other.create(createPlayer('Fremd', 'horse:bay', '#ff5a5f'))
+    await expect(store.giveItem(tom.id, stranger.id, 'hat-bow')).rejects.toThrow()
+  })
+
+  it('refuses a present the sibling already has', async () => {
+    const family = await createFamily(rpc, 'Doppelt')
+    const store = new FamilyPlayerStore(rpc, family.code)
+    const lena = await store.create({ ...createPlayer('Lena', 'horse:bay', '#ff5a5f'), totalPoints: 100 })
+    const tom = await store.create({ ...createPlayer('Tom', 'horse:grey', '#1cb0f6'), totalPoints: 100 })
+    await store.updateExtras(lena.id, (current) => buyItem(current, 'hat-bow'))
+    await store.updateExtras(tom.id, (current) => buyItem(current, 'hat-bow'))
+    await expect(store.giveItem(lena.id, tom.id, 'hat-bow')).rejects.toThrow('Das hat dein Geschwisterkind schon.')
   })
 })

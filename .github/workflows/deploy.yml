@@ -62,6 +62,7 @@ jobs:
           check add_usage "{$code,\"p_player_id\":$uuid,\"p_day\":\"2026-01-01\",\"p_seconds\":30}"
           check save_family_settings "{$code,\"p_pin_hash\":\"x\",\"p_settings\":{}}"
           check reset_usage "{$code,\"p_pin_hash\":\"x\",\"p_player_id\":$uuid}"
+          check give_item "{$code,\"p_from\":$uuid,\"p_to\":\"00000000-0000-0000-0000-000000000001\",\"p_item\":\"hat-bow\"}"
           if [ -n "$missing" ]; then
             echo "::warning::Familien-Server: es fehlen$missing – bitte supabase/schema.sql erneut ausführen."
             exit 1

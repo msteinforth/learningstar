@@ -3,6 +3,7 @@ import { Badges } from './components/Badges'
 import { Duels } from './components/Duels'
 import { BottomNav, type NavTarget } from './components/BottomNav'
 import { FamilySettings } from './components/FamilySettings'
+import { GiftNotice } from './components/GiftNotice'
 import { Leaderboard } from './components/Leaderboard'
 import { MissionMap } from './components/MissionMap'
 import { MissionPlay } from './components/MissionPlay'
@@ -20,7 +21,7 @@ import { addUsage, DEFAULT_SETTINGS, HEARTBEAT_SECONDS, limitFor, type PlayerUsa
 import { missions } from './game/missions'
 import { createPlayer } from './game/progress'
 import { type DuelStore, duelWins, FamilyDuelStore, LocalDuelStore, newSeed, openChallenges, toDuelResult } from './game/duels'
-import { awardBadges, buyItem, equipItem, extrasOf, newBadges } from './game/rewards'
+import { awardBadges, buyItem, equipItem, extrasOf, findItem, markGiftsSeen, newBadges, unseenGifts } from './game/rewards'
 import { playSound } from './game/sound'
 import { FamilyPlayerStore, LocalPlayerStore, type PlayerStore } from './game/storage'
 import type { Duel, Mission, MissionResult, Player, PlayerProfile } from './game/types'
@@ -402,9 +403,28 @@ export default function App() {
   const playerIds = (players ?? []).map((candidate) => candidate.id)
   const myMissions = content.missions.filter((mission) => isVisibleTo(mission, player.id, playerIds))
 
+  const gifts = unseenGifts(player)
+  const closeGifts = (equipItemId?: string) =>
+    updateExtras((current) => {
+      const seen = markGiftsSeen(current)
+      const item = findItem(equipItemId)
+      return item && extrasOf(seen).owned.includes(item.id) ? equipItem(seen, item.slot, item.id) : seen
+    })
+
+  const giveItem = async (itemId: string, to: Player) => {
+    const given = await store.giveItem(player.id, to.id, itemId)
+    replacePlayer(given.to)
+    // The badge for the first present is worked out here, like all badges.
+    const before = player
+    const after = await store.updateExtras(player.id, (current) => awardBadges(current, new Date()))
+    replacePlayer(after)
+    playSound(newBadges(before, after).length > 0 ? 'badge' : 'coin')
+  }
+
   const withNav = (active: NavTarget, content: ReactNode) => (
     <>
       {content}
+      {gifts.length > 0 && <GiftNotice gifts={gifts} onClose={closeGifts} />}
       <BottomNav
         active={active}
         onNavigate={(target) => {
@@ -441,6 +461,8 @@ export default function App() {
         'shop',
         <Shop
           player={player}
+          players={players ?? []}
+          onGive={(item, to) => giveItem(item.id, to)}
           onBuy={async (item) => {
             await updateExtras((current) => buyItem(current, item.id))
             playSound('coin')

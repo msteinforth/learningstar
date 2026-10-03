@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { missions } from './missions'
 import { applyResult, createPlayer, summarize } from './progress'
-import { BADGES, buyItem, canBuy, dayKey, equipItem, extrasOf, findItem, newBadges, nextStreak, SHOP_ITEMS, walletOf } from './rewards'
+import { BADGES, buyItem, canBuy, canGive, dayKey, equipItem, extrasOf, findItem, giveItem, markGiftsSeen, newBadges, nextStreak, SHOP_ITEMS, unseenGifts, walletOf } from './rewards'
 import type { Player } from './types'
 
 const withPoints = (points: number, extras: Partial<Player['extras']> = {}): Player => ({
@@ -74,5 +74,35 @@ describe('shop', () => {
     expect(extrasOf(equipItem(player, 'hat', null)).equipped.hat).toBeUndefined()
     expect(() => equipItem(player, 'hat', 'hat-crown')).toThrow()
     expect(() => equipItem(player, 'buddy', 'hat-bow')).toThrow()
+  })
+})
+
+describe('presents', () => {
+  const now = new Date(2026, 9, 3, 12)
+  const lena = () => buyItem(withPoints(100), 'hat-bow')
+  const tom = (): Player => ({ ...createPlayer('Tom', 'horse:grey', '#1cb0f6'), extras: { ...extrasOf({}) } })
+
+  it('moves the item to the sibling with a message and takes it off the giver', () => {
+    const giver = lena()
+    expect(extrasOf(giver).equipped.hat).toBe('hat-bow')
+    const { from, to } = giveItem(giver, tom(), 'hat-bow', now)
+    expect(extrasOf(from).owned).not.toContain('hat-bow')
+    expect(extrasOf(from).equipped.hat).toBeUndefined()
+    expect(extrasOf(from).spent).toBe(extrasOf(giver).spent)
+    expect(extrasOf(from).badges['grosses-herz']).toBeTruthy()
+    expect(extrasOf(to).owned).toContain('hat-bow')
+    expect(unseenGifts(to)).toEqual([{ itemId: 'hat-bow', fromId: giver.id, fromName: 'Lena', at: now.toISOString() }])
+    expect(unseenGifts(markGiftsSeen(to))).toEqual([])
+    // A present counts as owned: it can be worn and needs no badge or horseshoes.
+    expect(extrasOf(equipItem(to, 'hat', 'hat-bow')).equipped.hat).toBe('hat-bow')
+  })
+
+  it('cannot give what one does not have, or what the sibling already has', () => {
+    const giver = lena()
+    expect(canGive(giver, tom(), 'hat-cap')).toEqual({ ok: false, reason: 'not-owned' })
+    expect(canGive(giver, giver, 'hat-bow')).toEqual({ ok: false, reason: 'same-player' })
+    const { to } = giveItem(giver, tom(), 'hat-bow', now)
+    expect(canGive(lena(), to, 'hat-bow')).toEqual({ ok: false, reason: 'already-owned' })
+    expect(() => giveItem(giver, to, 'hat-bow', now)).toThrow()
   })
 })
