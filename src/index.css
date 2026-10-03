@@ -1060,12 +1060,20 @@ legend {
 }
 
 .task-prompt {
+  max-width: 100%;
   margin: 0;
   font-size: clamp(2.6rem, 13vw, 4rem);
   font-weight: 700;
   line-height: 1.05;
   overflow-wrap: anywhere;
+  hyphens: auto;
   color: var(--text);
+}
+
+/* Long questions, e.g. numbers written out. */
+.task-prompt.long {
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  line-height: 1.15;
 }
 
 .task.shake {
@@ -1075,8 +1083,30 @@ legend {
 .choices {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, …) keeps both columns equal even with very long words. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+/* Long answers (e.g. "einundsiebzigtausendfünfhundertzweiundachtzig") one below the other. */
+.choices.stacked {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.choices.compact .choice {
+  padding: 16px 8px 16px 30px;
+  font-size: clamp(1rem, 4.6vw, 1.3rem);
+}
+
+.choices.compact .choice::before {
+  left: 10px;
+}
+
+.choices.stacked .choice {
+  padding: 14px 14px 14px 38px;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  text-align: left;
 }
 
 .choice {
@@ -1090,6 +1120,9 @@ legend {
   color: #ffffff;
   font-size: 1.4rem;
   font-weight: 700;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
   box-shadow: 0 6px 0 var(--c-dark);
   transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.2s, filter 0.2s;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
@@ -1244,6 +1277,8 @@ legend {
 .feedback-text span {
   font-weight: 500;
   font-size: 1.1rem;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .feedback-sheet .button {
@@ -2769,6 +2804,8 @@ legend {
 }
 
 .tricky-item {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 4px 10px;
   border-radius: 999px;
   background: var(--hmm-bg);

@@ -24,6 +24,11 @@ type Feedback = { kind: 'correct'; points: number } | { kind: 'retry' } | { kind
 
 const msSince = (start: number) => performance.now() - start
 
+/** Answers longer than this are shown one below the other instead of in two columns. */
+const STACK_CHOICES_FROM = 12
+/** Questions longer than this get a smaller font so they fit on a phone. */
+const LONG_PROMPT_FROM = 14
+
 const CORRECT_PRAISE = ['Super!', 'Klasse!', 'Toll gesprungen!', 'Richtig!', 'Prima!', 'Wie ein Profi!']
 const CORRECT_ICONS = ['party', 'star', 'carrot', 'trophy', 'rainbow', 'apple']
 
@@ -95,6 +100,8 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
   const progress = (index + (answered ? 1 : 0)) / tasks.length
 
   const step = index + (answered ? 1 : 0)
+  const longestChoice = task.mode === 'choice' ? Math.max(...task.choices.map((choice) => choice.length)) : 0
+  const choiceLayout = longestChoice >= STACK_CHOICES_FROM ? 'stacked' : longestChoice > 7 ? 'compact' : ''
 
   return (
     <main className={`screen play theme-${mission.track}`}>
@@ -140,12 +147,12 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
 
       <section className={`card task ${feedback?.kind === 'retry' ? 'shake' : ''}`} key={index}>
         <p className="task-hint">{feedback?.kind === 'retry' ? 'Fast! Versuch es noch einmal!' : task.hint}</p>
-        <p className="task-prompt">
+        <p className={`task-prompt ${task.prompt.length >= LONG_PROMPT_FROM && !task.prompt.startsWith('img:') ? 'long' : ''}`}>
           {task.prompt.startsWith('img:') ? <GameIcon name={task.prompt.slice(4)} size={120} title="Bild" /> : task.prompt}
         </p>
 
         {task.mode === 'choice' ? (
-          <div className="choices">
+          <div className={`choices ${choiceLayout}`}>
             {task.choices.map((choice) => {
               const isAnswer = answered && choice === task.answer
               const isWrong = wrongChoices.includes(choice)
