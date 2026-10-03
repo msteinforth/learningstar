@@ -459,10 +459,10 @@ begin
   if v_from.id is null or v_to.id is null then
     raise exception 'player_not_found' using errcode = 'P0002';
   end if;
-  if not coalesce(v_from.extras -> 'owned', '[]'::jsonb) ? p_item then
+  if not coalesce(v_from.extras -> 'owned', '[]'::jsonb) @> jsonb_build_array(p_item) then
     raise exception 'item_not_owned' using errcode = '22023';
   end if;
-  if coalesce(v_to.extras -> 'owned', '[]'::jsonb) ? p_item then
+  if coalesce(v_to.extras -> 'owned', '[]'::jsonb) @> jsonb_build_array(p_item) then
     raise exception 'item_already_owned' using errcode = '22023';
   end if;
 

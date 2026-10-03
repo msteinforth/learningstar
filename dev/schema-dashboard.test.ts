@@ -8,4 +8,11 @@ describe('schema.sql in the Supabase SQL editor', () => {
     const schema = readFileSync(new URL('../supabase/schema.sql', import.meta.url), 'utf8')
     expect(schema).not.toMatch(/\b(select|returning)\b[^;]*\binto\b/i)
   })
+
+  it('has no question marks', () => {
+    // A "?" (e.g. the jsonb operator) makes the dashboard treat it as a parameter and split
+    // the script at every semicolon, even inside function bodies.
+    const schema = readFileSync(new URL('../supabase/schema.sql', import.meta.url), 'utf8')
+    expect(schema).not.toContain('?')
+  })
 })
