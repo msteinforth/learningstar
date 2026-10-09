@@ -3429,3 +3429,361 @@ legend {
 .gift-text small {
   display: block;
 }
+
+/* ==========================================================================
+   Welten: Hintergrund und Anmutung wechseln, Pferde und Spiel bleiben gleich.
+   (data-world auf <html>, siehe src/game/worlds.ts)
+   ========================================================================== */
+
+:root[data-world='space'] {
+  --sky-top: #0b0624;
+  --sky-bottom: #2a1a5e;
+  --cloud: #7a5cd6;
+  --hill-back: #3d3766;
+  --hill-mid: #554e85;
+  --hill-front: #726aa3;
+  --fence: #4ef0ff;
+}
+
+:root[data-world='halloween'] {
+  --sky-top: #2b0f3a;
+  --sky-bottom: #ff8a3d;
+  --cloud: #3a2a4a;
+  --hill-back: #4a2560;
+  --hill-mid: #331a45;
+  --hill-front: #22102f;
+  --fence: #140a1c;
+}
+
+:root[data-world='racetrack'] {
+  --sky-top: #2ea4ff;
+  --sky-bottom: #d6f1ff;
+  --hill-back: #8fd96f;
+  --hill-mid: #4fb83a;
+  --hill-front: #d9a066;
+  --fence: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Abendrennen unter Flutlicht */
+  :root[data-world='racetrack'] {
+    --sky-top: #141a4a;
+    --sky-bottom: #4a3f8f;
+    --hill-back: #2f5e45;
+    --hill-mid: #2a6b3a;
+    --hill-front: #8a6239;
+    --fence: #f4f1ff;
+  }
+}
+
+/* Stars for the dark worlds, in light mode too */
+.world-space .stars,
+.world-halloween .stars {
+  display: block;
+  position: absolute;
+  inset: 0 0 40% 0;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, #fff, transparent),
+    radial-gradient(2px 2px at 30% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 45% 30%, #fff, transparent),
+    radial-gradient(2px 2px at 62% 14%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 75% 40%, #fff, transparent),
+    radial-gradient(2px 2px at 88% 25%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 20% 45%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 55% 50%, #fff, transparent),
+    radial-gradient(2px 2px at 95% 55%, #fff, transparent),
+    radial-gradient(1px 1px at 5% 60%, #fff, transparent),
+    radial-gradient(1px 1px at 38% 62%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 70% 66%, #fff, transparent);
+  animation: twinkle 3s ease-in-out infinite alternate;
+}
+
+.world-halloween .stars {
+  inset: 0 0 60% 0;
+  opacity: 0.6;
+}
+
+/* --- Weltraum ---------------------------------------------------------------- */
+
+.scenery.world-space .sun {
+  width: 104px;
+  height: 104px;
+  background: radial-gradient(circle at 35% 32%, #ffd1ea, #ff7eb6 45%, #a560f0);
+  box-shadow: 0 0 40px 6px rgba(255, 126, 182, 0.35);
+  animation: none;
+}
+
+.scenery.world-space .sun::after {
+  content: '';
+  position: absolute;
+  left: -32%;
+  top: 36%;
+  width: 164%;
+  height: 28%;
+  border: 6px solid rgba(255, 230, 160, 0.85);
+  border-radius: 50%;
+  transform: rotate(-16deg);
+}
+
+.world-space .cloud {
+  opacity: 0.22;
+  filter: blur(6px);
+}
+
+.world-space .fence rect {
+  filter: drop-shadow(0 0 4px #4ef0ff);
+}
+
+.world-space .fence rect:not([height='46']) {
+  height: 3px;
+}
+
+.craters ellipse {
+  fill: rgba(20, 12, 50, 0.28);
+}
+
+.planet {
+  position: absolute;
+}
+
+.planet-small {
+  top: 22%;
+  left: 7%;
+  width: 46px;
+}
+
+.planet-tiny {
+  top: 44%;
+  right: 28%;
+  width: 24px;
+}
+
+.rocket {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  animation: rocket-fly 28s linear infinite;
+  animation-delay: -6s;
+}
+
+.rocket-flame {
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: flicker 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes rocket-fly {
+  0% {
+    transform: translate(-12vw, 70vh) rotate(55deg);
+  }
+  40%,
+  100% {
+    transform: translate(112vw, -10vh) rotate(55deg);
+  }
+}
+
+@keyframes flicker {
+  to {
+    transform: scaleY(0.6);
+  }
+}
+
+.shooting-star {
+  position: absolute;
+  width: 130px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffffff);
+  border-radius: 2px;
+  opacity: 0;
+  transform: rotate(-20deg);
+  animation: shoot 9s ease-out infinite;
+}
+
+.shooting-star-1 {
+  top: 12%;
+  left: 20%;
+}
+
+.shooting-star-2 {
+  top: 30%;
+  left: 55%;
+  animation-delay: -4.5s;
+}
+
+@keyframes shoot {
+  0%,
+  86% {
+    opacity: 0;
+    transform: rotate(-20deg) translateX(0);
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-20deg) translateX(260px);
+  }
+}
+
+/* --- Halloween ----------------------------------------------------------------- */
+
+.scenery.world-halloween .sun {
+  width: 120px;
+  height: 120px;
+  background:
+    radial-gradient(circle at 35% 40%, rgba(214, 190, 130, 0.6) 0 9px, transparent 10px),
+    radial-gradient(circle at 62% 62%, rgba(214, 190, 130, 0.5) 0 13px, transparent 14px),
+    radial-gradient(circle at 60% 28%, rgba(214, 190, 130, 0.45) 0 6px, transparent 7px),
+    #fff2c4;
+  box-shadow: 0 0 60px 22px rgba(255, 170, 80, 0.45);
+}
+
+.world-halloween .cloud {
+  opacity: 0.85;
+}
+
+.bat {
+  position: absolute;
+  left: 0;
+  width: 40px;
+  fill: #140a1c;
+  animation: drift linear infinite;
+}
+
+.bat path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flap 0.3s ease-in-out infinite alternate;
+}
+
+.bat-1 {
+  top: 18%;
+  animation-duration: 16s;
+}
+
+.bat-2 {
+  top: 28%;
+  width: 28px;
+  animation-duration: 22s;
+  animation-delay: -9s;
+}
+
+.bat-3 {
+  top: 38%;
+  width: 34px;
+  animation-duration: 19s;
+  animation-delay: -14s;
+}
+
+@keyframes flap {
+  to {
+    transform: scaleY(0.45);
+  }
+}
+
+.ghost {
+  position: absolute;
+  right: 10%;
+  bottom: calc(max(30vh, 170px) + 30px);
+  width: 54px;
+  opacity: 0.88;
+  animation: haunt 5s ease-in-out infinite;
+}
+
+@keyframes haunt {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-4deg);
+  }
+  50% {
+    transform: translate(-30px, -22px) rotate(4deg);
+    opacity: 0.6;
+  }
+}
+
+/* --- Rennbahn ------------------------------------------------------------------ */
+
+.bunting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+}
+
+.grandstand {
+  position: absolute;
+  left: 2%;
+  bottom: calc(max(30vh, 170px) * 0.6);
+  width: min(420px, 62vw);
+}
+
+.pennant {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: wave 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes wave {
+  to {
+    transform: scaleX(0.8) skewY(6deg);
+  }
+}
+
+.finish-post {
+  position: absolute;
+  right: 12%;
+  bottom: calc(max(30vh, 170px) * 0.08);
+  z-index: 1;
+  width: 32px;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.12));
+}
+
+/* World picker */
+.world-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 8px 10px;
+  border: 3px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg-soft);
+  color: var(--text);
+  text-align: left;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.world-option:hover {
+  transform: translateY(-2px);
+}
+
+.world-option.selected {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--purple) 30%, transparent);
+}
+
+.world-preview {
+  width: 100%;
+  height: 56px;
+  border-radius: 12px;
+}
+
+.world-option small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.pumpkin {
+  position: absolute;
+  z-index: 1;
+  filter: drop-shadow(0 0 10px rgba(255, 170, 60, 0.55));
+}

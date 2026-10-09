@@ -68,6 +68,12 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
     Spielzeit für heute zurücksetzen.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
+- **Welten**: Jedes Kind wählt seine Welt – Reiterhof, Weltraum (Sterne, Ringplanet,
+  Rakete, Mondkrater, Laserzaun), Halloween (Vollmond, Fledermäuse, Gespenst,
+  Kürbisse) oder Rennbahn (Tribüne, Fähnchen, weiße Rails, Zielpfosten). Nur
+  Hintergrund und Anmutung wechseln, Pferde, Laden und Missionen bleiben gleich.
+  Gewählt wird beim Anlegen oder unter „Mein Pferd“ (mit Live-Vorschau); die Welt
+  wird beim Kind gespeichert und gilt auf allen Geräten.
 - **Mein Pferd**: Nach der Auswahl im Stall lassen sich über den Stift neben dem
   eigenen Avatar Name, Pferd und Farbe jederzeit ändern. Jedes Kind kann sein Pferd mit einer eigenen PIN (4–6 Ziffern)
   schützen: Dann fragt die App beim Auswählen und Bearbeiten danach. In einem

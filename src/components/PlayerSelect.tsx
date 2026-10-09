@@ -1,7 +1,8 @@
-import { type CSSProperties, type FormEvent, useState } from 'react'
+import { type CSSProperties, type FormEvent, useEffect, useRef, useState } from 'react'
 import type { Player, PlayerExtras, PlayerProfile } from '../game/types'
 import { AVATARS, COLORS } from '../game/avatars'
 import { PIN_PATTERN } from '../game/pin'
+import { currentWorld, showWorld, WORLDS, type WorldId, worldOf } from '../game/worlds'
 import { Avatar } from './Avatar'
 import { HORSES, horseFor } from '../game/horses'
 import { HorseHead, HorseSide } from './Horse'
@@ -16,7 +17,7 @@ interface Props {
   onRetry: () => void
   onSelect: (player: Player) => void
   /** Creates a player; with `pin` the horse is protected right away. */
-  onCreate: (profile: PlayerProfile, pin: string | null) => Promise<void>
+  onCreate: (profile: PlayerProfile, pin: string | null, world: WorldId) => Promise<void>
   onCheckPin: (player: Player, pin: string) => Promise<boolean>
   /** Opens the family settings; missing when no family server is set up. */
   onOpenFamily?: () => void
@@ -114,8 +115,8 @@ export function PlayerSelect({ players, loadError, familyName, onRetry, onSelect
               submitLabel="Los geht's!"
               hasPin={false}
               onCancel={players.length > 0 ? toList : undefined}
-              onSubmit={async (profile, newPin) => {
-                await onCreate(profile, newPin ?? null)
+              onSubmit={async (profile, newPin, world) => {
+                await onCreate(profile, newPin ?? null, world)
                 toList()
               }}
             />
@@ -224,8 +225,20 @@ export function ProfileForm({
   hasPin: boolean
   onCancel?: () => void
   /** `newPin`: undefined keeps the PIN, null removes it. */
-  onSubmit: (profile: PlayerProfile, newPin: string | null | undefined) => Promise<void>
+  onSubmit: (profile: PlayerProfile, newPin: string | null | undefined, world: WorldId) => Promise<void>
 }) {
+  // A new horse starts in the world shown right now; an existing one in its own.
+  const [world, setWorld] = useState<WorldId>(() => (initial ? worldOf(initial) : currentWorld()))
+  const shownBefore = useRef(currentWorld())
+  const saved = useRef(false)
+  // Choosing a world shows it right away; cancelling goes back to the world shown before.
+  useEffect(() => showWorld(world), [world])
+  useEffect(
+    () => () => {
+      if (!saved.current) showWorld(shownBefore.current)
+    },
+    [],
+  )
   const [name, setName] = useState(initial?.name ?? '')
   const [avatar, setAvatar] = useState(initial?.avatar && horseFor(initial.avatar) ? initial.avatar : AVATARS[0])
   const [color, setColor] = useState(initial?.color ?? COLORS[0])
@@ -245,8 +258,10 @@ export function ProfileForm({
     }
     setBusy(true)
     try {
-      await onSubmit({ name, avatar, color }, pinChoice === 'set' ? pin : pinChoice === 'remove' ? null : undefined)
+      saved.current = true
+      await onSubmit({ name, avatar, color }, pinChoice === 'set' ? pin : pinChoice === 'remove' ? null : undefined, world)
     } catch (caught) {
+      saved.current = false
       setError(errorText(caught))
       setBusy(false)
     }
@@ -302,6 +317,24 @@ export function ProfileForm({
               aria-label={`Farbe ${option}`}
               aria-pressed={option === color}
             />
+          ))}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Deine Welt</legend>
+        <div className="world-options">
+          {WORLDS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={`world-option ${option.id === world ? 'selected' : ''}`}
+              aria-pressed={option.id === world}
+              onClick={() => setWorld(option.id)}
+            >
+              <span className="world-preview" style={{ background: option.preview }} aria-hidden="true" />
+              <strong>{option.name}</strong>
+              <small>{option.description}</small>
+            </button>
           ))}
         </div>
       </fieldset>

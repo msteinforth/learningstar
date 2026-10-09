@@ -19,6 +19,7 @@ import { isVisibleTo } from './game/custom'
 import { createFamily, type Family, joinFamily, moveIntoFamily, readFamily, writeFamily } from './game/family'
 import { addUsage, DEFAULT_SETTINGS, HEARTBEAT_SECONDS, limitFor, type PlayerUsage, secondsLeft, today } from './game/limits'
 import { missions } from './game/missions'
+import { showWorld, type WorldId, worldOf } from './game/worlds'
 import { createPlayer } from './game/progress'
 import { type DuelStore, duelWins, FamilyDuelStore, LocalDuelStore, newSeed, openChallenges, toDuelResult } from './game/duels'
 import { awardBadges, buyItem, equipItem, extrasOf, findItem, markGiftsSeen, newBadges, unseenGifts } from './game/rewards'
@@ -192,6 +193,12 @@ export default function App() {
     return () => clearInterval(timer)
   }, [countingId, store])
 
+  // Every child plays in their own world.
+  const playerWorld = player ? worldOf(player) : null
+  useEffect(() => {
+    if (playerWorld) showWorld(playerWorld)
+  }, [playerWorld])
+
   const unlock = (playerId: string, pin?: string) => {
     if (pin) setKnownPins((current) => ({ ...current, [playerId]: pin }))
     const next = [...unlocked.filter((id) => id !== playerId), playerId]
@@ -221,8 +228,9 @@ export default function App() {
     setScreen({ name: 'map' })
   }
 
-  const create = async (profile: PlayerProfile, pin: string | null) => {
-    let created = await store.create(createPlayer(profile.name, profile.avatar, profile.color))
+  const create = async (profile: PlayerProfile, pin: string | null, world: WorldId) => {
+    const fresh = createPlayer(profile.name, profile.avatar, profile.color)
+    let created = await store.create({ ...fresh, extras: { ...extrasOf(fresh), world } })
     if (pin) {
       created = await store.setPin(created.id, null, pin)
       unlock(created.id, pin)
@@ -237,9 +245,10 @@ export default function App() {
     return ok
   }
 
-  const editPlayer = async (candidate: Player, pin: string | null, profile: PlayerProfile, newPin: string | null | undefined) => {
+  const editPlayer = async (candidate: Player, pin: string | null, profile: PlayerProfile, newPin: string | null | undefined, world: WorldId) => {
     let updated = await store.updateProfile(candidate.id, pin, profile)
     if (newPin !== undefined) updated = await store.setPin(candidate.id, pin, newPin)
+    if (worldOf(updated) !== world) updated = await store.updateExtras(candidate.id, (current) => ({ ...current, extras: { ...extrasOf(current), world } }))
     replacePlayer(updated)
     // After setting a new PIN the child stays signed in on this device.
     if (newPin) unlock(candidate.id, newPin)
@@ -476,7 +485,7 @@ export default function App() {
           player={player}
           knownPin={knownPins[player.id] ?? null}
           onCheckPin={(pin) => checkPin(player, pin)}
-          onSave={(pin, profile, newPin) => editPlayer(player, pin, profile, newPin)}
+          onSave={(pin, profile, newPin, world) => editPlayer(player, pin, profile, newPin, world)}
           onBack={() => setScreen({ name: 'map' })}
         />
       )

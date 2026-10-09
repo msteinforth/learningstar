@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Player, PlayerProfile } from '../game/types'
+import type { WorldId } from '../game/worlds'
 import { PinPrompt, ProfileForm } from './PlayerSelect'
 
 interface Props {
@@ -8,11 +9,11 @@ interface Props {
   knownPin: string | null
   onCheckPin: (pin: string) => Promise<boolean>
   /** `newPin`: undefined keeps the PIN, null removes it. */
-  onSave: (pin: string | null, profile: PlayerProfile, newPin: string | null | undefined) => Promise<void>
+  onSave: (pin: string | null, profile: PlayerProfile, newPin: string | null | undefined, world: WorldId) => Promise<void>
   onBack: () => void
 }
 
-/** "Mein Pferd": name, horse, colour and PIN of the chosen child. */
+/** "Mein Pferd": name, horse, colour, world and PIN of the chosen child. */
 export function ProfileEdit({ player, knownPin, onCheckPin, onSave, onBack }: Props) {
   const [pin, setPin] = useState(knownPin)
   const needsPin = Boolean(player.hasPin) && pin === null
@@ -33,8 +34,8 @@ export function ProfileEdit({ player, knownPin, onCheckPin, onSave, onBack }: Pr
           initial={player}
           hasPin={Boolean(player.hasPin)}
           onCancel={onBack}
-          onSubmit={async (profile, newPin) => {
-            await onSave(player.hasPin ? pin : null, profile, newPin)
+          onSubmit={async (profile, newPin, world) => {
+            await onSave(player.hasPin ? pin : null, profile, newPin, world)
             onBack()
           }}
         />

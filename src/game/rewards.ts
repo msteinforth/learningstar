@@ -6,6 +6,8 @@ import type { Gift, ItemSlot, Player, PlayerExtras } from './types'
 export function extrasOf(player: { extras?: Partial<PlayerExtras> }): PlayerExtras {
   const extras = player.extras
   return {
+    // Fields this function does not know (e.g. the chosen world) are kept.
+    ...extras,
     spent: extras?.spent ?? 0,
     owned: extras?.owned ?? [],
     equipped: extras?.equipped ?? {},

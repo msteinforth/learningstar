@@ -106,3 +106,10 @@ describe('presents', () => {
     expect(() => giveItem(giver, to, 'hat-bow', now)).toThrow()
   })
 })
+
+describe('extras', () => {
+  it('keeps the chosen world through purchases', () => {
+    const player = withPoints(100, { world: 'space' })
+    expect(extrasOf(buyItem(player, 'hat-bow')).world).toBe('space')
+  })
+})

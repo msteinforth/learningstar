@@ -116,6 +116,8 @@ export interface PlayerExtras {
   giftsGiven?: number
   /** Presents from siblings; `seen` once the child read the message. */
   gifts?: Gift[]
+  /** Chosen world (backdrop), see worlds.ts. */
+  world?: string
 }
 
 export interface Gift {
