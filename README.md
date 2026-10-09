@@ -37,6 +37,10 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
   Artikel gibt es erst mit einem bestimmten Abzeichen (z. B. die Krone).
   Einkaufen verringert nur den *Beutel*, nicht die gesammelten Hufeisen in der
   Rangliste. Gekauft wird mit zwei Tipps, damit nichts aus Versehen passiert.
+- **Halloween-Kollektion** im Laden (mit Schildchen „Halloween“): Hexenhut,
+  Kürbismütze, Fledermaus-Haarreif, Teufelshörnchen, Bonbons, Kürbis-Laterne,
+  Spinne Thekla, Fledermaus, kleines Gespenst, schwarze Katze sowie die
+  Hintergründe Kürbisfeld und Spukschloss-Nacht.
 - **Verschenken**: Gekaufte Artikel lassen sich im Laden über „Verschenken“ an
   ein Geschwisterkind weitergeben (die Hufeisen gibt es nicht zurück). Das
   beschenkte Kind sieht beim nächsten Öffnen eine Geschenk-Nachricht und kann den

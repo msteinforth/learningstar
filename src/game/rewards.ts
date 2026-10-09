@@ -134,6 +134,8 @@ export interface ShopItem {
   price: number
   /** Only for sale once this badge was earned. */
   requiresBadge?: string
+  /** Small label on the card, e.g. for the Halloween collection. */
+  tag?: string
 }
 
 export const SLOTS: { id: ItemSlot; title: string; icon: string }[] = [
@@ -156,6 +158,10 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'hat-tiara', slot: 'hat', name: 'Diadem', look: 'tiara', price: 600 },
   { id: 'hat-wizard', slot: 'hat', name: 'Zauberhut', look: 'wizard-hat', price: 750 },
   { id: 'hat-viking', slot: 'hat', name: 'Wikingerhelm', look: 'viking-helmet', price: 900 },
+  { id: 'hat-witch', slot: 'hat', name: 'Hexenhut', look: 'witch-hat', price: 250, tag: 'Halloween' },
+  { id: 'hat-pumpkin', slot: 'hat', name: 'Kürbismütze', look: 'pumpkin-hat', price: 300, tag: 'Halloween' },
+  { id: 'hat-bat-ears', slot: 'hat', name: 'Fledermaus-Haarreif', look: 'bat-ears', price: 350, tag: 'Halloween' },
+  { id: 'hat-devil', slot: 'hat', name: 'Teufelshörnchen', look: 'devil-horns', price: 400, tag: 'Halloween' },
   { id: 'hat-unicorn', slot: 'hat', name: 'Einhorn-Horn', look: 'unicorn-horn', price: 1500, requiresBadge: 'hufeisen-500' },
 
   { id: 'buddy-carrot', slot: 'buddy', name: 'Karotte', look: 'carrot', price: 15 },
@@ -171,6 +177,12 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'buddy-fox', slot: 'buddy', name: 'Füchslein', look: 'fox', price: 650 },
   { id: 'buddy-penguin', slot: 'buddy', name: 'Pinguin', look: 'penguin', price: 800 },
   { id: 'buddy-dragon', slot: 'buddy', name: 'Mini-Drache', look: 'dragon', price: 1500, requiresBadge: 'duell-champion' },
+  { id: 'buddy-candy', slot: 'buddy', name: 'Halloween-Bonbons', look: 'candy', price: 150, tag: 'Halloween' },
+  { id: 'buddy-jack', slot: 'buddy', name: 'Kürbis-Laterne', look: 'jack-o-lantern', price: 250, tag: 'Halloween' },
+  { id: 'buddy-spider', slot: 'buddy', name: 'Spinne Thekla', look: 'spider', price: 300, tag: 'Halloween' },
+  { id: 'buddy-bat', slot: 'buddy', name: 'Fledermaus', look: 'bat-buddy', price: 350, tag: 'Halloween' },
+  { id: 'buddy-ghost', slot: 'buddy', name: 'Kleines Gespenst', look: 'ghost-buddy', price: 450, tag: 'Halloween' },
+  { id: 'buddy-black-cat', slot: 'buddy', name: 'Schwarze Katze', look: 'black-cat', price: 500, tag: 'Halloween' },
   // Snacks and drinks.
   { id: 'buddy-cocoa', slot: 'buddy', name: 'Heißer Kakao', look: 'cocoa', price: 150 },
   { id: 'buddy-cola', slot: 'buddy', name: 'Cola', look: 'cola', price: 150 },
@@ -188,6 +200,22 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'bg-night', slot: 'background', name: 'Sternennacht', look: 'radial-gradient(circle at 30% 30%, #fff 0 2px, transparent 3px), radial-gradient(circle at 70% 60%, #fff 0 1.5px, transparent 2.5px), linear-gradient(160deg, #3b3f8f, #141a4a)', price: 90 },
   { id: 'bg-rainbow', slot: 'background', name: 'Regenbogen', look: 'conic-gradient(from 200deg, #ff5a5f, #ff9f1c, #ffd23f, #58cc02, #1cb0f6, #a560f0, #ff5a5f)', price: 150 },
   { id: 'bg-gold', slot: 'background', name: 'Goldglanz', look: 'linear-gradient(135deg, #fff3b0, #ffc629 45%, #e0a000)', price: 150, requiresBadge: 'fehlerfrei' },
+  {
+    id: 'bg-pumpkin-field',
+    slot: 'background',
+    name: 'Kürbisfeld',
+    look: 'radial-gradient(circle at 25% 78%, #ff8a3d 0 7px, transparent 8px), radial-gradient(circle at 70% 84%, #ff8a3d 0 6px, transparent 7px), radial-gradient(circle at 75% 25%, #fff2c4 0 9px, transparent 10px), linear-gradient(180deg, #4a2560 0 55%, #ff9f1c 55% 62%, #3d1f55 62%)',
+    price: 300,
+    tag: 'Halloween',
+  },
+  {
+    id: 'bg-haunted',
+    slot: 'background',
+    name: 'Spukschloss-Nacht',
+    look: 'radial-gradient(circle at 70% 30%, #ffd23f 0 10px, rgba(255, 170, 60, 0.4) 11px, transparent 18px), linear-gradient(180deg, transparent 62%, #140a1c 62%), linear-gradient(90deg, transparent 22%, #140a1c 22% 34%, transparent 34% 40%, #140a1c 40% 46%, transparent 46%), linear-gradient(180deg, #2b0f3a, #a560f0)',
+    price: 500,
+    tag: 'Halloween',
+  },
   {
     id: 'bg-flowers',
     slot: 'background',

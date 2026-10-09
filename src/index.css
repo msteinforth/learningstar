@@ -3787,3 +3787,21 @@ legend {
   z-index: 1;
   filter: drop-shadow(0 0 10px rgba(255, 170, 60, 0.55));
 }
+
+.shop-item {
+  position: relative;
+}
+
+.item-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ff8a3d;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 0 #e86a10;
+}

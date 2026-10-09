@@ -173,6 +173,7 @@ export function Shop({ player, players, onBuy, onEquip, onGive }: Props) {
               <span className="item-look" style={item.slot === 'background' ? { background: item.look } : undefined} aria-hidden="true">
                 {item.slot === 'background' ? null : <GameIcon name={item.look} size="78%" />}
               </span>
+              {item.tag && <span className="item-tag">{item.tag}</span>}
               <strong>{item.name}</strong>
               {owned ? (
                 <>
