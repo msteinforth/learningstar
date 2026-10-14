@@ -72,6 +72,11 @@ Reitturnieren für Mathe, Deutsch, Englisch, Französisch und Spanisch.
     Spielzeit für heute zurücksetzen.
   - Mit Familie gelten PIN und Missionen auf allen Geräten. Die PIN wird nur als
     Hash gespeichert und nie an die App zurückgegeben.
+- **Rechenschieber** (nur in Mathe-Missionen): Über die Lasche am rechten Rand
+  klappt ein Rechenrahmen mit 10 × 10 Perlen auf (je Reihe 5 rote und 5 weiße,
+  Lücke nach der fünften Reihe). Antippen schiebt eine Perle samt Nachbarn auf die
+  andere Seite, Wischen geht auch; „Alle zurück“ setzt ihn zurück. Er zeigt nur
+  Perlen und rechnet nicht. Am Handy klappt er von unten auf, am Computer von der Seite.
 - **Welten**: Jedes Kind wählt seine Welt – Reiterhof, Weltraum (Sterne, Ringplanet,
   Rakete, Mondkrater, Laserzaun), Halloween (Vollmond, Fledermäuse, Gespenst,
   Kürbisse) oder Rennbahn (Tribüne, Fähnchen, weiße Rails, Zielpfosten). Nur

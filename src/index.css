@@ -3682,7 +3682,8 @@ legend {
   }
 }
 
-.ghost {
+/* Not ".ghost" – that is a button style. */
+.scenery .spook {
   position: absolute;
   right: 10%;
   bottom: calc(max(30vh, 170px) + 30px);
@@ -3804,4 +3805,224 @@ legend {
   font-weight: 700;
   letter-spacing: 0.02em;
   box-shadow: 0 2px 0 #e86a10;
+}
+
+/* ---------- Rechenschieber (nur in Mathe-Missionen) ---------- */
+.abacus-tab {
+  position: fixed;
+  z-index: 9;
+  right: 0;
+  top: 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 18px 0 0 18px;
+  background: var(--orange);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: -3px 4px 0 var(--orange-dark);
+  transition: right 0.3s ease, transform 0.15s;
+}
+
+.abacus-tab span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.abacus-tab:hover {
+  transform: translateX(-3px);
+}
+
+.abacus-panel {
+  position: fixed;
+  z-index: 8;
+  top: 50%;
+  right: 0;
+  width: 400px;
+  padding: 14px 16px 18px;
+  border-radius: var(--radius) 0 0 var(--radius);
+  border-right: none;
+  transform: translate(105%, -50%);
+  transition: transform 0.3s ease;
+  visibility: hidden;
+}
+
+.abacus-panel.open {
+  transform: translate(0, -50%);
+  visibility: visible;
+}
+
+.abacus-tab.open {
+  right: 400px;
+}
+
+.abacus-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.abacus-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.abacus-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  font-weight: 700;
+}
+
+.abacus-frame {
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 12px;
+  border: 6px solid #c98a4b;
+  border-radius: 16px;
+  background: #fff8ec;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.abacus-frame {
+  --bead: 24px;
+}
+
+.abacus-row {
+  position: relative;
+  width: calc(var(--bead) * var(--slots));
+  height: calc(var(--bead) + 4px);
+}
+
+.abacus-row.gap-after {
+  margin-bottom: 10px;
+}
+
+.abacus-rod {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: #8b5a3c;
+}
+
+.abacus-bead {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: var(--bead);
+  height: var(--bead);
+  padding: 0;
+  border: 2px solid;
+  border-radius: 50%;
+  touch-action: none;
+  transform: translateX(calc(var(--bead) * var(--slot)));
+  transition: transform 0.22s cubic-bezier(0.3, 1.3, 0.5, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.abacus-bead.red {
+  background: radial-gradient(circle at 35% 30%, #ffa3a6, #e5383b 70%);
+  border-color: #b52a2d;
+}
+
+.abacus-bead.white {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #e6e0ff 75%);
+  border-color: #b9b2d6;
+}
+
+.abacus-bead:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 1px;
+}
+
+/* Phones: the frame slides up from the bottom, the question stays visible above it. */
+@media (max-width: 720px) {
+  .abacus-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-right: 3px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    transform: translateY(105%);
+  }
+
+  .abacus-panel.open {
+    transform: translateY(0);
+  }
+
+  .abacus-tab.open {
+    right: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .abacus-frame {
+    --bead: 21px;
+  }
+}
+
+/* Computer: while the counting frame is open, the task moves left so nothing is covered. */
+@media (min-width: 721px) {
+  .screen.play:has(.abacus-panel.open) {
+    margin-left: max(0px, calc((100vw - 1080px) / 2));
+    margin-right: 410px;
+  }
+}
+
+@media (max-width: 720px) {
+  .abacus-tab {
+    top: auto;
+    bottom: 34vh;
+    padding: 10px 6px;
+  }
+
+  .abacus-tab span {
+    font-size: 0.85rem;
+  }
+}
+
+.abacus-header strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.abacus-actions .button.small {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .abacus-panel {
+    padding: 10px 12px 14px;
+  }
+
+  .abacus-header {
+    margin-bottom: 8px;
+  }
+
+  /* The page can be pushed up so the answers show above the open frame. */
+  .screen.play:has(.abacus-panel.open) {
+    padding-bottom: 420px;
+  }
 }

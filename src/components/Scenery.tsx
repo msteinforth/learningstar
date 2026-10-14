@@ -78,7 +78,7 @@ function SkyDecor({ world }: { world: WorldId }) {
             <path d={BAT} />
           </svg>
         ))}
-        <svg className="ghost" viewBox="0 0 40 48">
+        <svg className="spook" viewBox="0 0 40 48">
           <path d="M4 44 L4 20 C 4 8, 12 2, 20 2 C 28 2, 36 8, 36 20 L36 44 L30 39 L25 45 L20 39 L15 45 L10 39 Z" fill="#ffffff" />
           <ellipse cx="14" cy="20" rx="3" ry="4" fill="#2b2250" />
           <ellipse cx="26" cy="20" rx="3" ry="4" fill="#2b2250" />

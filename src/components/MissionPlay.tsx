@@ -9,6 +9,7 @@ import type { Mission, MissionResult, Player, TaskResult } from '../game/types'
 import { PlayerHorse } from './Avatar'
 import { Horseshoe } from './Icons'
 import { SoundToggle } from './SoundToggle'
+import { Abacus } from './Abacus'
 import { GameIcon } from './GameIcon'
 
 interface Props {
@@ -229,6 +230,7 @@ export function MissionPlay({ mission, player, seed, onFinish, onCancel }: Props
           </div>
         )}
       </div>
+      {mission.track === 'math' && <Abacus />}
     </main>
   )
 }
